@@ -1,0 +1,112 @@
+# ==============================================================================
+# Al-Sabiqoon - Root .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Environment Variables (NEVER commit real secrets)
+# ------------------------------------------------------------------------------
+.env
+.env.*.local
+.env.backup
+.env.production
+!.env.example
+!.env.*.example
+
+# ------------------------------------------------------------------------------
+# Dependencies (installed via package managers)
+# ------------------------------------------------------------------------------
+/vendor/
+/node_modules/
+/backend/vendor/
+/frontend/node_modules/
+
+# ------------------------------------------------------------------------------
+# Build Artifacts
+# ------------------------------------------------------------------------------
+/dist/
+/frontend/dist/
+/backend/public/build/
+/backend/public/hot
+/backend/public/storage
+
+# ------------------------------------------------------------------------------
+# Filament Published Assets (regenerate with: php artisan filament:assets)
+# ------------------------------------------------------------------------------
+/backend/public/css/filament/
+/backend/public/js/filament/
+/backend/public/fonts/filament/
+
+# ------------------------------------------------------------------------------
+# Laravel Runtime
+# ------------------------------------------------------------------------------
+/backend/bootstrap/cache/*.php
+/backend/storage/app/public/*
+/backend/storage/app/private/*
+/backend/storage/framework/cache/data/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/views/*
+/backend/storage/logs/*
+!/backend/storage/**/.gitignore
+
+# ------------------------------------------------------------------------------
+# Database (local development)
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# ------------------------------------------------------------------------------
+# IDE & Editor
+# ------------------------------------------------------------------------------
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Keep VS Code shared settings
+!.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ------------------------------------------------------------------------------
+# OS Generated
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ------------------------------------------------------------------------------
+# Testing & Coverage
+# ------------------------------------------------------------------------------
+.phpunit.cache
+.phpunit.result.cache
+.eslintcache
+/coverage/
+/backend/coverage/
+__screenshots__/
+
+# ------------------------------------------------------------------------------
+# Kubernetes Secrets (real ones, not examples)
+# ------------------------------------------------------------------------------
+infrastructure/kubernetes/**/secrets.yaml
+!infrastructure/kubernetes/**/secrets.yaml.example
+
+# ------------------------------------------------------------------------------
+# Authentication
+# ------------------------------------------------------------------------------
+auth.json
+
+# ------------------------------------------------------------------------------
+# Logs
+# ------------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

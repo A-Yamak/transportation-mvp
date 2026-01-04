@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Sabiqoon - Complete Project Documentation</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --bg-white: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #1e293b;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+
+        nav ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+            justify-content: center;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Sections */
+        section {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            color: var(--text);
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        h4 {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .card h4 {
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            text-transform: none;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Info boxes */
+        .info-box {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .info-box.info {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-box.success {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+        }
+
+        .info-box.warning {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+        }
+
+        .info-box.danger {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* File tree */
+        .file-tree {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        .file-tree .folder {
+            color: var(--accent);
+        }
+
+        .file-tree .file {
+            color: #94a3b8;
+        }
+
+        .file-tree .comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Links */
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Concept explanation boxes */
+        .concept {
+            background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .concept h4 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin: 0 0 0.75rem 0;
+            text-transform: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .concept p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .concept ul {
+            margin: 0.5rem 0 0 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            section {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Al-Sabiqoon</h1>
+        <p>Complete Project Documentation & Technical Reference</p>
+        <span class="badge">Version 1.0</span>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#technologies">Technologies</a></li>
+                <li><a href="#structure">Project Structure</a></li>
+                <li><a href="#concepts">Key Concepts</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#workflow">Workflow</a></li>
+                <li><a href="#urls">URLs & Ports</a></li>
+            </ul>
+        </nav>
+
+        <!-- Overview Section -->
+        <section id="overview">
+            <h2>Project Overview</h2>
+            <p>
+                Al-Sabiqoon is a modern full-stack web application built with <strong>Laravel 12</strong> (backend API)
+                and <strong>Vue 3</strong> (frontend SPA). The project follows industry best practices with
+                Docker containerization, Kubernetes-ready deployment, and a comprehensive testing strategy.
+            </p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Backend API</h4>
+                    <p>Laravel 12 with PHP 8.4, serving RESTful APIs with OAuth2 authentication via Passport.</p>
+                </div>
+                <div class="card">
+                    <h4>Frontend SPA</h4>
+                    <p>Vue 3 with TypeScript, featuring a glassy light/dark theme built with Tailwind CSS 4.</p>
+                </div>
+                <div class="card">
+                    <h4>Infrastructure</h4>
+                    <p>Docker Compose for local development, Kubernetes manifests for production deployment.</p>
+                </div>
+                <div class="card">
+                    <h4>Domain</h4>
+                    <p>alsabiqoon.com (frontend) and api.alsabiqoon.com (backend API).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture">
+            <h2>System Architecture</h2>
+
+            <h3>How the pieces fit together</h3>
+            <p>
+                The application follows a <strong>decoupled architecture</strong> where the frontend and backend
+                are completely separate applications that communicate via HTTP APIs.
+            </p>
+
+            <pre><code>                           +-------------------+
+     User Browser          |    Frontend       |
+          |                |    (Vue 3)        |
+          |                |    Port 5173      |
+          v                +-------------------+
+    +------------+                |
+    |   Nginx    |                | HTTP API Calls
+    |   (Prod)   |                v
+    +------------+         +-------------------+
+          |                |    Backend        |
+          |                |    (Laravel)      |
+          v                |    Port 8000      |
+    +------------+         +-------------------+
+    |  Frontend  |                |
+    |  Static    |         +------+------+
+    |  Files     |         |             |
+    +------------+    +--------+    +--------+
+                      | MySQL  |    | Redis  |
+                      | 3307   |    | 6379   |
+                      +--------+    +--------+</code></pre>
+
+            <h3>Request Flow</h3>
+            <ol>
+                <li><strong>User opens browser</strong> &rarr; Loads Vue 3 frontend from port 5173 (dev) or Nginx (prod)</li>
+                <li><strong>Frontend makes API call</strong> &rarr; Sends HTTP request to backend at port 8000</li>
+                <li><strong>Backend processes request</strong> &rarr; Laravel handles authentication, business logic, database queries</li>
+                <li><strong>Backend returns JSON</strong> &rarr; Frontend receives data and updates the UI</li>
+            </ol>
+        </section>
+
+        <!-- Technologies Section -->
+        <section id="technologies">
+            <h2>Technology Stack</h2>
+
+            <h3>Backend Technologies</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Technology</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PHP</strong></td>
+                        <td>8.4</td>
+                        <td>Server-side programming language</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Laravel</strong></td>
+                        <td>12.x</td>
+                        <td>PHP web framework for building APIs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Laravel Octane</strong></td>
+                        <td>2.x</td>
+                        <td>High-performance application server</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FrankenPHP</strong></td>
+                        <td>Latest</td>
+                        <td>Modern PHP application server (Octane driver)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Laravel Horizon</strong></td>
+                        <td>5.x</td>
+                        <td>Queue monitoring and management dashboard</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Laravel Passport</strong></td>
+                        <td>12.x</td>
+                        <td>OAuth2 authentication for API</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MySQL</strong></td>
+                        <td>8.0</td>
+                        <td>Relational database</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Redis</strong></td>
+                        <td>7.x</td>
+                        <td>In-memory cache, sessions, and queue driver</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PHPUnit</strong></td>
+                        <td>11.x</td>
+                        <td>Testing framework</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Frontend Technologies</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Technology</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Vue.js</strong></td>
+                        <td>3.5</td>
+                        <td>Progressive JavaScript framework</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TypeScript</strong></td>
+                        <td>5.9</td>
+                        <td>Type-safe JavaScript</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vite</strong></td>
+                        <td>7.x</td>
+                        <td>Fast build tool with hot module replacement</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tailwind CSS</strong></td>
+                        <td>4.x</td>
+                        <td>Utility-first CSS framework</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pinia</strong></td>
+                        <td>3.x</td>
+                        <td>Vue state management</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vue Router</strong></td>
+                        <td>4.x</td>
+                        <td>Client-side routing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vitest</strong></td>
+                        <td>4.x</td>
+                        <td>Unit testing framework</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Infrastructure Technologies</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Technology</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Docker</strong></td>
+                        <td>Containerization for consistent environments</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Docker Compose</strong></td>
+                        <td>Multi-container orchestration for local development</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kubernetes</strong></td>
+                        <td>Container orchestration for production</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nginx</strong></td>
+                        <td>Web server for serving frontend static files</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Supervisor</strong></td>
+                        <td>Process manager for Horizon and scheduler</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Project Structure Section -->
+        <section id="structure">
+            <h2>Project Structure</h2>
+
+            <div class="file-tree">
+<span class="folder">al-sabiqoon/</span>
+├── <span class="folder">backend/</span>                    <span class="comment"># Laravel API application</span>
+│   ├── <span class="folder">app/</span>                    <span class="comment"># Application code (Models, Controllers, etc.)</span>
+│   ├── <span class="folder">config/</span>                 <span class="comment"># Configuration files</span>
+│   ├── <span class="folder">database/</span>               <span class="comment"># Migrations and seeders</span>
+│   ├── <span class="folder">routes/</span>                 <span class="comment"># API route definitions</span>
+│   ├── <span class="folder">tests/</span>                  <span class="comment"># PHPUnit tests</span>
+│   ├── <span class="folder">docs/v1/</span>                <span class="comment"># Backend documentation</span>
+│   ├── <span class="file">composer.json</span>           <span class="comment"># PHP dependencies</span>
+│   └── <span class="file">phpunit.xml</span>             <span class="comment"># PHPUnit configuration</span>
+│
+├── <span class="folder">frontend/</span>                   <span class="comment"># Vue 3 SPA application</span>
+│   ├── <span class="folder">src/</span>                    <span class="comment"># Source code</span>
+│   │   ├── <span class="folder">api/</span>                <span class="comment"># API client</span>
+│   │   ├── <span class="folder">assets/</span>             <span class="comment"># CSS and static assets</span>
+│   │   ├── <span class="folder">components/</span>         <span class="comment"># Vue components</span>
+│   │   ├── <span class="folder">composables/</span>        <span class="comment"># Reusable composition functions</span>
+│   │   ├── <span class="folder">router/</span>             <span class="comment"># Vue Router configuration</span>
+│   │   ├── <span class="folder">stores/</span>             <span class="comment"># Pinia state stores</span>
+│   │   └── <span class="folder">views/</span>              <span class="comment"># Page components</span>
+│   ├── <span class="folder">docs/v1/</span>                <span class="comment"># Frontend documentation</span>
+│   ├── <span class="file">package.json</span>            <span class="comment"># Node dependencies</span>
+│   └── <span class="file">vite.config.ts</span>          <span class="comment"># Vite build configuration</span>
+│
+├── <span class="folder">infrastructure/</span>            <span class="comment"># DevOps configuration</span>
+│   ├── <span class="folder">docker/</span>                 <span class="comment"># Docker configurations</span>
+│   │   ├── <span class="folder">backend/</span>            <span class="comment"># Backend Dockerfiles</span>
+│   │   └── <span class="folder">frontend/</span>           <span class="comment"># Frontend Dockerfiles</span>
+│   ├── <span class="folder">kubernetes/</span>             <span class="comment"># K8s manifests</span>
+│   │   ├── <span class="folder">base/</span>               <span class="comment"># Base configurations</span>
+│   │   └── <span class="folder">overlays/</span>           <span class="comment"># Environment-specific configs</span>
+│   └── <span class="folder">docs/v1/</span>                <span class="comment"># Infrastructure documentation</span>
+│
+├── <span class="folder">docs/v1/</span>                    <span class="comment"># Project-wide documentation (this file)</span>
+├── <span class="file">compose.yaml</span>               <span class="comment"># Docker Compose for local dev</span>
+└── <span class="file">Makefile</span>                   <span class="comment"># Convenience commands</span>
+            </div>
+
+            <div class="info-box info">
+                <strong>Documentation Links</strong>
+                <p>Each folder has its own detailed documentation:</p>
+                <ul style="margin-top: 0.5rem;">
+                    <li><a href="../../backend/docs/v1/index.html">Backend Documentation</a> - Laravel, Octane, Horizon, PHPUnit</li>
+                    <li><a href="../../frontend/docs/v1/index.html">Frontend Documentation</a> - Vue 3, Tailwind CSS, Theme System</li>
+                    <li><a href="../../infrastructure/docs/v1/index.html">Infrastructure Documentation</a> - Docker, Kubernetes, Deployment</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Key Concepts Section -->
+        <section id="concepts">
+            <h2>Key Concepts Explained</h2>
+            <p>If you're new to these technologies, here's what each one does and why we use it:</p>
+
+            <div class="concept">
+                <h4>Laravel Octane</h4>
+                <p>
+                    <strong>What it is:</strong> Octane supercharges Laravel by keeping your application in memory
+                    between requests, rather than booting it fresh for every request.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Why it matters:</strong> Traditional PHP loads your entire application for each HTTP request,
+                    then throws it away. Octane boots once and handles thousands of requests, making your app 2-10x faster.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Simple analogy:</strong> Instead of starting your car engine for each trip to the mailbox,
+                    you keep it running all day.
+                </p>
+            </div>
+
+            <div class="concept">
+                <h4>FrankenPHP</h4>
+                <p>
+                    <strong>What it is:</strong> A modern PHP application server written in Go. It's one of the "engines"
+                    that can power Laravel Octane (alternatives: Swoole, RoadRunner).
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Why we chose it:</strong> FrankenPHP is the newest option, supports HTTP/3, automatic HTTPS,
+                    and integrates well with Docker. It's created by the Symfony team.
+                </p>
+            </div>
+
+            <div class="concept">
+                <h4>Laravel Horizon</h4>
+                <p>
+                    <strong>What it is:</strong> A beautiful dashboard and queue manager for Laravel's Redis-powered queues.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>What are queues?</strong> Some tasks are too slow to do during a web request (sending emails,
+                    processing images, generating reports). Queues let you "queue" these jobs to run in the background.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>What Horizon does:</strong> It monitors your queues, shows you what's running, what failed,
+                    how long jobs take, and lets you retry failed jobs.
+                </p>
+                <pre><code>// Example: Instead of sending email during request (slow)
+Mail::to($user)->send(new WelcomeEmail());
+
+// Queue it for background processing (fast response to user)
+Mail::to($user)->queue(new WelcomeEmail());</code></pre>
+            </div>
+
+            <div class="concept">
+                <h4>Supervisor</h4>
+                <p>
+                    <strong>What it is:</strong> A process manager that keeps your background processes running.
+                    If they crash, Supervisor restarts them automatically.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>What we use it for:</strong>
+                </p>
+                <ul>
+                    <li>Running <code>php artisan horizon</code> (queue worker)</li>
+                    <li>Running <code>php artisan schedule:work</code> (task scheduler)</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Simple analogy:</strong> It's like a babysitter for your background processes - if they fall
+                    asleep, it wakes them back up.
+                </p>
+            </div>
+
+            <div class="concept">
+                <h4>Laravel Tinker</h4>
+                <p>
+                    <strong>What it is:</strong> An interactive command-line shell (REPL) for Laravel. You can type
+                    PHP code and see results immediately.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Why it's useful:</strong> Perfect for testing code, querying the database, or experimenting
+                    without creating test files.
+                </p>
+                <pre><code># Start Tinker
+make tinker
+
+# Inside Tinker, you can:
+>>> User::count()
+=> 42
+
+>>> User::find(1)->name
+=> "John Doe"
+
+>>> User::create(['name' => 'Jane', 'email' => 'jane@example.com'])</code></pre>
+            </div>
+
+            <div class="concept">
+                <h4>PHPUnit</h4>
+                <p>
+                    <strong>What it is:</strong> The standard testing framework for PHP. It lets you write automated tests
+                    to verify your code works correctly.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Why testing matters:</strong> Tests catch bugs before users do. When you change code,
+                    run tests to make sure you didn't break anything.
+                </p>
+                <pre><code>// Example test: tests/Feature/UserTest.php
+public function test_user_can_register(): void
+{
+    $response = $this->post('/api/register', [
+        'name' => 'John Doe',
+        'email' => 'john@example.com',
+        'password' => 'password123',
+    ]);
+
+    $response->assertStatus(201);
+    $this->assertDatabaseHas('users', ['email' => 'john@example.com']);
+}</code></pre>
+                <pre><code># Run all tests
+make test
+
+# Run specific test
+make test-filter name="UserTest"</code></pre>
+            </div>
+
+            <div class="concept">
+                <h4>Redis</h4>
+                <p>
+                    <strong>What it is:</strong> An in-memory data store. Think of it as a super-fast database that
+                    stores data in RAM instead of disk.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>What we use it for:</strong>
+                </p>
+                <ul>
+                    <li><strong>Cache:</strong> Store frequently-accessed data (user sessions, API responses) for faster retrieval</li>
+                    <li><strong>Sessions:</strong> Store user login sessions</li>
+                    <li><strong>Queues:</strong> Store background jobs waiting to be processed</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Redis Isolation (k3s):</strong> When sharing Redis across environments, use different database numbers:
+                </p>
+                <table style="font-size: 0.85rem; margin-top: 0.5rem;">
+                    <thead>
+                        <tr><th>Environment</th><th>DB Numbers</th><th>Prefix</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Local</td><td>0, 1, 2</td><td><code>alsabiqoon_local_</code></td></tr>
+                        <tr><td>Staging</td><td>3, 4, 5</td><td><code>alsabiqoon_staging_</code></td></tr>
+                        <tr><td>Production</td><td>6, 7, 8</td><td><code>alsabiqoon_prod_</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="concept">
+                <h4>Telescope & Horizon Authorization</h4>
+                <p>
+                    <strong>What they are:</strong> Laravel debug dashboards. Telescope shows requests, queries, logs, exceptions.
+                    Horizon monitors Redis queues and background jobs.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Authorization:</strong> In non-local environments, access is restricted via email whitelist:
+                </p>
+                <pre style="margin-top: 0.5rem;"><code>DASHBOARD_AUTHORIZED_EMAILS=admin@alsabiqoon.com,dev@alsabiqoon.com</code></pre>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Telescope Recording Modes:</strong>
+                </p>
+                <ul>
+                    <li><code>all</code> - Records everything (Local, Staging)</li>
+                    <li><code>errors_only</code> - Only exceptions, failed requests/jobs, logs (Production)</li>
+                    <li><code>important_only</code> - Critical errors only (High-traffic production)</li>
+                </ul>
+            </div>
+
+            <div class="concept">
+                <h4>Docker & Docker Compose</h4>
+                <p>
+                    <strong>What Docker is:</strong> Docker packages your application with all its dependencies into
+                    "containers" - isolated environments that run the same everywhere.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Why it matters:</strong> "It works on my machine" becomes "It works on every machine."
+                    No more installing PHP, MySQL, Redis separately - Docker handles everything.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>What Docker Compose is:</strong> Defines and runs multiple containers together.
+                    Our <code>compose.yaml</code> defines backend, frontend, MySQL, Redis, etc.
+                </p>
+                <pre><code># Start all services (creates containers, networks, volumes)
+make up
+
+# Stop all services
+make down
+
+# View what's running
+make ps</code></pre>
+            </div>
+
+            <div class="concept">
+                <h4>Kubernetes (K8s)</h4>
+                <p>
+                    <strong>What it is:</strong> A platform for running containerized applications in production at scale.
+                    It handles deployment, scaling, load balancing, and self-healing.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>Docker vs Kubernetes:</strong>
+                </p>
+                <ul>
+                    <li><strong>Docker:</strong> Builds and runs containers on one machine</li>
+                    <li><strong>Kubernetes:</strong> Orchestrates containers across many machines in production</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">
+                    <strong>When you use it:</strong> For production deployment. Locally, Docker Compose is sufficient.
+                </p>
+            </div>
+
+            <div class="concept">
+                <h4>Laravel Passport (OAuth2)</h4>
+                <p>
+                    <strong>What it is:</strong> Full OAuth2 server implementation for Laravel. It handles API authentication
+                    with access tokens.
+                </p>
+                <p style="margin-top: 0.5rem;">
+                    <strong>How it works:</strong>
+                </p>
+                <ol>
+                    <li>User logs in with email/password</li>
+                    <li>Server validates credentials and returns an "access token"</li>
+                    <li>Frontend stores the token and includes it in every API request</li>
+                    <li>Server validates the token to identify the user</li>
+                </ol>
+                <pre><code>// Frontend sends token with every request
+fetch('/api/user', {
+    headers: {
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGc...'
+    }
+})</code></pre>
+            </div>
+        </section>
+
+        <!-- Commands Section -->
+        <section id="commands">
+            <h2>Essential Commands</h2>
+            <p>All commands are run from the project root directory using the Makefile:</p>
+
+            <h3>Getting Started</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make up</code></td>
+                        <td>Start all Docker services</td>
+                    </tr>
+                    <tr>
+                        <td><code>make down</code></td>
+                        <td>Stop all Docker services</td>
+                    </tr>
+                    <tr>
+                        <td><code>make setup</code></td>
+                        <td>Full setup: start services, install dependencies, run migrations</td>
+                    </tr>
+                    <tr>
+                        <td><code>make ps</code></td>
+                        <td>Show running containers</td>
+                    </tr>
+                    <tr>
+                        <td><code>make logs</code></td>
+                        <td>View logs from all services</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Development</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make shell-backend</code></td>
+                        <td>Open shell in backend container</td>
+                    </tr>
+                    <tr>
+                        <td><code>make shell-frontend</code></td>
+                        <td>Open shell in frontend container</td>
+                    </tr>
+                    <tr>
+                        <td><code>make tinker</code></td>
+                        <td>Open Laravel Tinker (interactive PHP shell)</td>
+                    </tr>
+                    <tr>
+                        <td><code>make artisan cmd="..."</code></td>
+                        <td>Run any artisan command</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Database</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make migrate</code></td>
+                        <td>Run database migrations</td>
+                    </tr>
+                    <tr>
+                        <td><code>make fresh</code></td>
+                        <td>Reset database and run all migrations + seeders</td>
+                    </tr>
+                    <tr>
+                        <td><code>make seed</code></td>
+                        <td>Run database seeders</td>
+                    </tr>
+                    <tr>
+                        <td><code>make shell-mysql</code></td>
+                        <td>Open MySQL CLI</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Testing & Quality</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make test</code></td>
+                        <td>Run all PHPUnit tests</td>
+                    </tr>
+                    <tr>
+                        <td><code>make test-unit</code></td>
+                        <td>Run unit tests only</td>
+                    </tr>
+                    <tr>
+                        <td><code>make test-feature</code></td>
+                        <td>Run feature tests only</td>
+                    </tr>
+                    <tr>
+                        <td><code>make lint</code></td>
+                        <td>Fix PHP code style (Laravel Pint)</td>
+                    </tr>
+                    <tr>
+                        <td><code>make lint-frontend</code></td>
+                        <td>Lint frontend code (ESLint)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Workflow Section -->
+        <section id="workflow">
+            <h2>Development Workflow</h2>
+
+            <h3>Daily Development</h3>
+            <ol>
+                <li><strong>Start your day:</strong> <code>make up</code> to start all services</li>
+                <li><strong>Write code:</strong> Changes auto-reload (backend via Octane, frontend via Vite HMR)</li>
+                <li><strong>Test:</strong> <code>make test</code> to run tests</li>
+                <li><strong>End your day:</strong> <code>make down</code> to stop services</li>
+            </ol>
+
+            <h3>Adding a New Feature</h3>
+            <ol>
+                <li>Create a new branch: <code>git checkout -b feature/my-feature</code></li>
+                <li>Write tests first (TDD approach)</li>
+                <li>Implement the feature</li>
+                <li>Run tests: <code>make test</code></li>
+                <li>Lint code: <code>make lint</code></li>
+                <li>Commit and push</li>
+            </ol>
+
+            <h3>Database Changes</h3>
+            <ol>
+                <li>Create migration: <code>make artisan cmd="make:migration create_posts_table"</code></li>
+                <li>Edit the migration file in <code>backend/database/migrations/</code></li>
+                <li>Run migration: <code>make migrate</code></li>
+                <li>If you made a mistake: <code>make fresh</code> resets everything</li>
+            </ol>
+
+            <div class="info-box warning">
+                <strong>Warning: <code>make fresh</code> destroys all data!</strong>
+                <p>Only use <code>make fresh</code> in development. It drops all tables and recreates them.</p>
+            </div>
+        </section>
+
+        <!-- URLs & Ports Section -->
+        <section id="urls">
+            <h2>URLs & Ports</h2>
+
+            <h3>Local Development</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>URL</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td><a href="http://localhost:5173">http://localhost:5173</a></td>
+                        <td>Vue 3 development server</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend API</strong></td>
+                        <td><a href="http://localhost:8000">http://localhost:8000</a></td>
+                        <td>Laravel API server</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Health (/up)</strong></td>
+                        <td><a href="http://localhost:8000/up">http://localhost:8000/up</a></td>
+                        <td>Laravel startup check (K8s startupProbe)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Health (/health)</strong></td>
+                        <td><a href="http://localhost:8000/health">http://localhost:8000/health</a></td>
+                        <td>Liveness check (K8s livenessProbe)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Health (/ready)</strong></td>
+                        <td><a href="http://localhost:8000/ready">http://localhost:8000/ready</a></td>
+                        <td>Readiness check - verifies DB, Redis (K8s readinessProbe)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mailpit</strong></td>
+                        <td><a href="http://localhost:8026">http://localhost:8026</a></td>
+                        <td>Email testing interface</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MySQL</strong></td>
+                        <td>localhost:3307</td>
+                        <td>Database (connect with MySQL client)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Production (after deployment)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td>https://alsabiqoon.com</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend API</strong></td>
+                        <td>https://api.alsabiqoon.com</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Database Connection (for MySQL clients)</h3>
+            <pre><code>Host: localhost
+Port: 3307
+Database: alsabiqoon
+Username: alsabiqoon
+Password: secret</code></pre>
+        </section>
+
+        <footer>
+            <p>Al-Sabiqoon Project Documentation v1</p>
+            <p>Laravel 12 + Vue 3 + Docker + Kubernetes</p>
+        </footer>
+    </div>
+</body>
+</html>

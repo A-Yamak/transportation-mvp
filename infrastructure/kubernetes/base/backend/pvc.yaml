@@ -1,0 +1,27 @@
+# ==============================================================================
+# Al-Sabiqoon Backend - Persistent Volume Claim
+# ==============================================================================
+# Persistent storage for Laravel's storage directory
+# Includes uploaded files, cached views, sessions (if file-based), and logs
+#
+# Note: In production, consider using object storage (S3/R2) for uploads
+# and keep this PVC minimal for framework cache only.
+# ==============================================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-storage
+  labels:
+    app: alsabiqoon
+    component: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  # Uncomment and set storageClassName for your cloud provider:
+  # storageClassName: gp3          # AWS EBS
+  # storageClassName: standard-rwo # GCP
+  # storageClassName: managed      # Azure

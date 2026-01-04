@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Sabiqoon - Project Documentation</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --bg-white: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badges {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: var(--success); color: white; }
+        .badge-warning { background: var(--accent); color: #1e293b; }
+        .badge-info { background: var(--primary-light); color: var(--primary-dark); }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .tab-nav {
+            display: flex;
+            background: var(--bg);
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--bg-white);
+        }
+
+        .tab-btn .tab-icon {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tab-content {
+            padding: 2rem;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--primary-dark);
+            font-size: 1.75rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--text);
+            font-size: 1.25rem;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        h4 {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        /* Code */
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            color: var(--primary-dark);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Info boxes */
+        .info-box {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .info-box.info {
+            background: #eff6ff;
+            border-color: var(--primary);
+        }
+
+        .info-box.success {
+            background: #ecfdf5;
+            border-color: var(--success);
+        }
+
+        .info-box.warning {
+            background: #fffbeb;
+            border-color: var(--warning);
+        }
+
+        .info-box.danger {
+            background: #fef2f2;
+            border-color: var(--danger);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .card h4 {
+            margin-top: 0;
+            color: var(--primary-dark);
+        }
+
+        /* URL Table */
+        .url-table {
+            background: var(--bg-white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .url-table th {
+            background: var(--primary);
+            color: white;
+        }
+
+        .url-table a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .url-table a:hover {
+            text-decoration: underline;
+        }
+
+        /* Architecture diagram */
+        .architecture {
+            background: var(--code-bg);
+            color: #a5f3fc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        /* File tree */
+        .file-tree {
+            background: var(--bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .file-tree .folder { color: var(--primary); font-weight: bold; }
+        .file-tree .file { color: var(--text); }
+        .file-tree .comment { color: var(--text-muted); font-style: italic; }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .checklist li.pending::before {
+            content: '○';
+            color: var(--text-muted);
+        }
+
+        /* Quick links */
+        .quick-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .quick-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .quick-link:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .tab-btn { padding: 0.75rem 1rem; font-size: 0.85rem; }
+            .tab-btn .tab-icon { font-size: 1.25rem; }
+            .tab-content { padding: 1rem; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Al-Sabiqoon</h1>
+        <p>A 20-year strategic plan to build a global full-service accelerator</p>
+        <div class="badges">
+            <span class="badge badge-success">Active Development</span>
+            <span class="badge badge-info">Version 1.0.0</span>
+            <span class="badge badge-warning">December 2025</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="general">
+                    <span class="tab-icon">📋</span>
+                    General
+                </button>
+                <button class="tab-btn" data-tab="development">
+                    <span class="tab-icon">💻</span>
+                    Development
+                </button>
+                <button class="tab-btn" data-tab="staging">
+                    <span class="tab-icon">🧪</span>
+                    Staging
+                </button>
+                <button class="tab-btn" data-tab="production">
+                    <span class="tab-icon">🚀</span>
+                    Production
+                </button>
+                <button class="tab-btn" data-tab="makefile">
+                    <span class="tab-icon">⚡</span>
+                    Makefile
+                </button>
+                <button class="tab-btn" data-tab="best-practices">
+                    <span class="tab-icon">📚</span>
+                    Best Practices
+                </button>
+            </div>
+
+            <div class="tab-content">
+                <!-- TAB 1: GENERAL -->
+                <div id="general" class="tab-pane active">
+                    <h2>Project Overview</h2>
+                    <p>Al-Sabiqoon is a full-stack web application consisting of:</p>
+                    <ul>
+                        <li><strong>Backend:</strong> Laravel 12 API with FrankenPHP/Octane</li>
+                        <li><strong>Frontend:</strong> Vue 3 SPA with Tailwind CSS 4</li>
+                        <li><strong>Infrastructure:</strong> Docker + Kubernetes</li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <div class="quick-links">
+                        <a href="./infrastructure/docs/v1/index.html" class="quick-link">📦 Infrastructure Docs</a>
+                        <a href="./backend/docs/v1/index.html" class="quick-link">⚙️ Backend Docs</a>
+                        <a href="./frontend/docs/v1/index.html" class="quick-link">🎨 Frontend Docs</a>
+                        <a href="./README.md" class="quick-link">📄 README.md</a>
+                    </div>
+
+                    <h2>Domains</h2>
+                    <table class="url-table">
+                        <thead>
+                            <tr>
+                                <th>Environment</th>
+                                <th>Frontend</th>
+                                <th>Backend API</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Production</strong></td>
+                                <td><a href="https://alsabiqoon.com">alsabiqoon.com</a></td>
+                                <td><a href="https://api.alsabiqoon.com">api.alsabiqoon.com</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Staging</strong></td>
+                                <td><a href="https://staging.alsabiqoon.com">staging.alsabiqoon.com</a></td>
+                                <td><a href="https://api.staging.alsabiqoon.com">api.staging.alsabiqoon.com</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Development</strong></td>
+                                <td><a href="http://localhost:5173">localhost:5173</a></td>
+                                <td><a href="http://localhost:8000">localhost:8000</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Local Development Services</h2>
+                    <p>All services and their connection details for local Docker development:</p>
+
+                    <h3>Web Services</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Service</th><th>URL</th><th>Notes</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Frontend (Vue)</td><td><a href="http://localhost:5173">http://localhost:5173</a></td><td>Vite dev server with HMR</td></tr>
+                            <tr><td>Backend API</td><td><a href="http://localhost:8000">http://localhost:8000</a></td><td>FrankenPHP/Octane</td></tr>
+                            <tr><td>Telescope</td><td><a href="http://localhost:8000/telescope">http://localhost:8000/telescope</a></td><td>Debug dashboard</td></tr>
+                            <tr><td>Horizon</td><td><a href="http://localhost:8000/horizon">http://localhost:8000/horizon</a></td><td>Queue dashboard</td></tr>
+                            <tr><td>Mailpit UI</td><td><a href="http://localhost:8026">http://localhost:8026</a></td><td>Email testing inbox</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Health Check Endpoints</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Endpoint</th><th>URL</th><th>K8s Probe</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>/up</code></td><td><a href="http://localhost:8000/up">http://localhost:8000/up</a></td><td>startupProbe</td></tr>
+                            <tr><td><code>/health</code></td><td><a href="http://localhost:8000/health">http://localhost:8000/health</a></td><td>livenessProbe</td></tr>
+                            <tr><td><code>/ready</code></td><td><a href="http://localhost:8000/ready">http://localhost:8000/ready</a></td><td>readinessProbe</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Database (MySQL 8.0)</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Setting</th><th>Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Host (from host machine)</td><td><code>localhost:3307</code></td></tr>
+                            <tr><td>Host (from Docker containers)</td><td><code>mysql:3306</code></td></tr>
+                            <tr><td>Database</td><td><code>alsabiqoon</code></td></tr>
+                            <tr><td>Username</td><td><code>alsabiqoon</code></td></tr>
+                            <tr><td>Password</td><td><code>secret</code></td></tr>
+                            <tr><td>Root Password</td><td><code>root</code></td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code># Connect from host machine (e.g., MySQL Workbench, TablePlus)
+mysql -h 127.0.0.1 -P 3307 -u alsabiqoon -psecret alsabiqoon
+
+# Connect from inside backend container
+mysql -h mysql -u alsabiqoon -psecret alsabiqoon</code></pre>
+
+                    <h3>Redis 7</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Setting</th><th>Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Host (from Docker containers)</td><td><code>redis:6379</code></td></tr>
+                            <tr><td>Password</td><td><em>None (local dev)</em></td></tr>
+                            <tr><td>Default DB</td><td><code>0</code></td></tr>
+                            <tr><td>Cache DB</td><td><code>1</code></td></tr>
+                            <tr><td>Session DB</td><td><code>2</code></td></tr>
+                            <tr><td>Key Prefix</td><td><code>alsabiqoon_local_</code></td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code># Connect to Redis from backend container
+docker exec -it alsabiqoon-backend redis-cli -h redis
+
+# Inside Redis CLI
+KEYS *                  # List all keys
+SELECT 1                # Switch to cache DB
+FLUSHDB                 # Clear current DB</code></pre>
+
+                    <h3>Mailpit (Email Testing)</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Setting</th><th>Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Web UI</td><td><a href="http://localhost:8026">http://localhost:8026</a></td></tr>
+                            <tr><td>SMTP Host (from Docker)</td><td><code>mailpit:1025</code></td></tr>
+                            <tr><td>SMTP Port</td><td><code>1025</code></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Quick Start Commands</h3>
+                    <pre><code># Start all services
+make up
+
+# View logs
+make logs
+
+# Enter backend container
+make shell-backend
+
+# Run migrations
+make migrate
+
+# Fresh database with seeds
+make fresh
+
+# Run tests
+make test
+
+# Stop all services
+make down
+
+# Clean up everything (including volumes)
+make clean</code></pre>
+
+                    <h2>Technology Stack</h2>
+
+                    <h3>Backend</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>PHP</td><td>8.4</td><td>Server-side language</td></tr>
+                            <tr><td>Laravel</td><td>12.x</td><td>Application framework</td></tr>
+                            <tr><td>FrankenPHP</td><td>1.x</td><td>High-performance PHP server</td></tr>
+                            <tr><td>Laravel Octane</td><td>2.x</td><td>Persistent application server</td></tr>
+                            <tr><td>Laravel Horizon</td><td>5.x</td><td>Queue dashboard & management</td></tr>
+                            <tr><td>Laravel Passport</td><td>13.x</td><td>OAuth2 API authentication</td></tr>
+                            <tr><td>MySQL</td><td>8.0</td><td>Primary database</td></tr>
+                            <tr><td>Redis</td><td>7.x</td><td>Cache, sessions, queues</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Frontend</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Vue</td><td>3.5</td><td>Reactive UI framework</td></tr>
+                            <tr><td>TypeScript</td><td>5.9</td><td>Type-safe JavaScript</td></tr>
+                            <tr><td>Vite</td><td>7.x</td><td>Build tool & dev server</td></tr>
+                            <tr><td>Tailwind CSS</td><td>4.x</td><td>Utility-first CSS (OKLCH colors)</td></tr>
+                            <tr><td>Pinia</td><td>3.x</td><td>State management</td></tr>
+                            <tr><td>Vue Router</td><td>4.x</td><td>Client-side routing</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Infrastructure</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Docker</td><td>24+</td><td>Containerization</td></tr>
+                            <tr><td>Docker Compose</td><td>2.22+</td><td>Local development</td></tr>
+                            <tr><td>Kubernetes</td><td>1.28+</td><td>Container orchestration</td></tr>
+                            <tr><td>Kustomize</td><td>Built-in</td><td>K8s configuration</td></tr>
+                            <tr><td>Nginx</td><td>Alpine</td><td>Frontend static server</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Project Structure</h2>
+                    <div class="file-tree">
+<span class="folder">al-sabiqoon/</span>
+├── <span class="folder">backend/</span>                 <span class="comment"># Laravel 12 API</span>
+│   ├── <span class="folder">app/</span>                 <span class="comment"># Application code</span>
+│   ├── <span class="folder">config/</span>              <span class="comment"># Configuration</span>
+│   ├── <span class="folder">database/</span>            <span class="comment"># Migrations & seeders</span>
+│   ├── <span class="folder">routes/</span>              <span class="comment"># API routes</span>
+│   ├── <span class="folder">tests/</span>               <span class="comment"># PHPUnit tests</span>
+│   └── <span class="folder">docs/v1/</span>             <span class="comment"># Backend documentation</span>
+│
+├── <span class="folder">frontend/</span>                <span class="comment"># Vue 3 SPA</span>
+│   ├── <span class="folder">src/</span>
+│   │   ├── <span class="folder">api/</span>             <span class="comment"># API client</span>
+│   │   ├── <span class="folder">assets/</span>          <span class="comment"># CSS & theme</span>
+│   │   ├── <span class="folder">components/</span>      <span class="comment"># Vue components</span>
+│   │   ├── <span class="folder">composables/</span>     <span class="comment"># Reusable logic</span>
+│   │   ├── <span class="folder">router/</span>          <span class="comment"># Vue Router</span>
+│   │   ├── <span class="folder">stores/</span>          <span class="comment"># Pinia stores</span>
+│   │   └── <span class="folder">views/</span>           <span class="comment"># Page components</span>
+│   └── <span class="folder">docs/v1/</span>             <span class="comment"># Frontend documentation</span>
+│
+├── <span class="folder">infrastructure/</span>          <span class="comment"># DevOps</span>
+│   ├── <span class="folder">docker/</span>
+│   │   ├── <span class="folder">backend/</span>         <span class="comment"># PHP Dockerfiles</span>
+│   │   └── <span class="folder">frontend/</span>        <span class="comment"># Node/Nginx Dockerfiles</span>
+│   ├── <span class="folder">kubernetes/</span>
+│   │   ├── <span class="folder">base/</span>            <span class="comment"># Shared K8s manifests</span>
+│   │   └── <span class="folder">overlays/</span>        <span class="comment"># Environment patches</span>
+│   └── <span class="folder">docs/v1/</span>             <span class="comment"># Infrastructure documentation</span>
+│
+├── <span class="folder">docs/v1/</span>                 <span class="comment"># Root documentation</span>
+├── <span class="file">compose.yaml</span>             <span class="comment"># Docker Compose config</span>
+├── <span class="file">Makefile</span>                 <span class="comment"># Development commands</span>
+├── <span class="file">README.md</span>                <span class="comment"># This file (markdown)</span>
+└── <span class="file">index.html</span>              <span class="comment"># This file (HTML)</span>
+                    </div>
+
+                    <h2>Architecture</h2>
+                    <div class="architecture">┌─────────────────────────────────────────────────────────────────┐
+│                         PRODUCTION                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌─────────────┐         ┌─────────────┐                      │
+│   │  Cloudflare │         │  Cloudflare │                      │
+│   │     CDN     │         │     R2      │                      │
+│   │ (Frontend)  │         │  (Storage)  │                      │
+│   └──────┬──────┘         └─────────────┘                      │
+│          │                                                      │
+│   ┌──────▼──────────────────────────────────────────────┐      │
+│   │              Kubernetes Cluster                      │      │
+│   │                                                      │      │
+│   │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌────────┐ │      │
+│   │  │Frontend │  │ Backend │  │ Horizon │  │ Redis  │ │      │
+│   │  │ (Nginx) │  │(Octane) │  │(Worker) │  │(Cache) │ │      │
+│   │  └─────────┘  └────┬────┘  └─────────┘  └────────┘ │      │
+│   │                    │                                │      │
+│   └────────────────────┼────────────────────────────────┘      │
+│                        │                                        │
+│                 ┌──────▼──────┐                                │
+│                 │    MySQL    │                                │
+│                 │  (Managed)  │                                │
+│                 └─────────────┘                                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+                </div>
+
+                <!-- TAB 2: DEVELOPMENT -->
+                <div id="development" class="tab-pane">
+                    <h2>Development Environment</h2>
+
+                    <div class="info-box info">
+                        <strong>Prerequisites</strong>
+                        <p>Docker Desktop (or Docker + Docker Compose), Git, Make (optional)</p>
+                    </div>
+
+                    <h3>Quick Start</h3>
+                    <pre><code># Clone repository
+git clone &lt;repo-url&gt; al-sabiqoon
+cd al-sabiqoon
+
+# Start all services
+make up
+
+# Or without make:
+docker-compose up -d
+
+# Access services:
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:8000
+# Mailpit:  http://localhost:8026</code></pre>
+
+                    <h2>Development URLs & Ports</h2>
+                    <table class="url-table">
+                        <thead>
+                            <tr><th>Service</th><th>URL</th><th>Port</th><th>Notes</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Frontend</td><td><a href="http://localhost:5173">http://localhost:5173</a></td><td>5173</td><td>Vite HMR</td></tr>
+                            <tr><td>Backend API</td><td><a href="http://localhost:8000">http://localhost:8000</a></td><td>8000</td><td>FrankenPHP/Octane</td></tr>
+                            <tr><td>Horizon</td><td><a href="http://localhost:8000/horizon">http://localhost:8000/horizon</a></td><td>8000</td><td>Queue monitoring</td></tr>
+                            <tr><td>Telescope</td><td><a href="http://localhost:8000/telescope">http://localhost:8000/telescope</a></td><td>8000</td><td>Debug dashboard</td></tr>
+                            <tr><td>Filament Admin</td><td><a href="http://localhost:8000/admin">http://localhost:8000/admin</a></td><td>8000</td><td>Admin panel</td></tr>
+                            <tr><td>Mailpit UI</td><td><a href="http://localhost:8026">http://localhost:8026</a></td><td>8026</td><td>Email testing</td></tr>
+                            <tr><td>MySQL</td><td>localhost:3307</td><td>3307</td><td>Database</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Make Commands</h2>
+                    <div class="card-grid">
+                        <div class="card">
+                            <h4>🐳 Docker</h4>
+                            <pre><code>make up        # Start services
+make down      # Stop services
+make ps        # Show status
+make logs      # View logs
+make rebuild   # Rebuild images
+make clean     # Remove volumes</code></pre>
+                        </div>
+                        <div class="card">
+                            <h4>⚙️ Backend</h4>
+                            <pre><code>make shell-backend  # Enter container
+make migrate        # Run migrations
+make fresh          # Fresh migrate
+make tinker         # Laravel REPL
+make test           # Run tests</code></pre>
+                        </div>
+                        <div class="card">
+                            <h4>🎨 Frontend</h4>
+                            <pre><code>make shell-frontend  # Enter container
+make lint            # Run ESLint
+make format          # Run Prettier</code></pre>
+                        </div>
+                        <div class="card">
+                            <h4>☸️ Kubernetes</h4>
+                            <pre><code>make k8s-staging     # Deploy staging
+make k8s-production  # Deploy prod</code></pre>
+                        </div>
+                    </div>
+
+                    <h2>Docker Compose Watch</h2>
+                    <div class="info-box success">
+                        <strong>Efficient File Syncing</strong>
+                        <p>For efficient development (requires Docker Compose v2.22+), use watch mode:</p>
+                    </div>
+                    <pre><code>docker compose watch</code></pre>
+                    <p>This syncs code changes without rebuilding containers.</p>
+
+                    <h2>Dev/Prod Parity</h2>
+                    <div class="info-box warning">
+                        <strong>Important</strong>
+                        <p>Both development and production use <strong>FrankenPHP with Octane</strong>. This ensures memory leaks are caught during development and behavior is consistent across environments.</p>
+                    </div>
+
+                    <h2>Environment Variables</h2>
+                    <h3>Backend (.env)</h3>
+                    <pre><code>APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+OCTANE_SERVER=frankenphp
+DB_HOST=mysql
+REDIS_HOST=redis
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis</code></pre>
+
+                    <h3>Frontend (.env.local)</h3>
+                    <pre><code>VITE_API_URL=http://localhost:8000
+VITE_APP_NAME=Al-Sabiqoon</code></pre>
+
+                    <h2>Debugging</h2>
+                    <h3>Enable Xdebug</h3>
+                    <pre><code># In compose.yaml, set:
+environment:
+  XDEBUG_MODE: debug</code></pre>
+
+                    <h3>View Logs</h3>
+                    <pre><code># All logs
+make logs
+
+# Specific service
+docker-compose logs -f backend
+
+# Laravel Pail (pretty logs)
+docker-compose exec backend php artisan pail</code></pre>
+                </div>
+
+                <!-- TAB 3: STAGING -->
+                <div id="staging" class="tab-pane">
+                    <h2>Staging Environment</h2>
+
+                    <div class="info-box info">
+                        <strong>Purpose</strong>
+                        <p>Staging mirrors production but with debug tools enabled, seeded test data, and lower resource limits.</p>
+                    </div>
+
+                    <h2>Staging URLs</h2>
+                    <table class="url-table">
+                        <thead>
+                            <tr><th>Service</th><th>URL</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Frontend</td><td><a href="https://staging.alsabiqoon.com">https://staging.alsabiqoon.com</a></td></tr>
+                            <tr><td>Backend API</td><td><a href="https://api.staging.alsabiqoon.com">https://api.staging.alsabiqoon.com</a></td></tr>
+                            <tr><td>Horizon</td><td><a href="https://api.staging.alsabiqoon.com/horizon">https://api.staging.alsabiqoon.com/horizon</a></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Deployment</h2>
+                    <pre><code># Deploy to staging
+make k8s-staging
+
+# Or manually:
+kubectl apply -k infrastructure/kubernetes/overlays/staging</code></pre>
+
+                    <h2>Configuration Files</h2>
+                    <div class="file-tree">
+<span class="folder">infrastructure/kubernetes/overlays/staging/</span>
+├── <span class="file">kustomization.yaml</span>    <span class="comment"># Patches for staging</span>
+├── <span class="file">ingress.yaml</span>          <span class="comment"># TLS + domain config</span>
+└── <span class="file">configmap.yaml</span>        <span class="comment"># Environment variables</span>
+                    </div>
+
+                    <h2>Staging vs Production</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Setting</th><th>Staging</th><th>Production</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>APP_DEBUG</td><td><code>true</code></td><td><code>false</code></td></tr>
+                            <tr><td>Replicas</td><td>1-2</td><td>2-10</td></tr>
+                            <tr><td>Resources</td><td>Lower</td><td>Higher</td></tr>
+                            <tr><td>Telescope</td><td>Enabled (all)</td><td>Enabled (errors_only)</td></tr>
+                            <tr><td>Error Display</td><td>Detailed</td><td>Generic</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Staging Environment Variables</h2>
+                    <pre><code>APP_ENV=staging
+APP_DEBUG=true
+APP_URL=https://api.staging.alsabiqoon.com
+LOG_LEVEL=debug
+
+# Redis Isolation (different DB numbers from prod!)
+REDIS_DB=3
+REDIS_CACHE_DB=4
+REDIS_SESSION_DB=5
+REDIS_PREFIX=alsabiqoon_staging_
+
+# Telescope & Horizon (full recording for debugging)
+DASHBOARD_AUTHORIZED_EMAILS=admin@alsabiqoon.com,dev@alsabiqoon.com
+TELESCOPE_ENABLED=true
+TELESCOPE_RECORDING_MODE=all</code></pre>
+
+                    <h2>Database Management</h2>
+                    <div class="info-box warning">
+                        <strong>Separate Database</strong>
+                        <p>Staging uses a separate database from production. It can be reset without any impact.</p>
+                    </div>
+                    <pre><code># Reset staging database
+kubectl exec -it deployment/backend -n alsabiqoon-staging -- php artisan migrate:fresh --seed</code></pre>
+
+                    <h2>Monitoring</h2>
+                    <pre><code># Check deployment status
+kubectl get pods -n alsabiqoon-staging
+
+# View logs
+kubectl logs -f deployment/backend -n alsabiqoon-staging
+
+# Check Horizon
+kubectl logs -f deployment/horizon -n alsabiqoon-staging</code></pre>
+                </div>
+
+                <!-- TAB 4: PRODUCTION -->
+                <div id="production" class="tab-pane">
+                    <h2>Production Environment</h2>
+
+                    <div class="info-box success">
+                        <strong>Optimized For</strong>
+                        <p>High availability (multi-replica), auto-scaling (HPA), security (non-root containers), and performance (OPcache, Redis).</p>
+                    </div>
+
+                    <h2>Production URLs</h2>
+                    <table class="url-table">
+                        <thead>
+                            <tr><th>Service</th><th>URL</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Frontend</td><td><a href="https://alsabiqoon.com">https://alsabiqoon.com</a></td></tr>
+                            <tr><td>Backend API</td><td><a href="https://api.alsabiqoon.com">https://api.alsabiqoon.com</a></td></tr>
+                            <tr><td>Horizon</td><td><a href="https://api.alsabiqoon.com/horizon">https://api.alsabiqoon.com/horizon</a> (auth required)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Deployment</h2>
+                    <pre><code># Deploy to production (with confirmation)
+make k8s-production
+
+# Or manually:
+kubectl apply -k infrastructure/kubernetes/overlays/production</code></pre>
+
+                    <h2>Architecture</h2>
+                    <div class="architecture">┌─────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster                        │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Namespace: alsabiqoon                   │   │
+│  │                                                      │   │
+│  │  Ingress ──► Service ──► Deployment (2-10 pods)     │   │
+│  │                              │                       │   │
+│  │                         ┌────┴────┐                 │   │
+│  │                         │   HPA   │                 │   │
+│  │                         │ (auto)  │                 │   │
+│  │                         └─────────┘                 │   │
+│  │                                                      │   │
+│  │  Backend:  2-10 replicas (CPU/Memory based)         │   │
+│  │  Frontend: 2-10 replicas (CPU/Memory based)         │   │
+│  │  Horizon:  1 replica (singleton)                    │   │
+│  │  Redis:    1 replica + PVC                          │   │
+│  │                                                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</div>
+
+                    <h2>Resource Limits</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Service</th><th>CPU Request</th><th>CPU Limit</th><th>Memory Request</th><th>Memory Limit</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Backend</td><td>250m</td><td>500m</td><td>256Mi</td><td>512Mi</td></tr>
+                            <tr><td>Frontend</td><td>100m</td><td>200m</td><td>128Mi</td><td>256Mi</td></tr>
+                            <tr><td>Horizon</td><td>250m</td><td>500m</td><td>256Mi</td><td>512Mi</td></tr>
+                            <tr><td>Redis</td><td>100m</td><td>200m</td><td>128Mi</td><td>256Mi</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Auto-Scaling (HPA)</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Service</th><th>Min</th><th>Max</th><th>Scale Up Trigger</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Backend</td><td>2</td><td>10</td><td>CPU > 70%</td></tr>
+                            <tr><td>Frontend</td><td>2</td><td>10</td><td>CPU > 70%</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Production Environment Variables</h2>
+                    <pre><code>APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://api.alsabiqoon.com
+LOG_LEVEL=error
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+# Redis Isolation (different DB numbers from staging!)
+REDIS_DB=6
+REDIS_CACHE_DB=7
+REDIS_SESSION_DB=8
+REDIS_PREFIX=alsabiqoon_prod_
+
+# Telescope & Horizon (errors only in production)
+DASHBOARD_AUTHORIZED_EMAILS=admin@alsabiqoon.com
+TELESCOPE_ENABLED=true
+TELESCOPE_RECORDING_MODE=errors_only
+TELESCOPE_PRUNE_HOURS=48</code></pre>
+
+                    <h2>Security Checklist</h2>
+                    <ul class="checklist">
+                        <li>Non-root containers</li>
+                        <li>CSP headers enabled</li>
+                        <li>HTTPS enforced (via Ingress)</li>
+                        <li>Secrets via Kubernetes Secrets</li>
+                        <li>Redis AUTH enabled</li>
+                        <li>Telescope/Horizon dashboard authorization</li>
+                        <li>Sensitive data masking in Telescope</li>
+                        <li class="pending">Network policies (configure per cluster)</li>
+                        <li class="pending">Pod security standards (configure per cluster)</li>
+                        <li class="pending">Backup strategy (configure per provider)</li>
+                    </ul>
+
+                    <h2>Health Checks</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Endpoint</th><th>Purpose</th><th>K8s Probe</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>GET /up</code></td><td>Laravel startup check</td><td>startupProbe</td></tr>
+                            <tr><td><code>GET /health</code></td><td>App liveness (no dependencies)</td><td>livenessProbe</td></tr>
+                            <tr><td><code>GET /ready</code></td><td>App readiness (checks DB, Redis)</td><td>readinessProbe</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Redis Isolation</h2>
+                    <p>When sharing Redis across environments in k3s:</p>
+                    <table>
+                        <thead>
+                            <tr><th>Environment</th><th>DB Numbers</th><th>Prefix</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Local</td><td>0, 1, 2</td><td><code>alsabiqoon_local_</code></td></tr>
+                            <tr><td>Staging</td><td>3, 4, 5</td><td><code>alsabiqoon_staging_</code></td></tr>
+                            <tr><td>Production</td><td>6, 7, 8</td><td><code>alsabiqoon_prod_</code></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Rollback</h2>
+                    <pre><code># View deployment history
+kubectl rollout history deployment/backend -n alsabiqoon
+
+# Rollback to previous version
+kubectl rollout undo deployment/backend -n alsabiqoon
+
+# Rollback to specific revision
+kubectl rollout undo deployment/backend -n alsabiqoon --to-revision=2</code></pre>
+
+                    <h2>Database Migrations</h2>
+                    <div class="info-box danger">
+                        <strong>Warning</strong>
+                        <p>Never run migrations automatically in production. Always run manually with backup.</p>
+                    </div>
+                    <pre><code>kubectl exec -it deployment/backend -n alsabiqoon -- php artisan migrate --force</code></pre>
+                </div>
+
+                <!-- TAB 5: MAKEFILE -->
+                <div id="makefile" class="tab-pane">
+                    <h2>Makefile Commands</h2>
+
+                    <div class="info-box info">
+                        <strong>Important</strong>
+                        <p>All <code>make</code> commands run from the <strong>project root directory</strong>. They use Docker Compose to execute commands inside containers, so you don't need to be inside any specific folder.</p>
+                    </div>
+
+                    <pre><code># Show all available commands with descriptions
+make help</code></pre>
+
+                    <h2>Docker Commands</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make up</code></td><td>Start all services in detached mode</td></tr>
+                            <tr><td><code>make down</code></td><td>Stop all services</td></tr>
+                            <tr><td><code>make ps</code></td><td>Show running containers</td></tr>
+                            <tr><td><code>make logs</code></td><td>View all logs (follow mode)</td></tr>
+                            <tr><td><code>make logs-backend</code></td><td>View backend logs only</td></tr>
+                            <tr><td><code>make logs-frontend</code></td><td>View frontend logs only</td></tr>
+                            <tr><td><code>make logs-horizon</code></td><td>View Horizon worker logs</td></tr>
+                            <tr><td><code>make build</code></td><td>Build all Docker images</td></tr>
+                            <tr><td><code>make rebuild</code></td><td>Rebuild images without cache</td></tr>
+                            <tr><td><code>make restart</code></td><td>Restart all services</td></tr>
+                            <tr><td><code>make clean</code></td><td>Remove containers, volumes, and networks</td></tr>
+                            <tr><td><code>make reset</code></td><td>Full reset: remove everything and rebuild</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Backend Commands</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make shell-backend</code></td><td>Enter backend container shell</td></tr>
+                            <tr><td><code>make tinker</code></td><td>Open Laravel REPL (Tinker)</td></tr>
+                            <tr><td><code>make pail</code></td><td>Stream Laravel logs (pretty format)</td></tr>
+                            <tr><td><code>make routes</code></td><td>List all registered routes</td></tr>
+                            <tr><td><code>make migrate</code></td><td>Run database migrations</td></tr>
+                            <tr><td><code>make fresh</code></td><td>Fresh migrate + run seeders</td></tr>
+                            <tr><td><code>make seed</code></td><td>Run database seeders only</td></tr>
+                            <tr><td><code>make cache-clear</code></td><td>Clear all Laravel caches</td></tr>
+                            <tr><td><code>make cache-all</code></td><td>Build all caches (production)</td></tr>
+                            <tr><td><code>make horizon</code></td><td>Start Horizon in foreground</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Testing Commands</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make test</code></td><td>Run all PHPUnit tests</td></tr>
+                            <tr><td><code>make test-unit</code></td><td>Run unit tests only</td></tr>
+                            <tr><td><code>make test-feature</code></td><td>Run feature tests only</td></tr>
+                            <tr><td><code>make test-coverage</code></td><td>Run tests with coverage report</td></tr>
+                            <tr><td><code>make test-filter name="UserTest"</code></td><td>Run specific test</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Artisan Generators</h2>
+                    <div class="info-box success">
+                        <strong>Shortcut Syntax</strong>
+                        <p>Use <code>name=</code> for the name and <code>flags=</code> for additional options.</p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Example</th><th>Creates</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make model</code></td><td><code>make model name=Post flags="-mc"</code></td><td>Model + migration + controller</td></tr>
+                            <tr><td><code>make controller</code></td><td><code>make controller name=PaymentController</code></td><td>Controller class</td></tr>
+                            <tr><td><code>make migration</code></td><td><code>make migration name=create_orders_table</code></td><td>Database migration</td></tr>
+                            <tr><td><code>make seeder</code></td><td><code>make seeder name=OrderSeeder</code></td><td>Database seeder</td></tr>
+                            <tr><td><code>make factory</code></td><td><code>make factory name=OrderFactory</code></td><td>Model factory</td></tr>
+                            <tr><td><code>make job</code></td><td><code>make job name=ProcessPayment</code></td><td>Queue job</td></tr>
+                            <tr><td><code>make event</code></td><td><code>make event name=OrderPlaced</code></td><td>Event class</td></tr>
+                            <tr><td><code>make listener</code></td><td><code>make listener name=SendConfirmation</code></td><td>Event listener</td></tr>
+                            <tr><td><code>make mail</code></td><td><code>make mail name=WelcomeMail</code></td><td>Mailable class</td></tr>
+                            <tr><td><code>make notification</code></td><td><code>make notification name=OrderShipped</code></td><td>Notification class</td></tr>
+                            <tr><td><code>make middleware</code></td><td><code>make middleware name=EnsureAdmin</code></td><td>HTTP middleware</td></tr>
+                            <tr><td><code>make policy</code></td><td><code>make policy name=OrderPolicy</code></td><td>Authorization policy</td></tr>
+                            <tr><td><code>make rule</code></td><td><code>make rule name=ValidPhone</code></td><td>Validation rule</td></tr>
+                            <tr><td><code>make command</code></td><td><code>make command name=CleanupOrders</code></td><td>Artisan command</td></tr>
+                            <tr><td><code>make test-make</code></td><td><code>make test-make name=OrderTest</code></td><td>PHPUnit test</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>V1 API Generators (Recommended)</h2>
+                    <div class="info-box warning">
+                        <strong>Use These for API Development</strong>
+                        <p>These commands create files in the versioned API structure: <code>Api/V1/</code></p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Example</th><th>Creates</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make v1-controller</code></td><td><code>make v1-controller name=UserController</code></td><td><code>Api/V1/UserController</code></td></tr>
+                            <tr><td><code>make v1-request</code></td><td><code>make v1-request name=StoreUserRequest</code></td><td><code>Api/V1/StoreUserRequest</code></td></tr>
+                            <tr><td><code>make v1-resource</code></td><td><code>make v1-resource name=UserResource</code></td><td><code>Api/V1/UserResource</code></td></tr>
+                            <tr><td><code>make v1-crud</code></td><td><code>make v1-crud name=User</code></td><td>Controller + Requests + Resource</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>v1-crud Creates:</h3>
+                    <pre><code># make v1-crud name=Order creates:
+app/Http/Controllers/Api/V1/OrderController.php
+app/Http/Requests/Api/V1/StoreOrderRequest.php
+app/Http/Requests/Api/V1/UpdateOrderRequest.php
+app/Http/Resources/Api/V1/OrderResource.php</code></pre>
+
+                    <h2>Frontend Commands</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make shell-frontend</code></td><td>Enter frontend container shell</td></tr>
+                            <tr><td><code>make lint</code></td><td>Run ESLint</td></tr>
+                            <tr><td><code>make lint-frontend</code></td><td>Run ESLint (alias)</td></tr>
+                            <tr><td><code>make format</code></td><td>Run Prettier formatter</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Kubernetes Commands</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make k8s-staging</code></td><td>Deploy to staging cluster</td></tr>
+                            <tr><td><code>make k8s-production</code></td><td>Deploy to production (with confirmation)</td></tr>
+                            <tr><td><code>make k8s-status</code></td><td>Show deployment status</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Production Image Builds</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make build-backend</code></td><td>Build production backend image</td></tr>
+                            <tr><td><code>make build-frontend</code></td><td>Build production frontend image</td></tr>
+                            <tr><td><code>make build-all</code></td><td>Build all production images</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Installation & Setup</h2>
+                    <table>
+                        <thead>
+                            <tr><th>Command</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>make install</code></td><td>Install all dependencies (composer + npm)</td></tr>
+                            <tr><td><code>make setup</code></td><td>Full setup: start, install deps, migrate</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB 6: BEST PRACTICES -->
+                <div id="best-practices" class="tab-pane">
+                    <h2>Config Caching</h2>
+
+                    <div class="info-box danger">
+                        <strong>Critical Rule</strong>
+                        <p>In production, <code>config:cache</code> compiles all config. After this, the <code>.env</code> file is <strong>NOT read</strong>.</p>
+                    </div>
+
+                    <h3>The Rule</h3>
+                    <pre><code>BAD:  $key = env('API_KEY');              // Returns NULL when cached!
+GOOD: $key = config('services.api_key');  // Always works!</code></pre>
+
+                    <h3>Where to Use env()</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Location</th><th>Use env()?</th><th>Use config()?</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>config/*.php</code> files</td><td>✅ YES</td><td>❌ NO</td></tr>
+                            <tr><td>Controllers</td><td>❌ NO</td><td>✅ YES</td></tr>
+                            <tr><td>Services</td><td>❌ NO</td><td>✅ YES</td></tr>
+                            <tr><td>Models</td><td>❌ NO</td><td>✅ YES</td></tr>
+                            <tr><td>Views</td><td>❌ NO</td><td>✅ YES</td></tr>
+                            <tr><td>Console commands</td><td>❌ NO</td><td>✅ YES</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>How Config Caching Works</h3>
+                    <ol>
+                        <li>Container starts</li>
+                        <li><code>entrypoint.sh</code> runs <code>php artisan config:cache</code></li>
+                        <li>All <code>config/*.php</code> files compile into <code>bootstrap/cache/config.php</code></li>
+                        <li><code>.env</code> file is no longer read</li>
+                        <li>K8s ConfigMaps/Secrets inject env vars into the container</li>
+                        <li>Laravel's <code>config()</code> reads these at boot time</li>
+                    </ol>
+
+                    <h2>API Versioning</h2>
+
+                    <table>
+                        <thead>
+                            <tr><th>Version</th><th>URL Prefix</th><th>Status</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>V1</td><td><code>/api/v1/*</code></td><td><span class="badge badge-success">Active</span></td><td>Current stable version</td></tr>
+                            <tr><td>V2</td><td><code>/api/v2/*</code></td><td><span class="badge badge-info">Planned</span></td><td>Future breaking changes</td></tr>
+                            <tr><td>V3</td><td><code>/api/v3/*</code></td><td><span class="badge badge-warning">Future</span></td><td>Major redesigns</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>API File Structure</h3>
+                    <div class="file-tree">
+<span class="folder">backend/app/Http/</span>
+├── <span class="folder">Controllers/Api/</span>
+│   ├── <span class="folder">V1/</span>
+│   │   ├── <span class="file">Controller.php</span>      <span class="comment"># Base controller with response helpers</span>
+│   │   └── <span class="file">*Controller.php</span>     <span class="comment"># Your V1 controllers</span>
+│   ├── <span class="folder">V2/</span>                     <span class="comment"># Extends V1 (future)</span>
+│   └── <span class="folder">V3/</span>                     <span class="comment"># Extends V2 (future)</span>
+├── <span class="folder">Requests/Api/</span>
+│   ├── <span class="folder">V1/</span>
+│   │   ├── <span class="file">ApiRequest.php</span>       <span class="comment"># Base request with JSON responses</span>
+│   │   └── <span class="file">*Request.php</span>         <span class="comment"># Your V1 requests</span>
+│   ├── <span class="folder">V2/</span>                     <span class="comment"># Extends V1</span>
+│   └── <span class="folder">V3/</span>                     <span class="comment"># Extends V2</span>
+└── <span class="folder">Resources/Api/</span>
+    ├── <span class="folder">V1/</span>
+    │   ├── <span class="file">ApiResource.php</span>      <span class="comment"># Base resource with version info</span>
+    │   └── <span class="file">*Resource.php</span>        <span class="comment"># Your V1 resources</span>
+    ├── <span class="folder">V2/</span>                     <span class="comment"># Extends V1</span>
+    └── <span class="folder">V3/</span>                     <span class="comment"># Extends V2</span>
+                    </div>
+
+                    <h2>Kubernetes Configuration</h2>
+
+                    <h3>ConfigMap vs Secret</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Use ConfigMap for</th><th>Use Secret for</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>APP_ENV, APP_DEBUG</td><td>APP_KEY (encryption)</td></tr>
+                            <tr><td>LOG_LEVEL</td><td>Database passwords</td></tr>
+                            <tr><td>Cache/queue driver names</td><td>API keys & tokens</td></tr>
+                            <tr><td>Service hostnames</td><td>OAuth credentials</td></tr>
+                            <tr><td>Feature flags</td><td>Private keys (Passport)</td></tr>
+                            <tr><td>Non-sensitive URLs</td><td>SMTP passwords</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Secure Secrets Options</h3>
+                    <ol>
+                        <li><strong>Sealed Secrets</strong> (GitOps recommended):
+                            <pre><code>kubeseal --format yaml < secrets.yaml > sealed-secrets.yaml</code></pre>
+                        </li>
+                        <li><strong>External Secrets Operator</strong>: Sync from AWS Secrets Manager, Vault, etc.</li>
+                        <li><strong>Direct Apply</strong> (with RBAC):
+                            <pre><code>kubectl apply -f secrets.yaml -n alsabiqoon</code></pre>
+                        </li>
+                    </ol>
+
+                    <h2>Health Check Endpoints</h2>
+
+                    <table>
+                        <thead>
+                            <tr><th>Endpoint</th><th>Purpose</th><th>Used By</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>GET /up</code></td><td>Basic health check (Laravel default)</td><td>Startup probe</td></tr>
+                            <tr><td><code>GET /health</code></td><td>Liveness check - is the app alive?</td><td>Liveness probe</td></tr>
+                            <tr><td><code>GET /ready</code></td><td>Readiness check - can it accept traffic?</td><td>Readiness probe</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Health Check Logic</h3>
+                    <pre><code># /health (Liveness) - Is the app alive?
+- Returns 200 if app is running
+- Returns 503 if app is stuck
+- Should be FAST (no DB checks)
+
+# /ready (Readiness) - Can it accept traffic?
+- Returns 200 if all dependencies are ready
+- Checks: Database, Redis, Queue
+- Returns 503 if dependencies unavailable</code></pre>
+
+                    <h2>Response Format Standards</h2>
+
+                    <h3>Success Response</h3>
+                    <pre><code>{
+  "data": { ... },
+  "message": "Optional success message",
+  "api_version": "v1"
+}</code></pre>
+
+                    <h3>Error Response</h3>
+                    <pre><code>{
+  "message": "Error description",
+  "errors": {
+    "field": ["Validation error"]
+  }
+}</code></pre>
+
+                    <h3>Paginated Response</h3>
+                    <pre><code>{
+  "data": [ ... ],
+  "meta": {
+    "current_page": 1,
+    "last_page": 10,
+    "per_page": 15,
+    "total": 150
+  },
+  "links": {
+    "first": "...",
+    "last": "...",
+    "prev": null,
+    "next": "..."
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Al-Sabiqoon Documentation | Last Updated: December 2025</p>
+    </footer>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all buttons and panes
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+                // Add active to clicked button and corresponding pane
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Handle URL hash for direct tab linking
+        function handleHash() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const btn = document.querySelector(`[data-tab="${hash}"]`);
+                if (btn) btn.click();
+            }
+        }
+
+        window.addEventListener('hashchange', handleHash);
+        handleHash();
+    </script>
+</body>
+</html>

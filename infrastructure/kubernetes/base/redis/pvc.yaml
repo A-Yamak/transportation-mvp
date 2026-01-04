@@ -1,0 +1,21 @@
+# ==============================================================================
+# Al-Sabiqoon Redis - Persistent Volume Claim
+# ==============================================================================
+# Ensures Redis data persists across pod restarts
+# ==============================================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  labels:
+    app: alsabiqoon
+    component: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # Use default storage class (k3s local-path or your configured class)
+  # storageClassName: local-path

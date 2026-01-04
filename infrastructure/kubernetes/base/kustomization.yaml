@@ -1,0 +1,36 @@
+# ==============================================================================
+# Al-Sabiqoon - Kustomize Base Configuration
+# ==============================================================================
+# Base resources shared across all environments
+# Use overlays (staging/production) to customize for each environment
+# ==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: transportationapp
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/name: transportationapp
+  app.kubernetes.io/part-of: transportationapp
+  app.kubernetes.io/managed-by: kustomize
+
+# Resources to deploy
+resources:
+  - namespace.yaml
+  # Backend
+  - backend/deployment.yaml
+  - backend/service.yaml
+  - backend/hpa.yaml
+  - backend/pvc.yaml
+  # Frontend
+  - frontend/deployment.yaml
+  - frontend/service.yaml
+  - frontend/hpa.yaml
+  # Workers (Horizon)
+  - workers/deployment.yaml
+  # Redis
+  - redis/deployment.yaml
+  - redis/service.yaml
+  - redis/pvc.yaml

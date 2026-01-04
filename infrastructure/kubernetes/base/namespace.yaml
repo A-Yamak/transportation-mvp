@@ -1,0 +1,14 @@
+# ==============================================================================
+# Al-Sabiqoon - Kubernetes Namespace
+# ==============================================================================
+# Creates a dedicated namespace for all Al-Sabiqoon resources.
+# This provides isolation and easier resource management.
+# ==============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: transportationapp
+  labels:
+    app.kubernetes.io/name: transportationapp
+    app.kubernetes.io/managed-by: kustomize

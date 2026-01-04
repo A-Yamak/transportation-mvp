@@ -1,0 +1,43 @@
+# ==============================================================================
+# Al-Sabiqoon - Staging ConfigMap
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  APP_NAME: "Al-Sabiqoon [Staging]"
+  APP_ENV: "staging"
+  APP_DEBUG: "true"
+  APP_URL: "https://api.staging.alsabiqoon.com"
+  APP_TIMEZONE: "UTC"
+
+  LOG_CHANNEL: "stack"
+  LOG_LEVEL: "debug"
+
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql-service-staging"
+  DB_PORT: "3306"
+  DB_DATABASE: "alsabiqoon_staging"
+
+  REDIS_HOST: "redis-service-staging"
+  REDIS_PORT: "6379"
+
+  CACHE_STORE: "redis"
+  QUEUE_CONNECTION: "redis"
+  SESSION_DRIVER: "redis"
+  SESSION_LIFETIME: "120"
+  SESSION_DOMAIN: ".staging.alsabiqoon.com"
+  SESSION_SECURE_COOKIE: "true"
+
+  OCTANE_SERVER: "frankenphp"
+  OCTANE_HTTPS: "true"
+
+  HORIZON_PREFIX: "alsabiqoon_staging_horizon:"
+
+  FILESYSTEM_DISK: "r2"
+  CLOUDFLARE_R2_BUCKET: "alsabiqoon-staging"
+
+  TELESCOPE_ENABLED: "true"
+  HORIZON_ENABLED: "true"

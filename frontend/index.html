@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Al-Sabiqoon - Global Full-Service Accelerator">
+
+    <title>Al-Sabiqoon</title>
+
+    <!-- Preconnect to API for performance -->
+    <link rel="preconnect" href="https://api.alsabiqoon.com">
+
+    <!-- Prevent FOUC (Flash of Unstyled Content) for dark mode -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('alsabiqoon-theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = theme === 'dark' || (theme === 'system' && systemDark) || (!theme && systemDark);
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#1a1a1a');
+        }
+      })();
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

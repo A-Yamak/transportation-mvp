@@ -1,0 +1,77 @@
+# ==============================================================================
+# Al-Sabiqoon - Production ConfigMap
+# ==============================================================================
+#
+# Non-sensitive configuration for production environment.
+# Secrets are stored separately in secrets.yaml (see secrets.yaml.example)
+#
+# How This Works with Laravel Config Caching:
+# -------------------------------------------
+# 1. Container starts -> entrypoint.sh runs `php artisan config:cache`
+# 2. Config is compiled into bootstrap/cache/config.php
+# 3. .env file is NO LONGER READ after caching
+# 4. These K8s env vars are injected into the container
+# 5. Laravel's config() reads these env vars at boot time
+#
+# IMPORTANT: The config/*.php files must use env() to read these values:
+#   - config/app.php:     'env' => env('APP_ENV', 'production')
+#   - config/database.php: 'host' => env('DB_HOST', 'localhost')
+#
+# NEVER use env() directly in application code (controllers, services, etc.)
+# ALWAYS use config() helper which works with or without caching.
+#
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  # Application
+  APP_NAME: "Al-Sabiqoon"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://api.alsabiqoon.com"
+  APP_TIMEZONE: "UTC"
+
+  # Logging
+  LOG_CHANNEL: "stack"
+  LOG_LEVEL: "error"
+
+  # Database
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql-service"
+  DB_PORT: "3306"
+  DB_DATABASE: "alsabiqoon"
+
+  # Redis
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+
+  # Cache/Queue/Session
+  CACHE_STORE: "redis"
+  QUEUE_CONNECTION: "redis"
+  SESSION_DRIVER: "redis"
+  SESSION_LIFETIME: "120"
+  SESSION_DOMAIN: ".alsabiqoon.com"
+  SESSION_SECURE_COOKIE: "true"
+
+  # Octane
+  OCTANE_SERVER: "frankenphp"
+  OCTANE_HTTPS: "true"
+
+  # Horizon
+  HORIZON_PREFIX: "alsabiqoon_horizon:"
+
+  # Filesystem
+  FILESYSTEM_DISK: "r2"
+  CLOUDFLARE_R2_BUCKET: "alsabiqoon-prod"
+
+  # Mail
+  MAIL_MAILER: "smtp"
+  MAIL_FROM_ADDRESS: "noreply@alsabiqoon.com"
+  MAIL_FROM_NAME: "Al-Sabiqoon"
+
+  # Debugging (disabled in production)
+  TELESCOPE_ENABLED: "false"
+  HORIZON_ENABLED: "true"

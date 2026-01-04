@@ -1,0 +1,89 @@
+# ==============================================================================
+# Al-Sabiqoon Backend - Development Dockerfile
+# ==============================================================================
+# Development image with FrankenPHP for dev/prod parity
+# Uses the same base as production but with development-friendly settings
+#
+# Key differences from production:
+#   - Xdebug installed and configurable
+#   - OPcache validates timestamps (sees code changes)
+#   - Source code mounted as volume
+#   - Runs as root to avoid permission issues with mounts
+#
+# This image is designed to be used with docker-compose for local development.
+# ==============================================================================
+
+FROM dunglas/frankenphp:1-php8.4-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies for PHP extensions
+RUN apk add --no-cache \
+    curl \
+    git \
+    zip \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    icu-dev \
+    oniguruma-dev \
+    linux-headers \
+    $PHPIZE_DEPS
+
+# Install PHP extensions required by Laravel
+RUN install-php-extensions \
+    pdo_mysql \
+    redis \
+    pcntl \
+    zip \
+    gd \
+    intl \
+    opcache \
+    bcmath \
+    exif
+
+# Install Xdebug for debugging (disabled by default)
+RUN install-php-extensions xdebug
+
+# Xdebug configuration (disabled by default, enable via XDEBUG_MODE env var)
+RUN echo "xdebug.mode=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
+    echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
+    echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
+    echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# PHP development configuration
+# Key difference: opcache.validate_timestamps=1 to see code changes
+RUN echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "max_execution_time=60" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "display_errors=On" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "opcache.validate_timestamps=1" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "opcache.revalidate_freq=0" >> /usr/local/etc/php/conf.d/99-dev.ini
+
+# Create storage and cache directories
+RUN mkdir -p \
+    /app/storage/app/public \
+    /app/storage/framework/cache \
+    /app/storage/framework/sessions \
+    /app/storage/framework/views \
+    /app/storage/logs \
+    /app/bootstrap/cache
+
+# Expose Octane port
+EXPOSE 8000
+
+# Note: Running as root for development to avoid permission issues with volume mounts
+# Production Dockerfile uses non-root user
+
+# Default command: Start Octane with FrankenPHP and watch for changes
+# The --watch flag enables hot-reload on file changes
+CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=8000", "--watch"]

@@ -1,0 +1,17 @@
+# ==============================================================================
+# Al-Sabiqoon Infrastructure .gitignore
+# ==============================================================================
+# Extra protection for Kubernetes secrets
+
+# Real secrets (not examples)
+kubernetes/**/secrets.yaml
+!kubernetes/**/secrets.yaml.example
+
+# Terraform state (if used in future)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# OS files
+.DS_Store

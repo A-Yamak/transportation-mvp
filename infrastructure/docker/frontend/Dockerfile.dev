@@ -1,0 +1,25 @@
+# ==============================================================================
+# Al-Sabiqoon Frontend - Development Dockerfile
+# ==============================================================================
+# Development image with Vite HMR (Hot Module Replacement) support
+# Source code is mounted as a volume for live changes
+#
+# This image is designed to be used with docker-compose for local development.
+# ==============================================================================
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install git (sometimes needed for npm packages)
+RUN apk add --no-cache git
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Note: Running as root for development to avoid permission issues with volume mounts
+# Production Dockerfile uses non-root user
+
+# Default command: Start Vite dev server
+# The --host flag allows external connections (required for Docker)
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -1,0 +1,61 @@
+# ==============================================================================
+# Al-Sabiqoon - Staging Kustomize Overlay
+# ==============================================================================
+# Staging-specific configurations for testing before production
+#
+# Deploy with: kubectl apply -k infrastructure/kubernetes/overlays/staging
+# ==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: alsabiqoon-staging
+
+# Reference base configuration
+resources:
+  - ../../base
+  - ingress.yaml
+  - configmap.yaml
+
+# Override namespace for staging
+nameSuffix: -staging
+
+# Staging-specific labels
+commonLabels:
+  environment: staging
+
+# Image tags for staging
+images:
+  - name: alsabiqoon/backend
+    newTag: staging
+  - name: alsabiqoon/frontend
+    newTag: staging
+
+# Secret generator
+secretGenerator:
+  - name: backend-secrets
+    literals:
+      - APP_KEY=base64:REPLACE_WITH_STAGING_KEY
+      - DB_PASSWORD=REPLACE_WITH_STAGING_PASSWORD
+      - PASSPORT_PRIVATE_KEY=REPLACE
+      - PASSPORT_PUBLIC_KEY=REPLACE
+  - name: redis-secrets
+    literals:
+      - password=REPLACE_WITH_STAGING_REDIS_PASSWORD
+
+# Patches for staging (fewer resources)
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: backend
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: frontend

@@ -1,0 +1,77 @@
+{
+  "@@locale": "en",
+  "appTitle": "Driver App",
+  "login": "Login",
+  "logout": "Logout",
+  "email": "Email",
+  "password": "Password",
+  "forgotPassword": "Forgot Password?",
+  "loginButton": "Login",
+  "loggingIn": "Logging in...",
+
+  "todaysTrips": "Today's Trips",
+  "noTripsToday": "No trips today",
+  "trip": "Trip",
+  "trips": "Trips",
+  "destinations": "Destinations",
+  "destination": "Destination",
+
+  "startTrip": "Start Trip",
+  "continueTrip": "Continue",
+  "endTrip": "End Trip",
+  "tripStarted": "Trip Started",
+  "tripCompleted": "Trip Completed",
+
+  "navigate": "Navigate",
+  "markArrived": "Mark Arrived",
+  "markComplete": "Mark Complete",
+  "markFailed": "Mark Failed",
+  "arrived": "Arrived",
+  "completed": "Completed",
+  "failed": "Failed",
+  "pending": "Pending",
+  "inProgress": "In Progress",
+
+  "notStarted": "Not Started",
+  "cancelled": "Cancelled",
+
+  "kilometers": "Kilometers",
+  "km": "km",
+  "estimatedKm": "Estimated Distance",
+  "actualKm": "Actual Distance",
+
+  "failureReasonNotHome": "Customer Not Home",
+  "failureReasonRefused": "Refused Delivery",
+  "failureReasonWrongAddress": "Wrong Address",
+  "failureReasonInaccessible": "Location Inaccessible",
+  "failureReasonOther": "Other",
+  "selectFailureReason": "Select Failure Reason",
+  "additionalNotes": "Additional Notes",
+
+  "recipientName": "Recipient Name",
+  "deliveryNotes": "Delivery Notes",
+  "confirmDelivery": "Confirm Delivery",
+
+  "settings": "Settings",
+  "language": "Language",
+  "arabic": "العربية",
+  "english": "English",
+
+  "error": "Error",
+  "tryAgain": "Try Again",
+  "networkError": "Network Error",
+  "unknownError": "An unexpected error occurred",
+  "invalidCredentials": "Invalid credentials",
+
+  "loading": "Loading...",
+  "pullToRefresh": "Pull to refresh",
+
+  "totalTrips": "Total Trips",
+  "completedTrips": "Completed Trips",
+  "totalKmDriven": "Total KM Driven",
+
+  "welcome": "Welcome",
+  "goodMorning": "Good Morning",
+  "goodAfternoon": "Good Afternoon",
+  "goodEvening": "Good Evening"
+}

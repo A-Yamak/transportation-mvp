@@ -1,0 +1,51 @@
+# ==============================================================================
+# Al-Sabiqoon Horizon Workers - Kubernetes Deployment
+# ==============================================================================
+# Deploys Laravel Horizon for background job processing
+# Uses supervisor to manage horizon and scheduler processes
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horizon-workers
+  labels:
+    app: alsabiqoon
+    component: workers
+spec:
+  # Single replica - Horizon manages its own worker scaling
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alsabiqoon
+      component: workers
+  template:
+    metadata:
+      labels:
+        app: alsabiqoon
+        component: workers
+    spec:
+      containers:
+        - name: horizon
+          image: alsabiqoon/backend:latest
+          imagePullPolicy: Always
+          command: ["php", "artisan", "horizon"]
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Graceful shutdown for long-running jobs
+          lifecycle:
+            preStop:
+              exec:
+                command: ["php", "artisan", "horizon:terminate"]
+      # Long termination period for job completion
+      terminationGracePeriodSeconds: 120

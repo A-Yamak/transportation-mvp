@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Sabiqoon Infrastructure Documentation</title>
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #5b21b6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --bg-white: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        nav {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+
+        nav ul { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; justify-content: center; }
+        nav a { color: var(--text); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; transition: all 0.2s; }
+        nav a:hover { background: var(--primary); color: white; }
+
+        section {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        h3 { color: var(--text); font-size: 1.25rem; margin: 1.5rem 0 1rem 0; }
+        h4 { color: var(--text-muted); font-size: 1rem; margin: 1rem 0 0.5rem 0; }
+        p { margin-bottom: 1rem; }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: var(--primary-dark);
+        }
+
+        pre code { background: none; padding: 0; color: inherit; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+        th { background: #f1f5f9; font-weight: 600; }
+        tr:hover { background: #f8fafc; }
+
+        .info-box { padding: 1rem 1.25rem; border-radius: 8px; margin: 1rem 0; }
+        .info-box.info { background: #f3e8ff; border-left: 4px solid var(--primary); }
+        .info-box.success { background: #f0fdf4; border-left: 4px solid var(--success); }
+        .info-box.warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .info-box strong { display: block; margin-bottom: 0.25rem; }
+
+        .file-tree {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        .file-tree .folder { color: var(--accent); }
+        .file-tree .file { color: #94a3b8; }
+        .file-tree .comment { color: #64748b; font-style: italic; }
+
+        ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+
+        .diagram {
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        .card { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); }
+        .card h4 { color: var(--primary); margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+        .card p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+
+        footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem; }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            header h1 { font-size: 1.75rem; }
+            nav ul { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Infrastructure Documentation</h1>
+        <p>Docker, Kubernetes, and Deployment Configuration</p>
+        <span class="badge">DevOps Guide</span>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#docker">Docker Basics</a></li>
+                <li><a href="#compose">Docker Compose</a></li>
+                <li><a href="#dockerfiles">Dockerfiles</a></li>
+                <li><a href="#kubernetes">Kubernetes</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+            </ul>
+        </nav>
+
+        <!-- Overview Section -->
+        <section id="overview">
+            <h2>Infrastructure Overview</h2>
+            <p>
+                This documentation explains how Al-Sabiqoon is containerized with Docker for local development
+                and prepared for Kubernetes deployment in production.
+            </p>
+
+            <h3>Infrastructure Directory Structure</h3>
+            <div class="file-tree">
+<span class="folder">infrastructure/</span>
+├── <span class="folder">docker/</span>                     <span class="comment"># Docker configurations</span>
+│   ├── <span class="folder">backend/</span>
+│   │   ├── <span class="file">Dockerfile</span>          <span class="comment"># Production image (FrankenPHP)</span>
+│   │   ├── <span class="file">Dockerfile.dev</span>      <span class="comment"># Development image (FrankenPHP - same as prod!)</span>
+│   │   ├── <span class="file">supervisord.conf</span>    <span class="comment"># Process manager config</span>
+│   │   ├── <span class="file">php.ini</span>             <span class="comment"># PHP settings for production</span>
+│   │   └── <span class="file">entrypoint.sh</span>       <span class="comment"># Container startup script</span>
+│   └── <span class="folder">frontend/</span>
+│       ├── <span class="file">Dockerfile</span>          <span class="comment"># Production image (Nginx)</span>
+│       ├── <span class="file">Dockerfile.dev</span>      <span class="comment"># Development image (Node)</span>
+│       └── <span class="file">nginx.conf</span>          <span class="comment"># Nginx configuration</span>
+│
+├── <span class="folder">kubernetes/</span>                 <span class="comment"># K8s manifests</span>
+│   ├── <span class="folder">base/</span>                   <span class="comment"># Base configurations (shared)</span>
+│   │   ├── <span class="file">kustomization.yaml</span>
+│   │   ├── <span class="file">namespace.yaml</span>
+│   │   ├── <span class="folder">backend/</span>            <span class="comment"># Backend deployment</span>
+│   │   ├── <span class="folder">frontend/</span>           <span class="comment"># Frontend deployment</span>
+│   │   ├── <span class="folder">workers/</span>            <span class="comment"># Horizon workers</span>
+│   │   └── <span class="folder">redis/</span>              <span class="comment"># Redis deployment</span>
+│   └── <span class="folder">overlays/</span>               <span class="comment"># Environment-specific</span>
+│       ├── <span class="folder">staging/</span>            <span class="comment"># Staging environment</span>
+│       └── <span class="folder">production/</span>         <span class="comment"># Production environment</span>
+│
+└── <span class="folder">docs/v1/</span>                    <span class="comment"># This documentation</span>
+            </div>
+
+            <h3>Development vs Production</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Development</th>
+                        <th>Production</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Orchestration</td>
+                        <td>Docker Compose</td>
+                        <td>Kubernetes</td>
+                    </tr>
+                    <tr>
+                        <td>Backend Server</td>
+                        <td>PHP built-in server</td>
+                        <td>FrankenPHP + Octane</td>
+                    </tr>
+                    <tr>
+                        <td>Frontend Server</td>
+                        <td>Vite dev server</td>
+                        <td>Nginx</td>
+                    </tr>
+                    <tr>
+                        <td>Hot Reload</td>
+                        <td>Yes (instant updates)</td>
+                        <td>No (requires rebuild)</td>
+                    </tr>
+                    <tr>
+                        <td>Debug Tools</td>
+                        <td>Xdebug enabled</td>
+                        <td>Disabled</td>
+                    </tr>
+                    <tr>
+                        <td>Config File</td>
+                        <td>compose.yaml</td>
+                        <td>kubernetes/overlays/production/</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Docker Basics Section -->
+        <section id="docker">
+            <h2>Docker Basics</h2>
+
+            <div class="info-box info">
+                <strong>What is Docker?</strong>
+                <p>Docker packages your application with all its dependencies into a "container" -
+                an isolated, portable environment that runs identically on any machine.</p>
+            </div>
+
+            <h3>Key Concepts</h3>
+
+            <h4>Image</h4>
+            <p>
+                A <strong>Docker image</strong> is a blueprint/template for creating containers.
+                Think of it like a class in programming - it defines what the container will have.
+            </p>
+            <pre><code># List all images on your machine
+docker images
+
+# Download an image from Docker Hub
+docker pull php:8.4-fpm-alpine
+
+# Build an image from a Dockerfile
+docker build -t my-app:latest .</code></pre>
+
+            <h4>Container</h4>
+            <p>
+                A <strong>container</strong> is a running instance of an image.
+                Like creating an object from a class - it's the actual running process.
+            </p>
+            <pre><code># List running containers
+docker ps
+
+# List all containers (including stopped)
+docker ps -a
+
+# Start a container from an image
+docker run -d -p 8000:8000 my-app:latest
+
+# Stop a container
+docker stop container_name
+
+# Remove a container
+docker rm container_name</code></pre>
+
+            <h4>Volume</h4>
+            <p>
+                <strong>Volumes</strong> persist data outside containers. Without volumes, all data
+                is lost when a container stops. Volumes are essential for databases.
+            </p>
+            <pre><code># Create a named volume
+docker volume create mysql-data
+
+# List volumes
+docker volume ls
+
+# Mount volume when running container
+docker run -v mysql-data:/var/lib/mysql mysql:8.0</code></pre>
+
+            <h4>Network</h4>
+            <p>
+                <strong>Networks</strong> allow containers to communicate with each other.
+                Containers on the same network can reach each other by container name.
+            </p>
+            <pre><code># In our setup, backend can reach MySQL as:
+# Host: mysql (container name)
+# Port: 3306
+
+DB_HOST=mysql
+DB_PORT=3306</code></pre>
+
+            <h3>Common Docker Commands</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>docker ps</code></td>
+                        <td>List running containers</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker ps -a</code></td>
+                        <td>List all containers</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker images</code></td>
+                        <td>List all images</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker logs &lt;container&gt;</code></td>
+                        <td>View container logs</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker exec -it &lt;container&gt; sh</code></td>
+                        <td>Open shell in container</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker build -t name:tag .</code></td>
+                        <td>Build image from Dockerfile</td>
+                    </tr>
+                    <tr>
+                        <td><code>docker system prune</code></td>
+                        <td>Remove unused containers, images, volumes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Docker Compose Section -->
+        <section id="compose">
+            <h2>Docker Compose</h2>
+
+            <div class="info-box info">
+                <strong>What is Docker Compose?</strong>
+                <p>Docker Compose lets you define and run multiple containers as a single application.
+                Instead of running 6 separate <code>docker run</code> commands, you define everything
+                in one <code>compose.yaml</code> file.</p>
+            </div>
+
+            <h3>Our Services</h3>
+            <p>The <code>compose.yaml</code> in the project root defines these services:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>backend</h4>
+                    <p>Laravel API (PHP 8.4) on port 8000. Handles all API requests.</p>
+                </div>
+                <div class="card">
+                    <h4>frontend</h4>
+                    <p>Vue 3 dev server on port 5173. Hot-reloads on code changes.</p>
+                </div>
+                <div class="card">
+                    <h4>horizon</h4>
+                    <p>Laravel Horizon queue worker. Processes background jobs.</p>
+                </div>
+                <div class="card">
+                    <h4>mysql</h4>
+                    <p>MySQL 8.0 database on port 3307. Stores application data.</p>
+                </div>
+                <div class="card">
+                    <h4>redis</h4>
+                    <p>Redis 7 for caching, sessions, and queue storage.</p>
+                </div>
+                <div class="card">
+                    <h4>mailpit</h4>
+                    <p>Email testing on port 8026. Catches all outgoing emails.</p>
+                </div>
+            </div>
+
+            <h3>Service Dependencies</h3>
+            <div class="diagram">
+                <pre style="background: transparent; color: var(--text); text-align: left;">
+    ┌─────────────┐     ┌─────────────┐
+    │  frontend   │     │   mailpit   │
+    │  (Vue 3)    │     │  (Email UI) │
+    └─────────────┘     └─────────────┘
+
+    ┌─────────────┐     ┌─────────────┐
+    │   backend   │────▶│   horizon   │
+    │  (Laravel)  │     │   (Queue)   │
+    └──────┬──────┘     └──────┬──────┘
+           │                   │
+           ▼                   ▼
+    ┌─────────────┐     ┌─────────────┐
+    │    mysql    │     │    redis    │
+    │ (Database)  │     │   (Cache)   │
+    └─────────────┘     └─────────────┘
+                </pre>
+            </div>
+
+            <h3>Docker Compose Watch (Recommended)</h3>
+            <div class="info-box success">
+                <strong>Efficient Development with Compose Watch</strong>
+                <p>Docker Compose v2.22+ includes a <code>watch</code> feature that efficiently syncs file changes
+                without rebuilding containers. This is faster than traditional volume mounts for large projects.</p>
+            </div>
+
+            <pre><code># Start with watch mode (recommended for development)
+docker compose watch
+
+# This will:
+# - Sync code changes instantly (app/, config/, routes/)
+# - Rebuild only when composer.json/package.json changes</code></pre>
+
+            <h3>Docker Compose Commands</h3>
+            <p>Use <code>make</code> commands or <code>docker compose</code> (v2 - no hyphen) directly:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Make Command</th>
+                        <th>Docker Compose Equivalent</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make up</code></td>
+                        <td><code>docker compose up -d</code></td>
+                        <td>Start all services in background</td>
+                    </tr>
+                    <tr>
+                        <td><code>make down</code></td>
+                        <td><code>docker compose down</code></td>
+                        <td>Stop all services</td>
+                    </tr>
+                    <tr>
+                        <td><code>make ps</code></td>
+                        <td><code>docker compose ps</code></td>
+                        <td>List running services</td>
+                    </tr>
+                    <tr>
+                        <td><code>make logs</code></td>
+                        <td><code>docker compose logs -f</code></td>
+                        <td>View logs (follow mode)</td>
+                    </tr>
+                    <tr>
+                        <td><code>make build</code></td>
+                        <td><code>docker compose build</code></td>
+                        <td>Build/rebuild images</td>
+                    </tr>
+                    <tr>
+                        <td><code>make clean</code></td>
+                        <td><code>docker compose down -v</code></td>
+                        <td>Stop and remove volumes</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Understanding compose.yaml</h3>
+            <pre><code># Example service definition
+services:
+  backend:
+    build:
+      context: .                                    # Build context (project root)
+      dockerfile: infrastructure/docker/backend/Dockerfile.dev
+    container_name: alsabiqoon-backend              # Container name
+    ports:
+      - "8000:8000"                                 # host:container port mapping
+    volumes:
+      - ./backend:/app                             # Mount source code for live reload
+      - /app/vendor                                # Exclude vendor from mount
+    environment:
+      DB_HOST: mysql                               # Environment variables
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy                 # Wait for MySQL to be ready
+    networks:
+      - alsabiqoon                                 # Connect to network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3</code></pre>
+        </section>
+
+        <!-- Dockerfiles Section -->
+        <section id="dockerfiles">
+            <h2>Dockerfiles Explained</h2>
+
+            <div class="info-box info">
+                <strong>What is a Dockerfile?</strong>
+                <p>A Dockerfile is a text file with instructions to build a Docker image.
+                Each instruction creates a new layer in the image.</p>
+            </div>
+
+            <h3>Backend Development Dockerfile</h3>
+            <div class="info-box success">
+                <strong>Dev/Prod Parity</strong>
+                <p>Both development and production use the same FrankenPHP base image. This ensures
+                consistent behavior and catches memory leaks early in development.</p>
+            </div>
+            <p>File: <code>infrastructure/docker/backend/Dockerfile.dev</code></p>
+            <pre><code># Same base as production for dev/prod parity!
+FROM dunglas/frankenphp:1-php8.4-alpine
+
+# Set working directory inside container
+WORKDIR /app
+
+# Install PHP extensions Laravel needs
+RUN install-php-extensions \
+    pdo_mysql \      # MySQL database driver
+    redis \          # Redis for cache/sessions/queues
+    pcntl \          # Process control (for Octane)
+    zip \            # ZIP file handling
+    gd \             # Image processing
+    intl \           # Internationalization
+    pcntl \          # Process control (for Horizon)
+    bcmath \         # Math operations
+    opcache          # Bytecode caching
+
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Install Xdebug for debugging
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+# Install Composer (PHP package manager)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Default command
+CMD ["php-fpm"]</code></pre>
+
+            <h3>Backend Production Dockerfile</h3>
+            <p>File: <code>infrastructure/docker/backend/Dockerfile</code></p>
+            <p>Production uses multi-stage builds and FrankenPHP for performance:</p>
+            <pre><code># Production Dockerfile uses FrankenPHP
+FROM dunglas/frankenphp:1-php8.4-alpine
+
+# Optimized for production:
+# - No Xdebug (debugging disabled)
+# - OPcache enabled and optimized
+# - Non-root user for security
+# - Multi-stage build for smaller image</code></pre>
+
+            <h3>Frontend Dockerfiles</h3>
+
+            <h4>Development (Dockerfile.dev)</h4>
+            <pre><code># Simple Node.js image for Vite dev server
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Just install git for npm packages that need it
+RUN apk add --no-cache git
+
+EXPOSE 5173
+
+# Run Vite dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]</code></pre>
+
+            <h4>Production (Dockerfile)</h4>
+            <pre><code># Multi-stage build: Build with Node, serve with Nginx
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage - just the built files
+FROM nginx:alpine AS production
+COPY --from=builder /app/dist /usr/share/nginx/html
+# Only the final stage becomes the image - small and efficient!</code></pre>
+
+            <h3>Supervisor Configuration</h3>
+            <p>File: <code>infrastructure/docker/backend/supervisord.conf</code></p>
+            <p>Supervisor keeps background processes running in production:</p>
+            <pre><code>[supervisord]
+nodaemon=true
+
+[program:horizon]
+command=php /app/artisan horizon
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+
+[program:scheduler]
+command=php /app/artisan schedule:work
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0</code></pre>
+
+            <div class="info-box warning">
+                <strong>Why Supervisor?</strong>
+                <p>In production, we need to run multiple processes: the web server, Horizon (queue worker),
+                and the scheduler. Supervisor watches these processes and restarts them if they crash.</p>
+            </div>
+        </section>
+
+        <!-- Kubernetes Section -->
+        <section id="kubernetes">
+            <h2>Kubernetes (K8s)</h2>
+
+            <div class="info-box info">
+                <strong>What is Kubernetes?</strong>
+                <p>Kubernetes (K8s) is a platform for running containerized applications at scale in production.
+                It handles deployment, scaling, load balancing, and self-healing automatically.</p>
+            </div>
+
+            <h3>Docker vs Kubernetes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Docker Compose</th>
+                        <th>Kubernetes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Runs on single machine</td>
+                        <td>Runs across multiple machines (cluster)</td>
+                    </tr>
+                    <tr>
+                        <td>Perfect for development</td>
+                        <td>Designed for production</td>
+                    </tr>
+                    <tr>
+                        <td>Manual scaling</td>
+                        <td>Automatic scaling based on load</td>
+                    </tr>
+                    <tr>
+                        <td>Manual restart on crash</td>
+                        <td>Self-healing (auto-restart)</td>
+                    </tr>
+                    <tr>
+                        <td>Simple YAML files</td>
+                        <td>More complex but more powerful</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Key Kubernetes Concepts</h3>
+
+            <h4>Pod</h4>
+            <p>Smallest deployable unit. Contains one or more containers. Usually one container per pod.</p>
+
+            <h4>Deployment</h4>
+            <p>Manages pods. Defines how many replicas (copies) to run, handles updates, rollbacks.</p>
+
+            <h4>Service</h4>
+            <p>Provides network access to pods. Pods can come and go; Services give a stable address.</p>
+
+            <h4>Ingress</h4>
+            <p>Routes external HTTP traffic to Services. Handles domain names and TLS certificates.</p>
+
+            <h4>ConfigMap / Secret</h4>
+            <p>Store configuration separately from code. ConfigMaps for non-sensitive data, Secrets for passwords.</p>
+
+            <h3>Our Kubernetes Structure</h3>
+            <pre><code>kubernetes/
+├── base/                    # Shared configs across environments
+│   ├── kustomization.yaml   # Lists all base resources
+│   ├── namespace.yaml       # Creates 'alsabiqoon' namespace
+│   ├── backend/
+│   │   ├── deployment.yaml  # Backend pod definition
+│   │   ├── service.yaml     # Internal service for backend
+│   │   └── hpa.yaml         # Auto-scaling rules
+│   ├── frontend/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── workers/
+│   │   └── deployment.yaml  # Horizon workers
+│   └── redis/
+│       ├── deployment.yaml
+│       ├── service.yaml
+│       └── pvc.yaml         # Persistent storage
+│
+└── overlays/                # Environment-specific overrides
+    ├── staging/
+    │   ├── kustomization.yaml
+    │   ├── configmap.yaml   # Staging config values
+    │   └── ingress.yaml     # Staging domain routing
+    └── production/
+        ├── kustomization.yaml
+        ├── configmap.yaml   # Production config values
+        └── ingress.yaml     # Production domain routing</code></pre>
+
+            <h3>Kustomize</h3>
+            <p>
+                We use <strong>Kustomize</strong> to manage Kubernetes configs. It lets us have a base config
+                and override specific values per environment (staging/production).
+            </p>
+            <pre><code># Deploy to staging
+kubectl apply -k infrastructure/kubernetes/overlays/staging
+
+# Deploy to production
+kubectl apply -k infrastructure/kubernetes/overlays/production</code></pre>
+
+            <h3>Example Deployment</h3>
+            <pre><code># backend/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2                    # Run 2 copies for high availability
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    spec:
+      containers:
+      - name: backend
+        image: alsabiqoon/backend:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"      # Minimum memory
+            cpu: "250m"          # Minimum CPU (0.25 cores)
+          limits:
+            memory: "512Mi"      # Maximum memory
+            cpu: "1000m"         # Maximum CPU (1 core)
+        startupProbe:            # K8s checks app is starting
+          httpGet:
+            path: /up
+            port: 8000
+          failureThreshold: 30
+          periodSeconds: 5
+        livenessProbe:           # K8s restarts if this fails
+          httpGet:
+            path: /health
+            port: 8000
+          periodSeconds: 10
+        readinessProbe:          # K8s stops sending traffic if this fails
+          httpGet:
+            path: /ready
+            port: 8000
+          periodSeconds: 5</code></pre>
+
+            <h3>Health Check Endpoints</h3>
+            <table>
+                <thead>
+                    <tr><th>Endpoint</th><th>Purpose</th><th>K8s Probe</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>/up</code></td><td>Laravel startup check</td><td>startupProbe</td></tr>
+                    <tr><td><code>/health</code></td><td>Liveness (no dependencies)</td><td>livenessProbe</td></tr>
+                    <tr><td><code>/ready</code></td><td>Readiness (checks DB, Redis)</td><td>readinessProbe</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Deployment Section -->
+        <section id="deployment">
+            <h2>Deployment Guide</h2>
+
+            <h3>Local Development</h3>
+            <ol>
+                <li>Clone the repository</li>
+                <li>Run <code>make up</code> to start all services</li>
+                <li>Access frontend at <a href="http://localhost:5173">http://localhost:5173</a></li>
+                <li>Access backend at <a href="http://localhost:8000">http://localhost:8000</a></li>
+            </ol>
+
+            <h3>Building Production Images</h3>
+            <pre><code># Build backend production image
+make build-backend
+# Or: docker build -t alsabiqoon/backend:latest \
+#     -f infrastructure/docker/backend/Dockerfile ./backend
+
+# Build frontend production image
+make build-frontend
+# Or: docker build -t alsabiqoon/frontend:latest \
+#     -f infrastructure/docker/frontend/Dockerfile ./frontend
+
+# Build all
+make build-all</code></pre>
+
+            <h3>Deploying to Kubernetes</h3>
+            <pre><code># 1. Push images to registry (Docker Hub, GCR, ECR, etc.)
+docker push alsabiqoon/backend:latest
+docker push alsabiqoon/frontend:latest
+
+# 2. Deploy to staging
+make k8s-staging
+# Or: kubectl apply -k infrastructure/kubernetes/overlays/staging
+
+# 3. Check status
+make k8s-status
+# Or: kubectl get all -n alsabiqoon
+
+# 4. Deploy to production (after testing staging)
+make k8s-production</code></pre>
+
+            <h3>Environment Configuration</h3>
+            <p>Each environment has its own ConfigMap with environment-specific values:</p>
+
+            <h4>Staging (overlays/staging/configmap.yaml)</h4>
+            <pre><code>data:
+  APP_NAME: "Al-Sabiqoon [Staging]"
+  APP_ENV: "staging"
+  APP_DEBUG: "true"
+  APP_URL: "https://api.staging.alsabiqoon.com"
+  LOG_LEVEL: "debug"
+  # Redis Isolation
+  REDIS_DB: "3"
+  REDIS_CACHE_DB: "4"
+  REDIS_SESSION_DB: "5"
+  REDIS_PREFIX: "alsabiqoon_staging_"
+  # Telescope & Horizon (full recording)
+  DASHBOARD_AUTHORIZED_EMAILS: "admin@alsabiqoon.com,dev@alsabiqoon.com"
+  TELESCOPE_ENABLED: "true"
+  TELESCOPE_RECORDING_MODE: "all"</code></pre>
+
+            <h4>Production (overlays/production/configmap.yaml)</h4>
+            <pre><code>data:
+  APP_NAME: "Al-Sabiqoon"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://api.alsabiqoon.com"
+  LOG_LEVEL: "warning"
+  # Redis Isolation
+  REDIS_DB: "6"
+  REDIS_CACHE_DB: "7"
+  REDIS_SESSION_DB: "8"
+  REDIS_PREFIX: "alsabiqoon_prod_"
+  # Telescope & Horizon (errors only)
+  DASHBOARD_AUTHORIZED_EMAILS: "admin@alsabiqoon.com"
+  TELESCOPE_ENABLED: "true"
+  TELESCOPE_RECORDING_MODE: "errors_only"
+  TELESCOPE_PRUNE_HOURS: "48"</code></pre>
+
+            <h3>Redis Isolation</h3>
+            <div class="info-box info">
+                <strong>Shared Redis in k3s</strong>
+                <p>When sharing a single Redis instance across environments, use different database numbers and key prefixes to avoid conflicts.</p>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Environment</th><th>DB Numbers</th><th>Prefix</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Local</td><td>0, 1, 2</td><td><code>alsabiqoon_local_</code></td></tr>
+                    <tr><td>Staging</td><td>3, 4, 5</td><td><code>alsabiqoon_staging_</code></td></tr>
+                    <tr><td>Production</td><td>6, 7, 8</td><td><code>alsabiqoon_prod_</code></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security">
+            <h2>Security Notes</h2>
+
+            <h3>Production Checklist</h3>
+            <ul>
+                <li><strong style="color: var(--success);">✓</strong> Non-root containers</li>
+                <li><strong style="color: var(--success);">✓</strong> CSP headers enabled</li>
+                <li><strong style="color: var(--success);">✓</strong> Telescope/Horizon dashboard authorization</li>
+                <li><strong style="color: var(--success);">✓</strong> Sensitive data masking in Telescope</li>
+                <li>Secrets via K8s Secrets (configure externally)</li>
+                <li>Network policies (configure per cluster)</li>
+                <li>Pod security standards (configure per cluster)</li>
+                <li>RBAC configuration (configure per cluster)</li>
+            </ul>
+
+            <h3>Telescope & Horizon in Production</h3>
+            <div class="info-box warning">
+                <strong>Dashboard Authorization</strong>
+                <p>Both Telescope and Horizon dashboards require authentication in non-local environments. Configure via ConfigMap/Secret:</p>
+            </div>
+            <pre><code># Comma-separated list of authorized emails
+DASHBOARD_AUTHORIZED_EMAILS=admin@alsabiqoon.com
+
+# Telescope recording mode (errors_only for production)
+TELESCOPE_ENABLED=true
+TELESCOPE_RECORDING_MODE=errors_only
+TELESCOPE_PRUNE_HOURS=48</code></pre>
+        </section>
+
+        <!-- Troubleshooting Section -->
+        <section id="troubleshooting">
+            <h2>Troubleshooting</h2>
+
+            <h3>Common Issues</h3>
+
+            <h4>Port already in use</h4>
+            <pre><code># Find what's using port 3306
+lsof -i :3306
+
+# Kill the process or use different port in compose.yaml
+# Our config uses 3307 to avoid conflicts</code></pre>
+
+            <h4>Container keeps restarting</h4>
+            <pre><code># Check logs
+docker-compose logs backend
+
+# Common causes:
+# - Missing environment variables
+# - Database not ready yet
+# - Permission issues with volumes</code></pre>
+
+            <h4>Permission denied errors</h4>
+            <pre><code># Usually caused by volume mount ownership
+# Development Dockerfiles run as root to avoid this
+# Production uses specific user IDs</code></pre>
+
+            <h4>Can't connect to database</h4>
+            <pre><code># Make sure MySQL is healthy
+docker-compose ps
+
+# Check if MySQL is actually ready (not just running)
+docker-compose logs mysql
+
+# Inside backend container, test connection:
+docker-compose exec backend php artisan db:show</code></pre>
+
+            <h4>Changes not appearing</h4>
+            <pre><code># Frontend: Vite should hot-reload automatically
+# Backend: Try clearing cache
+make cache-clear
+
+# If still stuck, rebuild:
+docker-compose build --no-cache backend</code></pre>
+
+            <h3>Useful Debug Commands</h3>
+            <pre><code># View all containers and their status
+docker-compose ps
+
+# View logs for specific service
+docker-compose logs -f backend
+
+# Open shell in container
+docker-compose exec backend sh
+
+# Check container resource usage
+docker stats
+
+# Inspect container details
+docker inspect alsabiqoon-backend
+
+# Clean up everything and start fresh
+make clean && make up</code></pre>
+        </section>
+
+        <footer>
+            <p>Al-Sabiqoon Infrastructure Documentation v1</p>
+            <p>Docker + Kubernetes DevOps Guide</p>
+        </footer>
+    </div>
+</body>
+</html>

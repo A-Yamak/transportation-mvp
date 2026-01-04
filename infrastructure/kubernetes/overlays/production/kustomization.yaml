@@ -1,0 +1,63 @@
+# ==============================================================================
+# Al-Sabiqoon - Production Kustomize Overlay
+# ==============================================================================
+# Production-specific configurations and resource patches
+#
+# Deploy with: kubectl apply -k infrastructure/kubernetes/overlays/production
+# ==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: alsabiqoon
+
+# Reference base configuration
+resources:
+  - ../../base
+  - ingress.yaml
+  - configmap.yaml
+
+# Production-specific labels
+commonLabels:
+  environment: production
+
+# Image tags for production
+images:
+  - name: alsabiqoon/backend
+    newTag: latest
+  - name: alsabiqoon/frontend
+    newTag: latest
+
+# Secret generator (use sealed-secrets or external-secrets in real deployment)
+secretGenerator:
+  - name: backend-secrets
+    literals:
+      - APP_KEY=base64:REPLACE_WITH_REAL_KEY
+      - DB_PASSWORD=REPLACE_WITH_REAL_PASSWORD
+      - PASSPORT_PRIVATE_KEY=REPLACE
+      - PASSPORT_PUBLIC_KEY=REPLACE
+  - name: redis-secrets
+    literals:
+      - password=REPLACE_WITH_REDIS_PASSWORD
+
+# Patches for production
+patches:
+  # Increase backend replicas
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      name: backend
+  # Increase backend resources
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "512Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "1Gi"
+    target:
+      kind: Deployment
+      name: backend

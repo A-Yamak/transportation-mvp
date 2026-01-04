@@ -1,0 +1,133 @@
+# ==============================================================================
+# Al-Sabiqoon Backend - Kubernetes Deployment
+# ==============================================================================
+# Deploys the Laravel API with FrankenPHP/Octane
+#
+# Features:
+#   - Health checks (liveness/readiness probes)
+#   - Resource limits and requests
+#   - Graceful shutdown handling
+#   - Anti-affinity for high availability
+#   - Persistent storage for Laravel storage directory
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: alsabiqoon
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alsabiqoon
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: alsabiqoon
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: alsabiqoon/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # ---------------------------------------------------------------------
+          # Kubernetes Probes
+          # ---------------------------------------------------------------------
+          # startupProbe:   /up     - Is the app starting? (Laravel default)
+          # livenessProbe:  /health - Is the app alive? (fast, no deps)
+          # readinessProbe: /ready  - Can it accept traffic? (checks deps)
+          # ---------------------------------------------------------------------
+
+          # Startup probe - allow longer startup time for Octane warm-up
+          # Once this passes, liveness probe takes over
+          startupProbe:
+            httpGet:
+              path: /up
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          # Liveness probe - restart container if app is stuck
+          # Uses /health (fast, no external dependency checks)
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Readiness probe - remove from load balancer if dependencies unavailable
+          # Uses /ready (checks DB, Redis, Cache)
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Graceful shutdown
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage/app
+            - name: cache
+              mountPath: /app/storage/framework/cache
+            - name: sessions
+              mountPath: /app/storage/framework/sessions
+            - name: views
+              mountPath: /app/storage/framework/views
+      volumes:
+        # Persistent storage for uploaded files
+        - name: storage
+          persistentVolumeClaim:
+            claimName: backend-storage
+        # Ephemeral storage for framework cache (can be lost)
+        - name: cache
+          emptyDir: {}
+        # Ephemeral storage for sessions (use Redis in production!)
+        - name: sessions
+          emptyDir: {}
+        # Ephemeral storage for compiled views (regenerated automatically)
+        - name: views
+          emptyDir: {}
+      # Pod scheduling preferences - spread across nodes for HA
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: alsabiqoon
+                    component: backend
+                topologyKey: kubernetes.io/hostname
+      # Graceful termination period (Octane needs time to finish requests)
+      terminationGracePeriodSeconds: 30

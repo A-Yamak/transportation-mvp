@@ -1,0 +1,66 @@
+# ==============================================================================
+# Al-Sabiqoon - Production Ingress
+# ==============================================================================
+# Routes external traffic to frontend and backend services
+# Configured for Traefik (K3s default) with Let's Encrypt TLS
+# ==============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alsabiqoon-ingress
+  annotations:
+    # Traefik annotations (K3s default ingress controller)
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+    # Let's Encrypt via cert-manager
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+    # Security headers
+    traefik.ingress.kubernetes.io/router.middlewares: default-security-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - alsabiqoon.com
+        - www.alsabiqoon.com
+        - api.alsabiqoon.com
+      secretName: alsabiqoon-tls
+
+  rules:
+    # Frontend - main domain
+    - host: alsabiqoon.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+    # Frontend - www subdomain (redirect to main via middleware or serve same content)
+    - host: www.alsabiqoon.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+    # Backend API - api subdomain
+    - host: api.alsabiqoon.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 8000

@@ -1,0 +1,23 @@
+# ==============================================================================
+# Al-Sabiqoon Backend - Kubernetes Service
+# ==============================================================================
+# Exposes the backend deployment within the cluster
+# ==============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels:
+    app: alsabiqoon
+    component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: alsabiqoon
+    component: backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP

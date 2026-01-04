@@ -1,0 +1,81 @@
+{
+  "@@locale": "ar",
+  "appTitle": "تطبيق السائق",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+
+  "login": "تسجيل الدخول",
+  "logout": "تسجيل الخروج",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "loginButton": "دخول",
+  "loggingIn": "جاري تسجيل الدخول...",
+
+  "todaysTrips": "رحلات اليوم",
+  "noTripsToday": "لا توجد رحلات اليوم",
+  "trip": "رحلة",
+  "trips": "رحلات",
+  "destinations": "وجهات",
+  "destination": "وجهة",
+
+  "startTrip": "ابدأ الرحلة",
+  "continueTrip": "متابعة",
+  "endTrip": "إنهاء الرحلة",
+  "tripStarted": "بدأت الرحلة",
+  "tripCompleted": "اكتملت الرحلة",
+
+  "navigate": "التوجيه",
+  "markArrived": "تم الوصول",
+  "markComplete": "تم التسليم",
+  "markFailed": "فشل التسليم",
+  "arrived": "تم الوصول",
+  "completed": "مكتمل",
+  "failed": "فشل",
+  "pending": "قيد الانتظار",
+  "inProgress": "جاري",
+
+  "notStarted": "لم تبدأ",
+  "cancelled": "ملغاة",
+
+  "kilometers": "كم",
+  "km": "كم",
+  "estimatedKm": "المسافة المقدرة",
+  "actualKm": "المسافة الفعلية",
+
+  "failureReasonNotHome": "العميل غير موجود",
+  "failureReasonRefused": "رفض الاستلام",
+  "failureReasonWrongAddress": "عنوان خاطئ",
+  "failureReasonInaccessible": "موقع غير قابل للوصول",
+  "failureReasonOther": "سبب آخر",
+  "selectFailureReason": "اختر سبب الفشل",
+  "additionalNotes": "ملاحظات إضافية",
+
+  "recipientName": "اسم المستلم",
+  "deliveryNotes": "ملاحظات التسليم",
+  "confirmDelivery": "تأكيد التسليم",
+
+  "settings": "الإعدادات",
+  "language": "اللغة",
+  "arabic": "العربية",
+  "english": "English",
+
+  "error": "خطأ",
+  "tryAgain": "حاول مرة أخرى",
+  "networkError": "خطأ في الاتصال",
+  "unknownError": "حدث خطأ غير متوقع",
+  "invalidCredentials": "بيانات الدخول غير صحيحة",
+
+  "loading": "جاري التحميل...",
+  "pullToRefresh": "اسحب للتحديث",
+
+  "totalTrips": "إجمالي الرحلات",
+  "completedTrips": "الرحلات المكتملة",
+  "totalKmDriven": "إجمالي الكيلومترات",
+
+  "welcome": "مرحباً",
+  "goodMorning": "صباح الخير",
+  "goodAfternoon": "مساء الخير",
+  "goodEvening": "مساء الخير"
+}

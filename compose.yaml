@@ -1,0 +1,270 @@
+# ==============================================================================
+# Al-Sabiqoon - Docker Compose (Development)
+# ==============================================================================
+# Modern Compose Specification - no version declaration needed.
+#
+# Quick Start:
+#   make up              # Start all services
+#   make logs            # View logs
+#   make down            # Stop all services
+#
+# Services:
+#   - backend:   Laravel API (FrankenPHP/Octane)   - http://localhost:8000
+#   - frontend:  Vue 3 (Vite dev server)           - http://localhost:5173
+#   - horizon:   Queue worker (Laravel Horizon)
+#   - mysql:     MySQL 8.0 database                - localhost:3307
+#   - redis:     Redis 7 (cache/queue/sessions)    - localhost:6379
+#   - mailpit:   Email testing UI                  - http://localhost:8026
+#
+# Dev/Prod Parity:
+#   Both development and production use FrankenPHP with Octane.
+#   This ensures consistent behavior and catches memory leaks early.
+#
+# References:
+#   - https://docs.docker.com/compose/
+#   - https://laravel.com/docs/12.x/octane
+#   - https://frankenphp.dev/
+# ==============================================================================
+
+name: transportationapp
+
+services:
+  # ============================================================================
+  # Backend API Service (FrankenPHP + Octane)
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/backend/Dockerfile.dev
+    container_name: transportationapp-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+      - backend-storage:/app/storage
+    environment:
+      APP_NAME: Al-Sabiqoon
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      LOG_CHANNEL: stack
+      LOG_LEVEL: debug
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: transportationapp
+      DB_USERNAME: transportationapp
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ""
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      OCTANE_SERVER: frankenphp
+      # Xdebug: Set to "debug" to enable, "off" to disable
+      XDEBUG_MODE: "off"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - transportationapp
+    command: >
+      sh -c "
+        composer install --no-interaction &&
+        php artisan key:generate --no-interaction --force 2>/dev/null || true &&
+        php artisan migrate --force --no-interaction &&
+        php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8000 --watch
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+    # Docker Compose Watch for efficient file sync (requires Compose v2.22+)
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+        - action: sync
+          path: ./backend/config
+          target: /app/config
+        - action: sync
+          path: ./backend/routes
+          target: /app/routes
+        - action: sync
+          path: ./backend/resources
+          target: /app/resources
+        - action: rebuild
+          path: ./backend/composer.json
+        - action: rebuild
+          path: ./backend/composer.lock
+
+  # ============================================================================
+  # Frontend Service (Vite Dev Server)
+  # ============================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/frontend/Dockerfile.dev
+    container_name: transportationapp-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:8000
+      VITE_APP_NAME: Al-Sabiqoon
+    networks:
+      - transportationapp
+    command: >
+      sh -c "
+        npm install &&
+        npm run dev -- --host 0.0.0.0
+      "
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+        - action: rebuild
+          path: ./frontend/package.json
+
+  # ============================================================================
+  # Horizon Queue Worker
+  # ============================================================================
+  horizon:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/backend/Dockerfile.dev
+    container_name: transportationapp-horizon
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+      - backend-storage:/app/storage
+    environment:
+      APP_NAME: Al-Sabiqoon
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: transportationapp
+      DB_USERNAME: transportationapp
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ""
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - transportationapp
+    command: >
+      sh -c "
+        composer install --no-interaction &&
+        php artisan horizon
+      "
+    # Horizon is a queue worker, not a web server - check if process is running
+    healthcheck:
+      test: ["CMD", "php", "artisan", "horizon:status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # ============================================================================
+  # MySQL Database
+  # ============================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: transportationapp-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: transportationapp
+      MYSQL_USER: transportationapp
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - transportationapp
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    command:
+      # MySQL 8.0 settings
+      # Note: PHP 8.4's PDO supports caching_sha2_password (MySQL 8 default)
+      # No authentication plugin override needed
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+
+  # ============================================================================
+  # Redis (Cache, Sessions, Queues)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: transportationapp-redis
+    # Port not exposed to host - only used internally by containers
+    # Uncomment below if you need local Redis access:
+    # ports:
+    #   - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - transportationapp
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================================
+  # Mailpit (Email Testing)
+  # ============================================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: transportationapp-mailpit
+    ports:
+      - "1026:1025"
+      - "8026:8025"
+    networks:
+      - transportationapp
+    restart: unless-stopped
+
+# ==============================================================================
+# Volumes
+# ==============================================================================
+volumes:
+  mysql-data:
+  redis-data:
+  backend-storage:
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  transportationapp:
+    driver: bridge

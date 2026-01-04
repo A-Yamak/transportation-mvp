@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Sabiqoon Frontend Documentation v1</title>
+    <style>
+        :root {
+            --primary: oklch(60% 0.18 250);
+            --primary-dark: oklch(50% 0.18 250);
+            --accent: oklch(70% 0.20 85);
+            --bg: oklch(98% 0 0);
+            --bg-code: oklch(95% 0 0);
+            --text: oklch(15% 0 0);
+            --text-muted: oklch(40% 0 0);
+            --border: oklch(90% 0 0);
+            --glass-bg: oklch(100% 0 0 / 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, oklch(97% 0.02 250), oklch(98% 0.01 85));
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid oklch(100% 0 0 / 0.3);
+            box-shadow: 0 8px 32px oklch(0% 0 0 / 0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .version {
+            display: inline-block;
+            background: var(--accent);
+            color: oklch(20% 0 0);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        nav {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid oklch(100% 0 0 / 0.3);
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+
+        nav ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid oklch(100% 0 0 / 0.3);
+            box-shadow: 0 4px 16px oklch(0% 0 0 / 0.05);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            color: var(--text);
+            font-size: 1.125rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--bg-code);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.875em;
+            background: var(--bg-code);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-code);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: oklch(100% 0 0 / 0.5);
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tech-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .tech-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .tech-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .file-tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            background: var(--bg-code);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .file-tree div {
+            padding: 0.125rem 0;
+        }
+
+        .warning {
+            background: oklch(95% 0.1 85);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+
+        .info {
+            background: oklch(95% 0.05 250);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+
+        .color-demo {
+            display: flex;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .color-swatch {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Al-Sabiqoon Frontend</h1>
+            <span class="version">v1.0.0</span>
+            <p class="subtitle">Vue 3 + TypeScript + Tailwind CSS 4 - Configuration & Architecture Reference</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#concepts">Key Concepts</a></li>
+                <li><a href="#tech-stack">Tech Stack</a></li>
+                <li><a href="#structure">Structure</a></li>
+                <li><a href="#theme">Theme System</a></li>
+                <li><a href="#composables">Composables</a></li>
+                <li><a href="#api-client">API Client</a></li>
+                <li><a href="#styling">Styling Guide</a></li>
+                <li><a href="#docker">Docker</a></li>
+                <li><a href="#environment">Environment</a></li>
+                <li><a href="#commands">Commands</a></li>
+            </ul>
+        </nav>
+
+        <!-- Overview Section -->
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                Al-Sabiqoon Frontend is a modern single-page application (SPA) built with Vue 3 and the
+                Composition API. It features a glassy light/dark theme system built on Tailwind CSS 4,
+                type-safe API communication with Laravel Passport OAuth2, and production-ready Docker
+                configurations for Kubernetes deployment.
+            </p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>Vue 3 Composition API</strong> - Modern, type-safe component architecture</li>
+                <li><strong>TypeScript</strong> - Full type safety across the entire codebase</li>
+                <li><strong>Tailwind CSS 4</strong> - Latest version with OKLCH colors and CSS-first configuration</li>
+                <li><strong>Glassy Theme</strong> - Beautiful frosted glass UI with smooth light/dark transitions</li>
+                <li><strong>Pinia State Management</strong> - Vue's official state management solution</li>
+                <li><strong>Vue Router 4</strong> - Client-side routing with typed routes</li>
+                <li><strong>Vitest</strong> - Fast unit testing with Vue Test Utils</li>
+                <li><strong>Production Docker</strong> - Multi-stage builds with Nginx for K8s</li>
+            </ul>
+        </section>
+
+        <!-- Key Concepts Section -->
+        <section id="concepts">
+            <h2>Key Concepts for Beginners</h2>
+            <p>
+                If you're new to frontend development with Vue 3 and TypeScript, this section explains
+                the core technologies and concepts you'll encounter in this codebase.
+            </p>
+
+            <!-- Vue 3 -->
+            <h3>Vue 3</h3>
+            <p>
+                <strong>What it is:</strong> Vue is a progressive JavaScript framework for building user interfaces.
+                "Progressive" means you can use as little or as much of Vue as you need - from adding interactive
+                elements to a page all the way to building a full single-page application.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Without a framework, building interactive web UIs requires
+                manually manipulating the DOM, tracking state changes, and keeping the UI in sync with data.
+                Vue handles all of this automatically through its reactivity system.
+            </p>
+            <pre><code>// Vue 3 Composition API - Modern way to write Vue components
+&lt;script setup lang="ts"&gt;
+import { ref, computed, onMounted } from 'vue'
+
+// Reactive state - automatically triggers UI updates when changed
+const count = ref(0)
+const name = ref('Al-Sabiqoon')
+
+// Computed property - recalculates when dependencies change
+const message = computed(() => `${name.value} has ${count.value} items`)
+
+// Functions that modify state
+function increment() {
+  count.value++  // UI automatically updates!
+}
+
+// Lifecycle hook - runs when component is mounted to DOM
+onMounted(() => {
+  console.log('Component is now visible')
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h1&gt;{{ message }}&lt;/h1&gt;
+    &lt;button @click="increment"&gt;Add Item&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+            <div class="info">
+                <strong>Key Concept - Reactivity:</strong> When you change <code>count.value</code>, Vue
+                automatically detects the change and updates the DOM. You never manually write
+                <code>document.getElementById(...).innerHTML = ...</code>.
+            </div>
+
+            <!-- Composition API -->
+            <h3>Composition API vs Options API</h3>
+            <p>
+                Vue 3 offers two ways to write components. This project uses the <strong>Composition API</strong>
+                (the modern approach) instead of the Options API (Vue 2 style).
+            </p>
+            <pre><code>// ❌ Options API (Vue 2 style) - NOT used in this project
+export default {
+  data() {
+    return { count: 0 }
+  },
+  methods: {
+    increment() { this.count++ }
+  },
+  computed: {
+    double() { return this.count * 2 }
+  }
+}
+
+// ✅ Composition API (Vue 3 style) - USED in this project
+&lt;script setup lang="ts"&gt;
+import { ref, computed } from 'vue'
+
+const count = ref(0)
+const double = computed(() => count.value * 2)
+const increment = () => count.value++
+&lt;/script&gt;</code></pre>
+            <p>
+                <strong>Why Composition API?</strong> Better TypeScript support, easier code reuse through
+                composables, and better organization of related logic (instead of scattering it across
+                data/methods/computed).
+            </p>
+
+            <!-- TypeScript -->
+            <h3>TypeScript</h3>
+            <p>
+                <strong>What it is:</strong> TypeScript is JavaScript with types. It adds optional static type
+                checking to JavaScript, catching errors at compile time instead of runtime.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> In JavaScript, you might call a function with the wrong
+                argument type and only discover the bug when users encounter it. TypeScript catches these errors
+                immediately in your editor.
+            </p>
+            <pre><code>// JavaScript - No errors until runtime
+function greet(user) {
+  return 'Hello ' + user.name  // Runtime error if user is undefined!
+}
+greet()  // No warning, crashes at runtime
+
+// TypeScript - Catches errors immediately
+interface User {
+  name: string
+  email: string
+}
+
+function greet(user: User): string {
+  return 'Hello ' + user.name
+}
+greet()  // ❌ Error: Expected 1 argument, but got 0
+greet({ name: 'John', email: 'john@example.com' })  // ✅ Works</code></pre>
+            <div class="info">
+                <strong>Type Inference:</strong> TypeScript often figures out types automatically. You don't
+                need to annotate everything - just what helps readability and catch errors.
+            </div>
+
+            <!-- Single File Components -->
+            <h3>Single File Components (.vue files)</h3>
+            <p>
+                <strong>What it is:</strong> Vue's unique file format that combines HTML template, JavaScript/TypeScript
+                logic, and CSS styles in a single <code>.vue</code> file.
+            </p>
+            <pre><code>&lt;!-- MyComponent.vue --&gt;
+&lt;script setup lang="ts"&gt;
+// TypeScript logic
+import { ref } from 'vue'
+const message = ref('Hello!')
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- HTML template --&gt;
+  &lt;div class="card"&gt;
+    &lt;p&gt;{{ message }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+/* CSS - "scoped" means these styles only apply to THIS component */
+.card {
+  padding: 1rem;
+  border-radius: 8px;
+}
+&lt;/style&gt;</code></pre>
+            <p>
+                <strong>Why this matters:</strong> Each component is self-contained. You can see everything
+                related to the component in one file, making it easier to understand and maintain.
+            </p>
+
+            <!-- Vite -->
+            <h3>Vite</h3>
+            <p>
+                <strong>What it is:</strong> Vite (French for "fast") is a modern build tool and development server.
+                It's created by Evan You, the creator of Vue.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Traditional bundlers like Webpack must process your entire
+                application before showing anything. Vite serves source files directly during development, making
+                the dev server start instantly regardless of project size.
+            </p>
+            <pre><code># Vite commands
+npm run dev      # Start dev server (instant!)
+npm run build    # Build for production (optimized bundle)
+npm run preview  # Preview production build locally</code></pre>
+            <div class="info">
+                <strong>Hot Module Replacement (HMR):</strong> When you save a file, Vite updates just that
+                component in the browser without refreshing the page. Your state (like form inputs) is preserved!
+            </div>
+
+            <!-- Tailwind CSS 4 -->
+            <h3>Tailwind CSS 4</h3>
+            <p>
+                <strong>What it is:</strong> A utility-first CSS framework where you style elements by applying
+                pre-built utility classes directly in your HTML.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Traditional CSS requires naming classes, creating
+                stylesheets, and managing the cascade. Tailwind lets you style directly in your template
+                without context switching.
+            </p>
+            <pre><code>&lt;!-- Traditional CSS approach --&gt;
+&lt;style&gt;
+.card {
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+&lt;/style&gt;
+&lt;div class="card"&gt;
+  &lt;h2 class="card-title"&gt;Title&lt;/h2&gt;
+&lt;/div&gt;
+
+&lt;!-- Tailwind approach --&gt;
+&lt;div class="p-4 bg-white rounded-lg shadow-md"&gt;
+  &lt;h2 class="text-xl font-bold mb-2"&gt;Title&lt;/h2&gt;
+&lt;/div&gt;</code></pre>
+            <p>
+                <strong>Tailwind CSS 4 Improvements:</strong> Version 4 introduces CSS-first configuration using
+                the <code>@theme</code> directive, native CSS cascade layers, and support for modern color
+                spaces like OKLCH.
+            </p>
+
+            <!-- OKLCH Colors -->
+            <h3>OKLCH Color Space</h3>
+            <p>
+                <strong>What it is:</strong> OKLCH (OK, Lightness, Chroma, Hue) is a modern color space that's
+                perceptually uniform - colors with the same lightness value actually look equally bright.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> With RGB or HSL, a blue and yellow at "50% brightness"
+                don't look equally bright. OKLCH fixes this, making it easier to create consistent color scales.
+            </p>
+            <pre><code>/* RGB - Hard to create consistent color scales */
+--blue: rgb(59, 130, 246);
+--yellow: rgb(234, 179, 8);  /* Looks MUCH brighter than blue! */
+
+/* OKLCH - Perceptually consistent */
+--blue: oklch(60% 0.18 250);    /* 60% lightness, hue 250 (blue) */
+--yellow: oklch(60% 0.18 85);   /* 60% lightness, hue 85 (yellow) */
+/* Both look equally bright! */
+
+/* OKLCH breakdown: oklch(L C H / A) */
+/* L = Lightness: 0% (black) to 100% (white) */
+/* C = Chroma: 0 (gray) to ~0.4 (vivid) */
+/* H = Hue: 0-360 (color wheel degrees) */
+/* A = Alpha (optional): 0 (transparent) to 1 (opaque) */</code></pre>
+            <div class="color-demo">
+                <div class="color-swatch" style="background: oklch(60% 0.18 0);" title="Red"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 60);" title="Orange"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 120);" title="Green"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 180);" title="Cyan"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 240);" title="Blue"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 300);" title="Purple"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">All colors at 60% lightness - they appear equally bright!</p>
+
+            <!-- Pinia -->
+            <h3>Pinia (State Management)</h3>
+            <p>
+                <strong>What it is:</strong> Pinia is Vue's official state management library. It provides a
+                centralized store for data that needs to be shared across multiple components.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Without a store, passing data between distant components
+                requires "prop drilling" - passing props through many intermediate components. Pinia lets any
+                component access shared state directly.
+            </p>
+            <pre><code>// stores/user.ts - Define a store
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useUserStore = defineStore('user', () => {
+  // State
+  const user = ref&lt;User | null&gt;(null)
+  const loading = ref(false)
+
+  // Getters (computed properties)
+  const isLoggedIn = computed(() => user.value !== null)
+  const displayName = computed(() => user.value?.name ?? 'Guest')
+
+  // Actions (methods)
+  async function login(email: string, password: string) {
+    loading.value = true
+    try {
+      user.value = await api.post('/login', { email, password })
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function logout() {
+    user.value = null
+  }
+
+  return { user, loading, isLoggedIn, displayName, login, logout }
+})
+
+// In ANY component - use the store
+&lt;script setup lang="ts"&gt;
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+// Access state
+console.log(userStore.displayName)
+console.log(userStore.isLoggedIn)
+
+// Call actions
+await userStore.login('email@example.com', 'password')
+&lt;/script&gt;</code></pre>
+
+            <!-- Vue Router -->
+            <h3>Vue Router</h3>
+            <p>
+                <strong>What it is:</strong> The official router for Vue.js. It maps URL paths to components,
+                enabling client-side navigation without full page reloads.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> In a traditional website, clicking a link requests
+                a new page from the server. Vue Router intercepts navigation and swaps components instantly,
+                creating a smooth, app-like experience.
+            </p>
+            <pre><code>// router/index.ts - Define routes
+import { createRouter, createWebHistory } from 'vue-router'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/views/HomeView.vue')  // Lazy loaded
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('@/views/AboutView.vue')
+    },
+    {
+      path: '/users/:id',  // Dynamic parameter
+      name: 'user-profile',
+      component: () => import('@/views/UserProfile.vue')
+    }
+  ]
+})
+
+// In a component
+&lt;script setup lang="ts"&gt;
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
+// Read URL parameter
+console.log(route.params.id)  // From /users/:id
+
+// Navigate programmatically
+function goToUser(id: number) {
+  router.push({ name: 'user-profile', params: { id } })
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- Navigate with links --&gt;
+  &lt;RouterLink to="/"&gt;Home&lt;/RouterLink&gt;
+  &lt;RouterLink :to="{ name: 'user-profile', params: { id: 123 } }"&gt;
+    View User
+  &lt;/RouterLink&gt;
+
+  &lt;!-- Current route's component renders here --&gt;
+  &lt;RouterView /&gt;
+&lt;/template&gt;</code></pre>
+
+            <!-- Composables -->
+            <h3>Composables</h3>
+            <p>
+                <strong>What they are:</strong> Composables are functions that use Vue's Composition API to
+                encapsulate and reuse stateful logic. They're like React hooks but for Vue.
+            </p>
+            <p>
+                <strong>What problem they solve:</strong> Before composables, reusing logic between components
+                required mixins (which had naming conflicts) or higher-order components (which were complex).
+                Composables are simple functions that can be shared across any component.
+            </p>
+            <pre><code>// composables/useTheme.ts - A composable for theme management
+import { ref, computed, watchEffect } from 'vue'
+
+type Theme = 'light' | 'dark' | 'system'
+
+export function useTheme() {
+  const theme = ref&lt;Theme&gt;('system')
+
+  const isDark = computed(() => {
+    if (theme.value === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+    }
+    return theme.value === 'dark'
+  })
+
+  // Apply theme to document
+  watchEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark.value)
+  })
+
+  function toggleTheme() {
+    theme.value = isDark.value ? 'light' : 'dark'
+  }
+
+  return { theme, isDark, toggleTheme }
+}
+
+// Using the composable in ANY component
+&lt;script setup lang="ts"&gt;
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark, toggleTheme } = useTheme()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button @click="toggleTheme"&gt;
+    {{ isDark ? 'Switch to Light' : 'Switch to Dark' }}
+  &lt;/button&gt;
+&lt;/template&gt;</code></pre>
+
+            <!-- Single Page Application -->
+            <h3>Single Page Application (SPA)</h3>
+            <p>
+                <strong>What it is:</strong> An SPA loads a single HTML page and dynamically updates content
+                using JavaScript as the user navigates. The server sends the HTML shell once, and Vue handles
+                everything else.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Traditional websites reload the entire page for every
+                navigation. SPAs provide instant navigation, preserve application state, and feel like native apps.
+            </p>
+            <pre><code>&lt;!-- index.html - The only HTML page served --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Al-Sabiqoon&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="app"&gt;&lt;/div&gt;  &lt;!-- Vue mounts here --&gt;
+    &lt;script type="module" src="/src/main.ts"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+/* Nginx SPA routing - All paths return index.html */
+location / {
+    try_files $uri $uri/ /index.html;
+}</code></pre>
+            <div class="warning">
+                <strong>Note:</strong> Because the server always returns <code>index.html</code> for all routes,
+                proper Nginx configuration is essential for production. Vue Router handles the routing client-side.
+            </div>
+
+            <!-- Vitest -->
+            <h3>Vitest (Unit Testing)</h3>
+            <p>
+                <strong>What it is:</strong> Vitest is a fast unit testing framework built for Vite. It has
+                a Jest-compatible API but runs tests much faster thanks to Vite's architecture.
+            </p>
+            <p>
+                <strong>What problem it solves:</strong> Tests ensure your code works as expected and catch
+                regressions when you make changes. Vitest's speed makes running tests frequently practical.
+            </p>
+            <pre><code>// components/__tests__/MyComponent.spec.ts
+import { describe, it, expect, beforeEach } from 'vitest'
+import { mount } from '@vue/test-utils'
+import MyComponent from '../MyComponent.vue'
+
+describe('MyComponent', () => {
+  it('renders a greeting', () => {
+    const wrapper = mount(MyComponent, {
+      props: { name: 'World' }
+    })
+    expect(wrapper.text()).toContain('Hello, World!')
+  })
+
+  it('increments counter when button is clicked', async () => {
+    const wrapper = mount(MyComponent)
+    const button = wrapper.find('button')
+
+    expect(wrapper.text()).toContain('Count: 0')
+    await button.trigger('click')
+    expect(wrapper.text()).toContain('Count: 1')
+  })
+})
+
+// Run tests
+npm run test:unit        # Run all tests
+npm run test:unit -- --watch  # Watch mode - re-runs on file changes</code></pre>
+
+            <!-- @ Path Alias -->
+            <h3>The @ Import Alias</h3>
+            <p>
+                <strong>What it is:</strong> <code>@</code> is configured as an alias for the <code>src</code>
+                directory. This provides consistent, absolute-style imports throughout the codebase.
+            </p>
+            <pre><code>// Without alias - relative paths get messy
+import { useTheme } from '../../../composables/useTheme'
+import { api } from '../../../api/client'
+
+// With @ alias - always clean
+import { useTheme } from '@/composables/useTheme'
+import { api } from '@/api/client'
+
+// @ is configured in vite.config.ts:
+resolve: {
+  alias: {
+    '@': fileURLToPath(new URL('./src', import.meta.url))
+  }
+}</code></pre>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section id="tech-stack">
+            <h2>Technology Stack</h2>
+
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <h4>Vue 3</h4>
+                    <p>v3.5.26 - Progressive JavaScript Framework</p>
+                </div>
+                <div class="tech-card">
+                    <h4>TypeScript</h4>
+                    <p>v5.9.3 - Type-safe JavaScript</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Vite</h4>
+                    <p>v7.3.0 - Next Generation Build Tool</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Tailwind CSS</h4>
+                    <p>v4.1.18 - Utility-First CSS Framework</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Pinia</h4>
+                    <p>v3.0.4 - Vue State Management</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Vue Router</h4>
+                    <p>v4.6.4 - Official Router for Vue.js</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Vitest</h4>
+                    <p>v4.0.16 - Fast Unit Testing</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Node.js</h4>
+                    <p>^20.19.0 || >=22.12.0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Structure Section -->
+        <section id="structure">
+            <h2>Project Structure</h2>
+
+            <div class="file-tree">
+                <div>frontend/</div>
+                <div>&nbsp;&nbsp;src/</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;api/</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client.ts         # HTTP client for API calls</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;assets/</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;main.css          # Tailwind + theme system</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;components/               # Reusable Vue components</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;composables/</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;useTheme.ts       # Dark mode composable</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;router/                   # Vue Router configuration</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;stores/                   # Pinia state stores</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;views/                    # Page-level components</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;App.vue                   # Root component</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;main.ts                   # Application entry point</div>
+                <div>&nbsp;&nbsp;public/                   # Static assets</div>
+                <div>&nbsp;&nbsp;docs/v1/                  # This documentation</div>
+                <div>&nbsp;&nbsp;index.html                # HTML entry point</div>
+                <div>&nbsp;&nbsp;vite.config.ts            # Vite configuration</div>
+                <div>&nbsp;&nbsp;tsconfig.json             # TypeScript configuration</div>
+                <div>&nbsp;&nbsp;package.json              # Dependencies & scripts</div>
+            </div>
+        </section>
+
+        <!-- Theme System Section -->
+        <section id="theme">
+            <h2>Theme System</h2>
+            <p>
+                The theme system uses Tailwind CSS 4's native <code>@theme</code> directive combined with
+                CSS custom properties for dynamic light/dark mode switching. Colors are defined using
+                OKLCH color space for perceptual uniformity.
+            </p>
+
+            <h3>Primary Color Scale</h3>
+            <div class="color-demo">
+                <div class="color-swatch" style="background: oklch(97% 0.02 250);" title="primary-50"></div>
+                <div class="color-swatch" style="background: oklch(94% 0.04 250);" title="primary-100"></div>
+                <div class="color-swatch" style="background: oklch(88% 0.08 250);" title="primary-200"></div>
+                <div class="color-swatch" style="background: oklch(80% 0.12 250);" title="primary-300"></div>
+                <div class="color-swatch" style="background: oklch(70% 0.15 250);" title="primary-400"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 250);" title="primary-500"></div>
+                <div class="color-swatch" style="background: oklch(50% 0.18 250);" title="primary-600"></div>
+                <div class="color-swatch" style="background: oklch(42% 0.16 250);" title="primary-700"></div>
+                <div class="color-swatch" style="background: oklch(35% 0.14 250);" title="primary-800"></div>
+                <div class="color-swatch" style="background: oklch(28% 0.10 250);" title="primary-900"></div>
+                <div class="color-swatch" style="background: oklch(20% 0.08 250);" title="primary-950"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">primary-50 through primary-950 (hue: 250 - blue)</p>
+
+            <h3>Accent Color Scale (Gold/Amber)</h3>
+            <div class="color-demo">
+                <div class="color-swatch" style="background: oklch(98% 0.02 85);" title="accent-50"></div>
+                <div class="color-swatch" style="background: oklch(95% 0.05 85);" title="accent-100"></div>
+                <div class="color-swatch" style="background: oklch(90% 0.10 85);" title="accent-200"></div>
+                <div class="color-swatch" style="background: oklch(85% 0.15 85);" title="accent-300"></div>
+                <div class="color-swatch" style="background: oklch(78% 0.18 85);" title="accent-400"></div>
+                <div class="color-swatch" style="background: oklch(70% 0.20 85);" title="accent-500"></div>
+                <div class="color-swatch" style="background: oklch(60% 0.18 85);" title="accent-600"></div>
+                <div class="color-swatch" style="background: oklch(50% 0.15 75);" title="accent-700"></div>
+                <div class="color-swatch" style="background: oklch(42% 0.12 75);" title="accent-800"></div>
+                <div class="color-swatch" style="background: oklch(35% 0.08 75);" title="accent-900"></div>
+                <div class="color-swatch" style="background: oklch(25% 0.05 75);" title="accent-950"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">accent-50 through accent-950 (hue: 85 - gold)</p>
+
+            <h3>Theme Configuration (main.css)</h3>
+            <pre><code>@import "tailwindcss";
+
+@theme {
+  /* Primary Color Scale (Blue) */
+  --color-primary-50: oklch(97% 0.02 250);
+  --color-primary-500: oklch(60% 0.18 250);
+  --color-primary-600: oklch(50% 0.18 250);
+  /* ... full scale defined */
+
+  /* Accent Color Scale (Gold/Amber) */
+  --color-accent-500: oklch(70% 0.20 85);
+  /* ... full scale defined */
+
+  /* Custom Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}</code></pre>
+
+            <h3>Light/Dark Mode Variables</h3>
+            <pre><code>:root {
+  /* Light mode (default) */
+  --glass-bg: oklch(100% 0 0 / 0.7);
+  --glass-border: oklch(100% 0 0 / 0.3);
+  --glass-blur: 16px;
+  --surface-bg: oklch(98% 0 0);
+  --text-primary: oklch(15% 0 0);
+}
+
+.dark {
+  /* Dark mode */
+  --glass-bg: oklch(20% 0 0 / 0.8);
+  --glass-border: oklch(100% 0 0 / 0.1);
+  --surface-bg: oklch(12% 0 0);
+  --text-primary: oklch(95% 0 0);
+}</code></pre>
+
+            <h3>Glass Component Classes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Description</th>
+                        <th>Blur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.glass</code></td>
+                        <td>Standard frosted glass effect</td>
+                        <td>16px</td>
+                    </tr>
+                    <tr>
+                        <td><code>.glass-subtle</code></td>
+                        <td>Light, subtle glass effect</td>
+                        <td>8px</td>
+                    </tr>
+                    <tr>
+                        <td><code>.glass-strong</code></td>
+                        <td>Prominent glass with inner glow</td>
+                        <td>24px</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Pre-built Button Classes</h3>
+            <pre><code>&lt;button class="btn-primary"&gt;Primary Action&lt;/button&gt;
+&lt;button class="btn-secondary"&gt;Secondary Action&lt;/button&gt;
+&lt;button class="btn-glass"&gt;Glass Button&lt;/button&gt;</code></pre>
+        </section>
+
+        <!-- Composables Section -->
+        <section id="composables">
+            <h2>Composables</h2>
+
+            <h3>useTheme</h3>
+            <p>
+                Reactive composable for light/dark mode switching with system preference support
+                and localStorage persistence.
+            </p>
+
+            <pre><code>import { useTheme } from '@/composables/useTheme'
+
+const { theme, isDark, setTheme, toggleTheme, themeIcon, themeLabel } = useTheme()
+
+// Toggle between light and dark
+toggleTheme()
+
+// Set specific theme
+setTheme('dark')    // Always dark
+setTheme('light')   // Always light
+setTheme('system')  // Follow OS preference
+
+// Check current state
+if (isDark.value) {
+  console.log('Dark mode active')
+}</code></pre>
+
+            <h3>useTheme API Reference</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property/Method</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>theme</code></td>
+                        <td><code>Ref&lt;'light' | 'dark' | 'system'&gt;</code></td>
+                        <td>Current theme setting</td>
+                    </tr>
+                    <tr>
+                        <td><code>isDark</code></td>
+                        <td><code>Ref&lt;boolean&gt;</code></td>
+                        <td>Whether dark mode is currently active</td>
+                    </tr>
+                    <tr>
+                        <td><code>setTheme(theme)</code></td>
+                        <td><code>(theme: Theme) => void</code></td>
+                        <td>Set and persist theme preference</td>
+                    </tr>
+                    <tr>
+                        <td><code>toggleTheme()</code></td>
+                        <td><code>() => void</code></td>
+                        <td>Toggle between light and dark</td>
+                    </tr>
+                    <tr>
+                        <td><code>themeIcon</code></td>
+                        <td><code>ComputedRef&lt;string&gt;</code></td>
+                        <td>Icon name: 'sun', 'moon', or 'computer'</td>
+                    </tr>
+                    <tr>
+                        <td><code>themeLabel</code></td>
+                        <td><code>ComputedRef&lt;string&gt;</code></td>
+                        <td>Human-readable label for accessibility</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info">
+                <strong>FOUC Prevention:</strong> The theme is applied immediately via an inline script
+                in <code>index.html</code> to prevent flash of unstyled content on page load.
+            </div>
+        </section>
+
+        <!-- API Client Section -->
+        <section id="api-client">
+            <h2>API Client</h2>
+            <p>
+                Type-safe HTTP client for communicating with the Laravel backend API.
+                Supports Bearer token authentication (Laravel Passport OAuth2).
+            </p>
+
+            <h3>Basic Usage</h3>
+            <pre><code>import { api, ApiError } from '@/api/client'
+
+// GET request
+const users = await api.get&lt;User[]&gt;('/users')
+
+// POST request with body
+const user = await api.post&lt;User&gt;('/users', { name: 'John', email: 'john@example.com' })
+
+// PUT request
+await api.put&lt;User&gt;('/users/1', { name: 'John Updated' })
+
+// DELETE request
+await api.delete('/users/1')</code></pre>
+
+            <h3>Authentication</h3>
+            <pre><code>// After successful OAuth login, set the token
+api.setAuthToken(response.access_token)
+
+// Check if authenticated
+if (api.isAuthenticated()) {
+  // Token is set
+}
+
+// On logout, clear the token
+api.clearAuthToken()</code></pre>
+
+            <h3>Query Parameters</h3>
+            <pre><code>// GET /users?page=2&per_page=10&active=true
+const users = await api.get&lt;PaginatedResponse&lt;User&gt;&gt;('/users', {
+  params: {
+    page: 2,
+    per_page: 10,
+    active: true
+  }
+})</code></pre>
+
+            <h3>Error Handling</h3>
+            <pre><code>import { api, ApiError } from '@/api/client'
+
+try {
+  const user = await api.get&lt;User&gt;('/users/999')
+} catch (error) {
+  if (error instanceof ApiError) {
+    console.log(error.status)   // HTTP status code (e.g., 404)
+    console.log(error.message)  // Error message
+    console.log(error.data)     // Full error response body
+
+    if (error.status === 401) {
+      // Redirect to login
+    } else if (error.status === 422) {
+      // Validation errors
+      const errors = error.data.errors
+    }
+  }
+}</code></pre>
+
+            <h3>API Client Configuration</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Base URL</td>
+                        <td><code>http://localhost:8000</code></td>
+                        <td><code>VITE_API_URL</code></td>
+                    </tr>
+                    <tr>
+                        <td>Timeout</td>
+                        <td>30 seconds</td>
+                        <td><code>VITE_API_TIMEOUT</code></td>
+                    </tr>
+                    <tr>
+                        <td>Content-Type</td>
+                        <td><code>application/json</code></td>
+                        <td>Default header</td>
+                    </tr>
+                    <tr>
+                        <td>Credentials</td>
+                        <td><code>include</code></td>
+                        <td>For CSRF cookies</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Styling Guide Section -->
+        <section id="styling">
+            <h2>Styling Guide</h2>
+
+            <h3>When to Use Tailwind CSS</h3>
+            <ul>
+                <li><strong>Layout:</strong> flex, grid, spacing (p-*, m-*, gap-*)</li>
+                <li><strong>Typography:</strong> font-*, text-*, leading-*</li>
+                <li><strong>Colors:</strong> bg-*, text-*, border-*</li>
+                <li><strong>Responsive:</strong> sm:, md:, lg:, xl:</li>
+                <li><strong>State variants:</strong> hover:, focus:, dark:, active:</li>
+                <li><strong>Transitions:</strong> transition-*, duration-*</li>
+            </ul>
+
+            <h3>When to Use Vanilla CSS</h3>
+            <ul>
+                <li><strong>Complex animations:</strong> @keyframes with multiple steps</li>
+                <li><strong>Pseudo-elements:</strong> ::before, ::after content</li>
+                <li><strong>Third-party overrides:</strong> Styling library components</li>
+                <li><strong>Complex selectors:</strong> :nth-child, attribute selectors</li>
+            </ul>
+
+            <h3>Theme-Aware Utilities</h3>
+            <pre><code>&lt;!-- Background utilities --&gt;
+&lt;div class="bg-surface"&gt;Main background&lt;/div&gt;
+&lt;div class="bg-surface-elevated"&gt;Cards, modals&lt;/div&gt;
+&lt;div class="bg-surface-sunken"&gt;Inset areas&lt;/div&gt;
+
+&lt;!-- Text utilities --&gt;
+&lt;p class="text-primary"&gt;Main text&lt;/p&gt;
+&lt;p class="text-secondary"&gt;Secondary text&lt;/p&gt;
+&lt;p class="text-muted"&gt;Muted/helper text&lt;/p&gt;
+
+&lt;!-- Border utilities --&gt;
+&lt;div class="border border-default"&gt;Standard border&lt;/div&gt;
+&lt;div class="border border-subtle"&gt;Subtle border&lt;/div&gt;
+&lt;div class="border border-glass"&gt;Glass-style border&lt;/div&gt;</code></pre>
+
+            <h3>Glass Card Example</h3>
+            <pre><code>&lt;div class="glass rounded-xl p-6"&gt;
+  &lt;h2 class="text-xl font-semibold text-primary mb-4"&gt;Card Title&lt;/h2&gt;
+  &lt;p class="text-secondary"&gt;Card content goes here.&lt;/p&gt;
+  &lt;button class="btn-primary mt-4"&gt;Action&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+            <h3>Available Animations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Effect</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.shimmer</code></td>
+                        <td>Skeleton loading shimmer effect</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-fade-in</code></td>
+                        <td>Fade in with upward slide (0.3s)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.pulse-glow</code></td>
+                        <td>Pulsing glow effect for focus states</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Docker Section -->
+        <section id="docker">
+            <h2>Docker Configuration</h2>
+
+            <h3>Development (docker-compose.yml)</h3>
+            <p>
+                Development uses Vite's hot module replacement (HMR) for instant updates without
+                full page reloads.
+            </p>
+            <pre><code># Start development server
+docker compose up -d frontend
+
+# View logs
+docker compose logs -f frontend
+
+# Access at: http://localhost:5173</code></pre>
+
+            <h3>Production Dockerfile</h3>
+            <p>
+                Multi-stage build that compiles the Vue app and serves with Nginx.
+                Located at: <code>infrastructure/docker/frontend/Dockerfile</code>
+            </p>
+
+            <pre><code># Build production image
+docker build \
+  -t alsabiqoon/frontend:latest \
+  -f infrastructure/docker/frontend/Dockerfile \
+  --build-arg VITE_API_URL=https://api.alsabiqoon.com \
+  ./frontend
+
+# Run locally for testing
+docker run -p 80:80 alsabiqoon/frontend:latest
+
+# Access at: http://localhost</code></pre>
+
+            <h3>Nginx Configuration</h3>
+            <p>The production Nginx config (<code>infrastructure/docker/frontend/nginx.conf</code>) includes:</p>
+            <ul>
+                <li><strong>SPA fallback:</strong> <code>try_files $uri $uri/ /index.html</code></li>
+                <li><strong>Gzip compression:</strong> For JS, CSS, and JSON</li>
+                <li><strong>Asset caching:</strong> 1 year for immutable files (JS/CSS with hashes)</li>
+                <li><strong>Security headers:</strong> X-Frame-Options, X-Content-Type-Options</li>
+                <li><strong>Health endpoint:</strong> <code>/health</code> returns 200 OK</li>
+            </ul>
+
+            <h3>Build Arguments</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Argument</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>VITE_API_URL</code></td>
+                        <td>https://api.alsabiqoon.com</td>
+                        <td>Backend API base URL</td>
+                    </tr>
+                    <tr>
+                        <td><code>VITE_APP_NAME</code></td>
+                        <td>Al-Sabiqoon</td>
+                        <td>Application name</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Environment Section -->
+        <section id="environment">
+            <h2>Environment Variables</h2>
+
+            <div class="warning">
+                <strong>Important:</strong> All frontend environment variables must be prefixed with
+                <code>VITE_</code> to be exposed to the client bundle.
+            </div>
+
+            <h3>Development (.env.local)</h3>
+            <pre><code># Backend API URL
+VITE_API_URL=http://localhost:8000
+
+# Application Name
+VITE_APP_NAME=Al-Sabiqoon [Dev]
+
+# API Timeout (milliseconds)
+VITE_API_TIMEOUT=30000</code></pre>
+
+            <h3>Production</h3>
+            <pre><code># Set via Docker build args or CI/CD
+VITE_API_URL=https://api.alsabiqoon.com
+VITE_APP_NAME=Al-Sabiqoon</code></pre>
+
+            <h3>Staging</h3>
+            <pre><code>VITE_API_URL=https://api.staging.alsabiqoon.com
+VITE_APP_NAME=Al-Sabiqoon [Staging]</code></pre>
+
+            <h3>Variable Reference</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>VITE_API_URL</code></td>
+                        <td>Yes</td>
+                        <td>Backend API base URL (no trailing slash)</td>
+                    </tr>
+                    <tr>
+                        <td><code>VITE_APP_NAME</code></td>
+                        <td>No</td>
+                        <td>Application display name</td>
+                    </tr>
+                    <tr>
+                        <td><code>VITE_API_TIMEOUT</code></td>
+                        <td>No</td>
+                        <td>Request timeout in ms (default: 30000)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Commands Section -->
+        <section id="commands">
+            <h2>Development Commands</h2>
+
+            <h3>NPM Scripts</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>npm run dev</code></td>
+                        <td>Start Vite dev server with HMR</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run build</code></td>
+                        <td>Type-check and build for production</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run preview</code></td>
+                        <td>Preview production build locally</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run test:unit</code></td>
+                        <td>Run unit tests with Vitest</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run type-check</code></td>
+                        <td>Run TypeScript type checking</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run lint</code></td>
+                        <td>Lint and auto-fix with ESLint</td>
+                    </tr>
+                    <tr>
+                        <td><code>npm run format</code></td>
+                        <td>Format code with Prettier</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Makefile Commands (from project root)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>make up</code></td>
+                        <td>Start all services (frontend on :5173)</td>
+                    </tr>
+                    <tr>
+                        <td><code>make logs-frontend</code></td>
+                        <td>View frontend container logs</td>
+                    </tr>
+                    <tr>
+                        <td><code>make shell-frontend</code></td>
+                        <td>Open shell in frontend container</td>
+                    </tr>
+                    <tr>
+                        <td><code>make lint-frontend</code></td>
+                        <td>Run ESLint in container</td>
+                    </tr>
+                    <tr>
+                        <td><code>make format</code></td>
+                        <td>Run Prettier in container</td>
+                    </tr>
+                    <tr>
+                        <td><code>make build-frontend</code></td>
+                        <td>Build production Docker image</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Vite Configuration Highlights</h3>
+            <pre><code>// vite.config.ts
+export default defineConfig({
+  plugins: [
+    vue(),              // Vue 3 SFC support
+    vueDevTools(),      // Vue DevTools integration
+    tailwindcss(),      // Tailwind CSS 4
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  server: {
+    host: true,         // Allow external connections (Docker)
+    port: 5173,
+    strictPort: true,   // Fail if port is taken
+    cors: true,
+  },
+  build: {
+    target: 'esnext',   // Modern browsers only
+    sourcemap: false,   // No source maps in production
+  },
+})</code></pre>
+        </section>
+
+        <footer>
+            <p>Al-Sabiqoon Frontend Documentation v1 | Generated 2025</p>
+            <p>Vue 3 + TypeScript + Tailwind CSS 4</p>
+        </footer>
+    </div>
+</body>
+</html>

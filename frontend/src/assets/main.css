@@ -1,0 +1,452 @@
+/* =============================================================================
+ * Al-Sabiqoon Frontend - Main Stylesheet
+ * =============================================================================
+ * This file imports Tailwind CSS and defines the glassy theme system.
+ *
+ * Architecture:
+ *   - Tailwind utilities for layout, spacing, typography, responsive design
+ *   - Custom CSS for complex animations, pseudo-elements, glass effects
+ *   - CSS variables for theming (light/dark mode)
+ * ============================================================================= */
+
+@import "tailwindcss";
+
+/* =============================================================================
+ * Theme Configuration
+ * =============================================================================
+ * Tailwind CSS 4 uses @theme to define design tokens.
+ * These are converted to CSS custom properties automatically.
+ * ============================================================================= */
+
+@theme {
+  /* ---------------------------------------------------------------------------
+   * Primary Color Scale
+   * ---------------------------------------------------------------------------
+   * A blue-based primary color using OKLCH for perceptual uniformity.
+   * Adjust the hue (250) to change the brand color.
+   */
+  --color-primary-50: oklch(97% 0.02 250);
+  --color-primary-100: oklch(94% 0.04 250);
+  --color-primary-200: oklch(88% 0.08 250);
+  --color-primary-300: oklch(80% 0.12 250);
+  --color-primary-400: oklch(70% 0.15 250);
+  --color-primary-500: oklch(60% 0.18 250);
+  --color-primary-600: oklch(50% 0.18 250);
+  --color-primary-700: oklch(42% 0.16 250);
+  --color-primary-800: oklch(35% 0.14 250);
+  --color-primary-900: oklch(28% 0.10 250);
+  --color-primary-950: oklch(20% 0.08 250);
+
+  /* ---------------------------------------------------------------------------
+   * Accent Color Scale (Gold/Amber)
+   * ---------------------------------------------------------------------------
+   * Secondary color for highlights and call-to-actions.
+   */
+  --color-accent-50: oklch(98% 0.02 85);
+  --color-accent-100: oklch(95% 0.05 85);
+  --color-accent-200: oklch(90% 0.10 85);
+  --color-accent-300: oklch(85% 0.15 85);
+  --color-accent-400: oklch(78% 0.18 85);
+  --color-accent-500: oklch(70% 0.20 85);
+  --color-accent-600: oklch(60% 0.18 85);
+  --color-accent-700: oklch(50% 0.15 75);
+  --color-accent-800: oklch(42% 0.12 75);
+  --color-accent-900: oklch(35% 0.08 75);
+  --color-accent-950: oklch(25% 0.05 75);
+
+  /* ---------------------------------------------------------------------------
+   * Custom Fonts
+   * ---------------------------------------------------------------------------
+   */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* =============================================================================
+ * CSS Custom Properties for Theming
+ * =============================================================================
+ * These variables are toggled by the .dark class on the html element.
+ * ============================================================================= */
+
+:root {
+  /* Light mode (default) */
+  --glass-bg: oklch(100% 0 0 / 0.7);
+  --glass-border: oklch(100% 0 0 / 0.3);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px oklch(0% 0 0 / 0.1);
+
+  --surface-bg: oklch(98% 0 0);
+  --surface-elevated: oklch(100% 0 0);
+  --surface-sunken: oklch(95% 0 0);
+
+  --text-primary: oklch(15% 0 0);
+  --text-secondary: oklch(40% 0 0);
+  --text-muted: oklch(60% 0 0);
+
+  --border-default: oklch(90% 0 0);
+  --border-subtle: oklch(95% 0 0);
+}
+
+.dark {
+  /* Dark mode */
+  --glass-bg: oklch(20% 0 0 / 0.8);
+  --glass-border: oklch(100% 0 0 / 0.1);
+  --glass-shadow: 0 8px 32px oklch(0% 0 0 / 0.3);
+
+  --surface-bg: oklch(12% 0 0);
+  --surface-elevated: oklch(18% 0 0);
+  --surface-sunken: oklch(8% 0 0);
+
+  --text-primary: oklch(95% 0 0);
+  --text-secondary: oklch(75% 0 0);
+  --text-muted: oklch(55% 0 0);
+
+  --border-default: oklch(25% 0 0);
+  --border-subtle: oklch(20% 0 0);
+}
+
+/* =============================================================================
+ * Base Styles
+ * ============================================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* =============================================================================
+ * Component Layer - Reusable Glass Components
+ * =============================================================================
+ * Use @layer components to ensure proper specificity ordering with Tailwind.
+ * ============================================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------------------------
+   * Glass Card
+   * ---------------------------------------------------------------------------
+   * Frosted glass effect for cards and containers.
+   * Usage: <div class="glass">...</div>
+   */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Glass Card Variants
+   * ---------------------------------------------------------------------------
+   */
+  .glass-subtle {
+    background: oklch(100% 0 0 / 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid oklch(100% 0 0 / 0.15);
+  }
+
+  .dark .glass-subtle {
+    background: oklch(20% 0 0 / 0.5);
+    border-color: oklch(100% 0 0 / 0.05);
+  }
+
+  .glass-strong {
+    background: oklch(100% 0 0 / 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid oklch(100% 0 0 / 0.4);
+    box-shadow:
+      0 8px 32px oklch(0% 0 0 / 0.1),
+      inset 0 1px 0 oklch(100% 0 0 / 0.5);
+  }
+
+  .dark .glass-strong {
+    background: oklch(18% 0 0 / 0.9);
+    border-color: oklch(100% 0 0 / 0.15);
+    box-shadow:
+      0 8px 32px oklch(0% 0 0 / 0.3),
+      inset 0 1px 0 oklch(100% 0 0 / 0.1);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Buttons - Base styles written in vanilla CSS for Tailwind CSS 4 compatibility
+   * ---------------------------------------------------------------------------
+   * Use .btn as base class, then add variant: .btn.btn-primary
+   * Or use variant directly for standalone: .btn-primary
+   */
+
+  /* Base button styles - shared by all button variants */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Focus ring - shared by all buttons */
+  .btn:focus,
+  .btn-primary:focus,
+  .btn-secondary:focus,
+  .btn-glass:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-primary-500);
+  }
+
+  /* Disabled state - shared by all buttons */
+  .btn:disabled,
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-glass:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Primary button variant */
+  .btn-primary {
+    background-color: var(--color-primary-600);
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-700);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    background-color: var(--color-primary-800);
+  }
+
+  /* Secondary button variant */
+  .btn-secondary {
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--surface-sunken);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    background-color: var(--surface-bg);
+  }
+
+  /* Glass button variant */
+  .btn-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    color: var(--text-primary);
+  }
+
+  .btn-glass:hover:not(:disabled) {
+    background: oklch(100% 0 0 / 0.8);
+  }
+
+  .dark .btn-glass:hover:not(:disabled) {
+    background: oklch(100% 0 0 / 0.1);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Input Fields - Base styles written in vanilla CSS
+   * ---------------------------------------------------------------------------
+   */
+  .input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-default);
+    transition: all 0.2s ease;
+    background-color: var(--surface-elevated);
+    color: var(--text-primary);
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px oklch(60% 0.18 250 / 0.2);
+  }
+
+  .input-glass {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    color: var(--text-primary);
+  }
+
+  .input-glass::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input-glass:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 2px oklch(60% 0.18 250 / 0.2);
+  }
+}
+
+/* =============================================================================
+ * Utility Layer - Custom Utilities
+ * ============================================================================= */
+
+@layer utilities {
+  /* Theme-aware background utilities */
+  .bg-surface {
+    background-color: var(--surface-bg);
+  }
+
+  .bg-surface-elevated {
+    background-color: var(--surface-elevated);
+  }
+
+  .bg-surface-sunken {
+    background-color: var(--surface-sunken);
+  }
+
+  /* Theme-aware text utilities */
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  /* Theme-aware border utilities */
+  .border-default {
+    border-color: var(--border-default);
+  }
+
+  .border-subtle {
+    border-color: var(--border-subtle);
+  }
+
+  /* Glass border utility */
+  .border-glass {
+    border-color: var(--glass-border);
+  }
+}
+
+/* =============================================================================
+ * Custom Animations (Vanilla CSS)
+ * =============================================================================
+ * Complex animations are better expressed in vanilla CSS.
+ * ============================================================================= */
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(100% 0 0 / 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+.dark .shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(100% 0 0 / 0.05),
+    transparent
+  );
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Pulse glow effect for focus states */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(60% 0.18 250 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px oklch(60% 0.18 250 / 0);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* =============================================================================
+ * Print Styles
+ * ============================================================================= */
+
+@media print {
+  .glass,
+  .glass-subtle,
+  .glass-strong {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
