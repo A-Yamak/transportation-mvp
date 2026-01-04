@@ -68,7 +68,7 @@ class VehicleFactory extends Factory
     /**
      * New vehicle with zero kilometers.
      */
-    public function new(): static
+    public function withZeroKilometers(): static
     {
         return $this->state(fn () => [
             'total_km_driven' => 0,

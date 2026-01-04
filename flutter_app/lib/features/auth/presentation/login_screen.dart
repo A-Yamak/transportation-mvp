@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:driver_app/generated/l10n/app_localizations.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../app.dart';
 import '../../../shared/theme/app_theme.dart';

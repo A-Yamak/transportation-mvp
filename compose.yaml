@@ -9,12 +9,12 @@
 #   make down            # Stop all services
 #
 # Services:
-#   - backend:   Laravel API (FrankenPHP/Octane)   - http://localhost:8000
-#   - frontend:  Vue 3 (Vite dev server)           - http://localhost:5173
+#   - backend:   Laravel API (FrankenPHP/Octane)   - http://localhost:8001
+#   - frontend:  Vue 3 (Vite dev server)           - http://localhost:5174
 #   - horizon:   Queue worker (Laravel Horizon)
-#   - mysql:     MySQL 8.0 database                - localhost:3307
+#   - mysql:     MySQL 8.0 database                - localhost:3308
 #   - redis:     Redis 7 (cache/queue/sessions)    - localhost:6379
-#   - mailpit:   Email testing UI                  - http://localhost:8026
+#   - mailpit:   Email testing UI                  - http://localhost:8027
 #
 # Dev/Prod Parity:
 #   Both development and production use FrankenPHP with Octane.
@@ -38,16 +38,16 @@ services:
       dockerfile: infrastructure/docker/backend/Dockerfile.dev
     container_name: transportationapp-backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend:/app
       - /app/vendor
       - backend-storage:/app/storage
     environment:
-      APP_NAME: Al-Sabiqoon
+      APP_NAME: Transportation MVP
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_URL: http://localhost:8000
+      APP_URL: http://localhost:8001
       LOG_CHANNEL: stack
       LOG_LEVEL: debug
       DB_CONNECTION: mysql
@@ -118,13 +118,13 @@ services:
       dockerfile: infrastructure/docker/frontend/Dockerfile.dev
     container_name: transportationapp-frontend
     ports:
-      - "5173:5173"
+      - "5174:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      VITE_API_URL: http://localhost:8000
-      VITE_APP_NAME: Al-Sabiqoon
+      VITE_API_URL: http://localhost:8001
+      VITE_APP_NAME: Transportation MVP
     networks:
       - transportationapp
     command: >
@@ -154,7 +154,7 @@ services:
       - /app/vendor
       - backend-storage:/app/storage
     environment:
-      APP_NAME: Al-Sabiqoon
+      APP_NAME: Transportation MVP
       APP_ENV: local
       APP_DEBUG: "true"
       DB_CONNECTION: mysql
@@ -195,7 +195,7 @@ services:
     image: mysql:8.0
     container_name: transportationapp-mysql
     ports:
-      - "3307:3306"
+      - "3308:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: transportationapp
@@ -248,8 +248,8 @@ services:
     image: axllent/mailpit:latest
     container_name: transportationapp-mailpit
     ports:
-      - "1026:1025"
-      - "8026:8025"
+      - "1027:1025"
+      - "8027:8025"
     networks:
       - transportationapp
     restart: unless-stopped

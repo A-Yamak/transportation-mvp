@@ -73,5 +73,10 @@
   "welcome": "Welcome",
   "goodMorning": "Good Morning",
   "goodAfternoon": "Good Afternoon",
-  "goodEvening": "Good Evening"
+  "goodEvening": "Good Evening",
+
+  "arrivedSuccess": "Marked as arrived",
+  "completedSuccess": "Delivery completed!",
+  "navigateTo": "Navigate to: {address}",
+  "tripId": "Trip ID"
 }

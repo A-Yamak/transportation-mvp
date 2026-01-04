@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:driver_app/generated/l10n/app_localizations.dart';
 import 'router/app_router.dart';
 import 'shared/theme/app_theme.dart';
 import 'core/auth/auth_provider.dart';

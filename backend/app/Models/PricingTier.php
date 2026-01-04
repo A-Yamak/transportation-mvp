@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name Tier name (e.g., "Standard", "Premium")
  * @property BusinessType|null $business_type Business type this applies to (null = default)
  * @property float $price_per_km Price per kilometer
+ * @property float $base_fee Fixed fee per delivery
+ * @property float $minimum_cost Minimum cost for any delivery
  * @property \Carbon\Carbon $effective_date Date this pricing becomes effective
  * @property bool $is_active Whether this tier is active
  * @property \Carbon\Carbon $created_at
@@ -33,6 +35,8 @@ class PricingTier extends Model
         'name',
         'business_type',
         'price_per_km',
+        'base_fee',
+        'minimum_cost',
         'effective_date',
         'is_active',
     ];
@@ -42,6 +46,8 @@ class PricingTier extends Model
         return [
             'business_type' => BusinessType::class,
             'price_per_km' => 'decimal:4',
+            'base_fee' => 'decimal:2',
+            'minimum_cost' => 'decimal:2',
             'effective_date' => 'date',
             'is_active' => 'boolean',
         ];

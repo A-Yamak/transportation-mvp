@@ -77,5 +77,10 @@
   "welcome": "مرحباً",
   "goodMorning": "صباح الخير",
   "goodAfternoon": "مساء الخير",
-  "goodEvening": "مساء الخير"
+  "goodEvening": "مساء الخير",
+
+  "arrivedSuccess": "تم التمييز كوصول",
+  "completedSuccess": "تم التسليم!",
+  "navigateTo": "انتقل إلى: {address}",
+  "tripId": "معرف الرحلة"
 }

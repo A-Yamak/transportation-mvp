@@ -94,7 +94,7 @@ class DestinationFactory extends Factory
     /**
      * With specific sequence order.
      */
-    public function sequence(int $order): static
+    public function withSequenceOrder(int $order): static
     {
         return $this->state(fn () => [
             'sequence_order' => $order,

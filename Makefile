@@ -53,7 +53,7 @@ endif
 
 help: ## Show this help message
 	@echo ""
-	@echo "$(BLUE)Al-Sabiqoon - Development Commands$(NC)"
+	@echo "$(BLUE)Transportation MVP - Development Commands$(NC)"
 	@echo ""
 	@echo "Using: $(GREEN)$(DOCKER_COMPOSE)$(NC)"
 	@echo ""
@@ -77,10 +77,10 @@ up: ## Start all services in detached mode
 	$(DOCKER_COMPOSE) up -d
 	@echo ""
 	@echo "$(GREEN)Services started!$(NC)"
-	@echo "  Frontend: http://localhost:5173"
-	@echo "  Backend:  http://localhost:8000"
-	@echo "  Mailpit:  http://localhost:8026"
-	@echo "  MySQL:    localhost:3307"
+	@echo "  Frontend: http://localhost:5174"
+	@echo "  Backend:  http://localhost:8001"
+	@echo "  Mailpit:  http://localhost:8027"
+	@echo "  MySQL:    localhost:3308"
 
 down: ## Stop all services
 	$(DOCKER_COMPOSE) down
@@ -124,7 +124,7 @@ shell-frontend: ## Open shell in frontend container
 	$(DOCKER_COMPOSE) exec frontend sh
 
 shell-mysql: ## Open MySQL CLI
-	$(DOCKER_COMPOSE) exec mysql mysql -u alsabiqoon -psecret alsabiqoon
+	$(DOCKER_COMPOSE) exec mysql mysql -utransportationapp -psecret transportationapp
 
 shell-redis: ## Open Redis CLI
 	$(DOCKER_COMPOSE) exec redis redis-cli
@@ -347,10 +347,10 @@ setup: up ## Full setup: start services, install deps, run migrations
 	$(DOCKER_COMPOSE) exec frontend npm install
 	@echo ""
 	@echo "$(GREEN)Setup complete!$(NC)"
-	@echo "  Frontend: http://localhost:5173"
-	@echo "  Backend:  http://localhost:8000"
-	@echo "  Mailpit:  http://localhost:8026"
-	@echo "  MySQL:    localhost:3307"
+	@echo "  Frontend: http://localhost:5174"
+	@echo "  Backend:  http://localhost:8001"
+	@echo "  Mailpit:  http://localhost:8027"
+	@echo "  MySQL:    localhost:3308"
 
 # ==============================================================================
 # Kubernetes

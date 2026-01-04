@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../api/api_client.dart';
 import '../api/api_config.dart';
-import '../api/api_exceptions.dart';
+import 'mock_auth_service.dart';
 
 /// User model
 class User {
@@ -54,12 +54,17 @@ class AuthState {
   }
 }
 
+/// Mock auth service provider
+final mockAuthServiceProvider = Provider((ref) => MockAuthService());
+
 /// Auth state notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _apiClient;
   final FlutterSecureStorage _storage;
+  final MockAuthService _mockAuth;
 
-  AuthNotifier(this._apiClient, this._storage) : super(const AuthState()) {
+  AuthNotifier(this._apiClient, this._storage, this._mockAuth)
+      : super(const AuthState()) {
     _checkAuth();
   }
 
@@ -93,36 +98,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _apiClient.post(
-        ApiEndpoints.login,
-        data: {
-          'email': email,
-          'password': password,
-        },
-      );
+      // USE MOCK SERVICE (comment out real API for now)
+      final result = await _mockAuth.login(email, password);
 
-      final data = response.data;
-      final accessToken = data['access_token'];
-      final refreshToken = data['refresh_token'];
-      final user = User.fromJson(data['user']);
+      if (result.success) {
+        // Store mock tokens
+        await _storage.write(key: 'access_token', value: result.accessToken!);
+        await _storage.write(key: 'refresh_token', value: result.refreshToken!);
 
-      // Store tokens
-      await _storage.write(key: 'access_token', value: accessToken);
-      await _storage.write(key: 'refresh_token', value: refreshToken);
-
-      state = AuthState(
-        user: user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
-
-      return true;
-    } on ApiException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.message,
-      );
-      return false;
+        state = AuthState(
+          user: result.user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        return true;
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: result.error,
+        );
+        return false;
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -156,7 +152,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final storage = ref.watch(secureStorageProvider);
-  return AuthNotifier(apiClient, storage);
+  final mockAuth = ref.watch(mockAuthServiceProvider);
+  return AuthNotifier(apiClient, storage, mockAuth);
 });
 
 /// Convenience provider for checking if authenticated
