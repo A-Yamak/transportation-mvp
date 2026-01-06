@@ -2,7 +2,50 @@
 
 ## Quick Context
 
-This is a logistics/delivery management application that handles delivery requests from multiple business clients (like the Sweets Factory ERP). It optimizes routes using Google Maps API, calculates costs based on distance, and provides a Flutter mobile app for drivers. The system uses an independent double-entry ledger for financial tracking and supports dynamic API payload schemas for different client integrations.
+This is a logistics/delivery management application that handles delivery requests from multiple business clients (like the **Melo Group ERP**). It optimizes routes using Google Maps API, calculates costs based on distance, and provides a Flutter mobile app for drivers. The system uses an independent double-entry ledger for financial tracking and supports dynamic API payload schemas for different client integrations.
+
+**Primary Client**: Melo Group (Sweets Factory in Jordan) - handles daily deliveries to 10+ shops via their Tramelo and Melo Supply distributors.
+
+---
+
+## MVP Status: ~30% Complete
+
+| Component | Status | % Complete |
+|-----------|--------|------------|
+| Database Schema | DONE | 100% |
+| Eloquent Models | DONE | 100% |
+| Authentication | DONE | 100% |
+| API Controllers | STUB | 5% (only AuthController) |
+| Route Optimization Service | NOT STARTED | 0% |
+| Pricing Service | NOT STARTED | 0% |
+| Driver Endpoints | NOT STARTED | 0% |
+| ERP Callback Service | NOT STARTED | 0% |
+| Flutter UI | DONE | 85% |
+| Flutter API Integration | NOT STARTED | 0% |
+
+### MVP Priority Order
+
+**Priority 1 - ERP Integration (CRITICAL)**
+1. `DeliveryRequestController::store()` - Receive orders from Melo ERP
+2. `DeliveryCallbackService` - Notify ERP when delivery completes
+3. Route optimization with Google Maps
+
+**Priority 2 - Driver App Integration**
+1. Driver trip endpoints (7 routes)
+2. Flutter API integration (replace mock data)
+3. GPS tracking for actual KM
+
+**Priority 3 - Lower Priority (Post-MVP)**
+1. Ledger/Accounting system
+2. Pricing tiers and billing
+3. Financial reports
+
+### Integration Blockers with Melo ERP
+1. No `/api/v1/delivery-requests` endpoint (ERP can't submit orders)
+2. No driver trip endpoints (Flutter app stuck on mock data)
+3. No callback service (ERP won't know when delivery completes)
+
+---
 
 ## Tech Stack
 

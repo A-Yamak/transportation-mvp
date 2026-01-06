@@ -2,9 +2,25 @@
 
 A logistics and delivery management application with route optimization, cost calculation, and multi-client API integration.
 
+## MVP Status: ~30% Complete
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Database/Models | 100% | Schema complete |
+| Authentication | 100% | OAuth2 working |
+| API Controllers | 5% | Only AuthController |
+| ERP Integration | 0% | **BLOCKING** - Priority 1 |
+| Driver Endpoints | 0% | Priority 2 |
+| Flutter UI | 85% | Stuck on mock data |
+
+### MVP Priority Order
+1. **ERP Integration** - Receive orders from Melo ERP, send delivery callbacks
+2. **Driver Endpoints** - Connect Flutter app to real API
+3. **Ledger/Billing** - Lower priority, post-MVP
+
 ## Overview
 
-This system manages delivery logistics for multiple business clients:
+This system manages delivery logistics for multiple business clients (primary: **Melo Group ERP**):
 
 ```
 Business A (ERP) ──┐
