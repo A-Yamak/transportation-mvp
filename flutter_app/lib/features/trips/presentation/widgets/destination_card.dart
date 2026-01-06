@@ -4,42 +4,57 @@ import '../../data/models/destination_model.dart';
 import '../../data/models/destination_status.dart';
 import '../../providers/trip_actions_provider.dart';
 
+/// Failure reasons matching backend enum
+enum FailureReason {
+  notHome('not_home', 'Customer Not Home', 'العميل غير موجود'),
+  refused('refused', 'Refused Delivery', 'رفض الاستلام'),
+  wrongAddress('wrong_address', 'Wrong Address', 'عنوان خاطئ'),
+  inaccessible('inaccessible', 'Location Inaccessible', 'موقع غير قابل للوصول'),
+  other('other', 'Other', 'سبب آخر');
+
+  final String apiValue;
+  final String labelEn;
+  final String labelAr;
+
+  const FailureReason(this.apiValue, this.labelEn, this.labelAr);
+}
+
 class DestinationCard extends ConsumerWidget {
   final DestinationModel destination;
   final String tripId;
 
   const DestinationCard({
-    Key? key,
+    super.key,
     required this.destination,
     required this.tripId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 CircleAvatar(
-                  child: Text('${destination.sequenceOrder}'),
                   backgroundColor: destination.status.color,
                   foregroundColor: Colors.white,
+                  child: Text('${destination.sequenceOrder}'),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         destination.address,
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         destination.status.label,
                         style: TextStyle(
@@ -52,7 +67,7 @@ class DestinationCard extends ConsumerWidget {
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildActions(context, ref),
           ],
         ),
@@ -62,7 +77,7 @@ class DestinationCard extends ConsumerWidget {
 
   Widget _buildActions(BuildContext context, WidgetRef ref) {
     if (destination.status == DestinationStatus.completed) {
-      return Row(
+      return const Row(
         children: [
           Icon(Icons.check_circle, color: Colors.green, size: 16),
           SizedBox(width: 4),
@@ -72,11 +87,11 @@ class DestinationCard extends ConsumerWidget {
     }
 
     if (destination.status == DestinationStatus.failed) {
-      return Row(
+      return const Row(
         children: [
           Icon(Icons.error, color: Colors.red, size: 16),
           SizedBox(width: 4),
-          Text('Failed', style: TextStyle(color: Colors.red)),
+          Text('Skipped', style: TextStyle(color: Colors.red)),
         ],
       );
     }
@@ -102,8 +117,8 @@ class DestinationCard extends ConsumerWidget {
               ),
             );
           },
-          icon: Icon(Icons.navigation, size: 16),
-          label: Text('Navigate'),
+          icon: const Icon(Icons.navigation, size: 16),
+          label: const Text('Navigate'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
@@ -117,12 +132,14 @@ class DestinationCard extends ConsumerWidget {
               await ref
                   .read(tripActionsProvider)
                   .markArrived(tripId, destination.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Marked as arrived')),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Marked as arrived')),
+                );
+              }
             },
-            icon: Icon(Icons.location_on, size: 16),
-            label: Text('Arrived'),
+            icon: const Icon(Icons.location_on, size: 16),
+            label: const Text('Arrived'),
           ),
 
         // Mark Complete - only if arrived
@@ -132,18 +149,95 @@ class DestinationCard extends ConsumerWidget {
               await ref
                   .read(tripActionsProvider)
                   .markCompleted(tripId, destination.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Delivery completed!')),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Delivery completed!')),
+                );
+              }
             },
-            icon: Icon(Icons.check, size: 16),
-            label: Text('Complete'),
+            icon: const Icon(Icons.check, size: 16),
+            label: const Text('Complete'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
           ),
+
+        // Skip button - for pending or arrived destinations
+        OutlinedButton.icon(
+          onPressed: () => _showSkipDialog(context, ref),
+          icon: const Icon(Icons.skip_next, size: 16),
+          label: const Text('Skip'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.orange,
+            side: const BorderSide(color: Colors.orange),
+          ),
+        ),
       ],
     );
+  }
+
+  /// Show dialog to select skip reason
+  void _showSkipDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Skip Delivery'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select reason:'),
+            const SizedBox(height: 12),
+            ...FailureReason.values.map((reason) => ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.arrow_right),
+                  title: Text(reason.labelEn),
+                  subtitle: Text(reason.labelAr, style: const TextStyle(fontSize: 12)),
+                  onTap: () async {
+                    Navigator.of(dialogContext).pop();
+                    await _skipDestination(context, ref, reason);
+                  },
+                )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Skip destination with selected reason
+  Future<void> _skipDestination(
+    BuildContext context,
+    WidgetRef ref,
+    FailureReason reason,
+  ) async {
+    try {
+      await ref.read(tripActionsProvider).markFailed(
+            tripId,
+            destination.id,
+            reason: reason.apiValue,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Skipped: ${reason.labelEn}')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

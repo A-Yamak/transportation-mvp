@@ -10,6 +10,11 @@ class DestinationModel {
   final DateTime? arrivedAt;
   final DateTime? completedAt;
   final String? externalId;
+  final String? contactName;
+  final String? contactPhone;
+  final String? notes;
+  final String? signatureUrl;
+  final String? photoUrl;
 
   DestinationModel({
     required this.id,
@@ -21,7 +26,54 @@ class DestinationModel {
     this.arrivedAt,
     this.completedAt,
     this.externalId,
+    this.contactName,
+    this.contactPhone,
+    this.notes,
+    this.signatureUrl,
+    this.photoUrl,
   });
+
+  /// Factory to create from API JSON response
+  factory DestinationModel.fromJson(Map<String, dynamic> json) {
+    return DestinationModel(
+      id: json['id'].toString(),
+      address: json['address'] ?? '',
+      lat: (json['lat'] ?? json['latitude'] ?? 0.0).toDouble(),
+      lng: (json['lng'] ?? json['longitude'] ?? 0.0).toDouble(),
+      sequenceOrder: json['sequence_order'] ?? 0,
+      status: DestinationStatus.fromString(json['status'] ?? 'pending'),
+      arrivedAt: json['arrived_at'] != null
+          ? DateTime.parse(json['arrived_at'])
+          : null,
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'])
+          : null,
+      externalId: json['external_id']?.toString(),
+      contactName: json['contact_name'],
+      contactPhone: json['contact_phone'],
+      notes: json['notes'],
+      signatureUrl: json['signature_url'],
+      photoUrl: json['photo_url'],
+    );
+  }
+
+  /// Convert to JSON for API requests
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'address': address,
+      'lat': lat,
+      'lng': lng,
+      'sequence_order': sequenceOrder,
+      'status': status.toApiString(),
+      'arrived_at': arrivedAt?.toIso8601String(),
+      'completed_at': completedAt?.toIso8601String(),
+      'external_id': externalId,
+      'contact_name': contactName,
+      'contact_phone': contactPhone,
+      'notes': notes,
+    };
+  }
 
   /// copyWith for immutability
   DestinationModel copyWith({
@@ -34,6 +86,11 @@ class DestinationModel {
     DateTime? arrivedAt,
     DateTime? completedAt,
     String? externalId,
+    String? contactName,
+    String? contactPhone,
+    String? notes,
+    String? signatureUrl,
+    String? photoUrl,
   }) {
     return DestinationModel(
       id: id ?? this.id,
@@ -45,6 +102,11 @@ class DestinationModel {
       arrivedAt: arrivedAt ?? this.arrivedAt,
       completedAt: completedAt ?? this.completedAt,
       externalId: externalId ?? this.externalId,
+      contactName: contactName ?? this.contactName,
+      contactPhone: contactPhone ?? this.contactPhone,
+      notes: notes ?? this.notes,
+      signatureUrl: signatureUrl ?? this.signatureUrl,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 

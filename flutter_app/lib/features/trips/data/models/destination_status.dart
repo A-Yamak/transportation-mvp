@@ -45,4 +45,35 @@ enum DestinationStatus {
         return StatusColors.failed;
     }
   }
+
+  /// Parse status from API string (e.g., 'pending', 'arrived', 'completed', 'failed', 'skipped')
+  static DestinationStatus fromString(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return DestinationStatus.pending;
+      case 'arrived':
+        return DestinationStatus.arrived;
+      case 'completed':
+        return DestinationStatus.completed;
+      case 'failed':
+      case 'skipped':
+        return DestinationStatus.failed;
+      default:
+        return DestinationStatus.pending;
+    }
+  }
+
+  /// Convert to API string format
+  String toApiString() {
+    switch (this) {
+      case DestinationStatus.pending:
+        return 'pending';
+      case DestinationStatus.arrived:
+        return 'arrived';
+      case DestinationStatus.completed:
+        return 'completed';
+      case DestinationStatus.failed:
+        return 'failed';
+    }
+  }
 }

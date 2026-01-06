@@ -85,6 +85,9 @@ Usage:
         <!-- Mail (array driver - no actual sending) -->
         <env name="MAIL_MAILER" value="array" force="true"/>
 
+        <!-- Google Maps API (fake key for testing) -->
+        <env name="GOOGLE_MAPS_API_KEY" value="test-api-key-for-testing" force="true"/>
+
         <!-- Disable debugging tools in tests -->
         <env name="TELESCOPE_ENABLED" value="false" force="true"/>
         <env name="HORIZON_ENABLED" value="false" force="true"/>

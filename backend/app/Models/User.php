@@ -6,6 +6,7 @@ namespace App\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -57,5 +58,13 @@ class User extends Authenticatable implements FilamentUser
         // For now, all authenticated users can access the admin panel
         // In production, you might check: return $this->is_admin;
         return true;
+    }
+
+    /**
+     * Get the driver profile associated with this user.
+     */
+    public function driver(): HasOne
+    {
+        return $this->hasOne(Driver::class);
     }
 }
