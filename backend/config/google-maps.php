@@ -61,6 +61,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Start/End Point (Depot/Factory Location)
+    |--------------------------------------------------------------------------
+    |
+    | The default starting point for route optimization.
+    | This is typically the warehouse or factory location.
+    | Default: Amman, Jordan (Melo factory area)
+    |
+    */
+    'factory_location' => [
+        'lat' => (float) env('GOOGLE_MAPS_FACTORY_LAT', 31.9539),
+        'lng' => (float) env('GOOGLE_MAPS_FACTORY_LNG', 35.9106),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Route Optimization
     |--------------------------------------------------------------------------
     |

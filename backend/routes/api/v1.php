@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DeliveryRequestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,8 +57,30 @@ Route::prefix('auth')->group(function () {
 // -----------------------------------------------------------------------------
 
 Route::middleware('auth:api')->group(function () {
-    // TODO: Add V1 resource routes here
+    // TODO: Add V1 resource routes here for user-based authentication
     // Example:
     // Route::apiResource('users', UserController::class);
     // Route::apiResource('projects', ProjectController::class);
+});
+
+// -----------------------------------------------------------------------------
+// Business API Routes (API Key Authentication)
+// -----------------------------------------------------------------------------
+// These routes use X-API-Key header authentication for B2B/ERP integrations.
+// Businesses authenticate with their api_key to submit delivery requests.
+
+Route::middleware('auth.api_key')->group(function () {
+    // Delivery Requests - Core ERP integration endpoints
+    Route::prefix('delivery-requests')->group(function () {
+        Route::get('/', [DeliveryRequestController::class, 'index'])
+            ->name('delivery-requests.index');
+        Route::post('/', [DeliveryRequestController::class, 'store'])
+            ->name('delivery-requests.store');
+        Route::get('{deliveryRequest}', [DeliveryRequestController::class, 'show'])
+            ->name('delivery-requests.show');
+        Route::get('{deliveryRequest}/route', [DeliveryRequestController::class, 'route'])
+            ->name('delivery-requests.route');
+        Route::post('{deliveryRequest}/cancel', [DeliveryRequestController::class, 'cancel'])
+            ->name('delivery-requests.cancel');
+    });
 });
