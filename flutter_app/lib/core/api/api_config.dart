@@ -1,11 +1,11 @@
 /// API Configuration
 class ApiConfig {
   /// Base URL for the API
-  /// Uses dart-define for production: --dart-define=API_BASE_URL=https://api.example.com
-  /// Defaults to localhost for development
+  /// Defaults to production URL: https://transportation-app.alsabiqoon.com
+  /// Can be overridden with: --dart-define=API_BASE_URL=http://10.0.2.2:8000
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8000', // Android emulator -> host machine
+    defaultValue: 'https://transportation-app.alsabiqoon.com',
   );
 
   /// API version prefix
