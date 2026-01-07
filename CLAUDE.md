@@ -21,6 +21,8 @@ This is a logistics/delivery management application that handles delivery reques
 | Driver Endpoints | DONE | 13 endpoints for Flutter app |
 | ERP Callback Service | DONE | Async job-based callbacks |
 | Ledger System | DONE | Double-entry accounting |
+| Auto-Assignment | DONE | Single driver MVP, round-robin for multi |
+| Price Tracking | DONE | amount_to_collect, item prices, line totals |
 | Flutter UI | DONE | Complete driver interface |
 | Flutter API Integration | DONE | Real API client, GPS tracking |
 
@@ -35,6 +37,8 @@ This is a logistics/delivery management application that handles delivery reques
 - [x] Double-entry ledger for financial tracking
 - [x] API key authentication for B2B integrations
 - [x] OAuth2 token auth for driver app
+- [x] Auto-assignment of trips to drivers (configurable)
+- [x] Price tracking: amount_to_collect, item unit_price, line totals
 
 **Flutter App (Ready)**
 - [x] Real API integration (not mock data)
@@ -49,6 +53,110 @@ This is a logistics/delivery management application that handles delivery reques
 3. Configure business callback URLs in admin panel
 4. Deploy queue workers (Horizon) for async callbacks
 5. Test end-to-end flow with Melo ERP
+
+---
+
+## Auto-Assignment (Trip Assignment)
+
+When Melo ERP submits a delivery request, the system automatically assigns it to an available driver.
+
+### How It Works
+1. ERP submits delivery request via `POST /api/v1/delivery-requests`
+2. System creates Trip and assigns to available driver automatically
+3. Response includes `assigned_driver` info so ERP knows assignment status
+4. Driver sees trip immediately in Flutter app
+
+### Configuration
+
+Environment variables (in `.env`):
+```bash
+DELIVERY_AUTO_ASSIGN=true              # Enable/disable auto-assignment (default: true)
+DELIVERY_AUTO_ASSIGN_STRATEGY=single   # 'single' or 'round_robin'
+DELIVERY_AUTO_ASSIGN_DRIVER_ID=        # Optional: specific driver UUID to always use
+```
+
+**Strategies:**
+- `single`: Always assign to the first active driver (ideal for single-driver MVP)
+- `round_robin`: Distribute orders evenly among drivers (for multi-driver operations)
+
+### API Response with Assignment
+
+```json
+{
+  "data": {
+    "id": "019b9a30-f892-...",
+    "status": "pending",
+    "total_km": 15.5,
+    "estimated_cost": 7.75,
+    "assigned_driver": {
+      "trip_id": "019b9a30-f8a2-...",
+      "driver_name": "Ahmad Driver",
+      "assigned_at": "2026-01-07T20:47:27+00:00"
+    },
+    "destinations": [...]
+  }
+}
+```
+
+### Files
+- `app/Services/TripAssignment/AutoAssignmentService.php` - Assignment logic
+- `config/delivery.php` - Configuration settings
+
+### Future: Manual Assignment
+When you have multiple drivers, you can:
+1. Set `DELIVERY_AUTO_ASSIGN=false`
+2. Build admin panel for manual trip assignment
+3. Or use `round_robin` strategy for automatic distribution
+
+---
+
+## Price Tracking (Items & Amounts)
+
+Track prices at destination and item level for COD (Cash on Delivery) operations.
+
+### Destination-Level
+- `amount_to_collect`: Total amount driver should collect at this stop
+
+### Item-Level
+- `unit_price`: Price per unit of item
+- `quantity_ordered`: How many units ordered
+- `line_total`: Computed (unit_price × quantity_ordered)
+- `quantity_delivered`: How many actually delivered
+- `delivered_total`: Computed (unit_price × quantity_delivered)
+
+### Example API Request
+```json
+{
+  "destinations": [{
+    "external_id": "ORDER-001",
+    "address": "123 Main St, Amman",
+    "lat": 31.9539,
+    "lng": 35.9106,
+    "contact_name": "Ahmad Shop",
+    "contact_phone": "+962791234567",
+    "amount_to_collect": 125.50,
+    "items": [
+      {
+        "order_item_id": "ITEM-001",
+        "name": "Baklava Box",
+        "unit_price": 35.00,
+        "quantity_ordered": 2
+      },
+      {
+        "order_item_id": "ITEM-002",
+        "name": "Kunafa Tray",
+        "unit_price": 27.75,
+        "quantity_ordered": 2
+      }
+    ]
+  }]
+}
+```
+
+### Driver App Display
+- Shows amount to collect per destination
+- Shows item list with prices and quantities
+- Tracks partial deliveries (quantity_delivered vs quantity_ordered)
 
 ---
 
