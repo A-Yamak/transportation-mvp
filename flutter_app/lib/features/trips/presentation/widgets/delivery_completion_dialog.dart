@@ -71,6 +71,18 @@ class _DeliveryCompletionDialogState extends State<DeliveryCompletionDialog> {
     super.dispose();
   }
 
+  /// Calculate total from items
+  double get _calculatedTotal {
+    return _items.fold(0.0, (sum, item) => sum + (item.deliveredTotal ?? 0));
+  }
+
+  /// Get the amount to collect
+  double? get _amountToCollect {
+    return widget.destination.amountToCollect ??
+           widget.destination.itemsTotal ??
+           (_items.isNotEmpty ? _calculatedTotal : null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -121,6 +133,47 @@ class _DeliveryCompletionDialogState extends State<DeliveryCompletionDialog> {
             ),
             const Divider(),
 
+            // Amount to collect banner (if applicable)
+            if (_amountToCollect != null && _amountToCollect! > 0) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.payments, color: Colors.orange.shade700, size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Amount to Collect',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                          Text(
+                            '${_amountToCollect!.toStringAsFixed(2)} JOD',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Recipient name
             TextField(
               controller: _recipientController,
@@ -134,12 +187,26 @@ class _DeliveryCompletionDialogState extends State<DeliveryCompletionDialog> {
 
             // Items section (if items exist)
             if (_items.isNotEmpty) ...[
-              const Text(
-                'Items',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Items',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (_calculatedTotal > 0)
+                    Text(
+                      'Total: ${_calculatedTotal.toStringAsFixed(2)} JOD',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               ...List.generate(_items.length, (index) {
@@ -237,6 +304,7 @@ class _ItemQuantityEditorState extends State<_ItemQuantityEditor> {
   @override
   Widget build(BuildContext context) {
     final hasDiscrepancy = widget.item.hasDiscrepancy;
+    final hasPrice = widget.item.unitPrice != null;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -245,7 +313,7 @@ class _ItemQuantityEditorState extends State<_ItemQuantityEditor> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Item name and expected quantity
+            // Item name, price, and expected quantity
             Row(
               children: [
                 Expanded(
@@ -256,13 +324,36 @@ class _ItemQuantityEditorState extends State<_ItemQuantityEditor> {
                         widget.item.name ?? 'Item ${widget.item.orderItemId}',
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
-                      Text(
-                        'Expected: ${widget.item.quantityOrdered}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'Expected: ${widget.item.quantityOrdered}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          if (hasPrice) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              '@ ${widget.item.unitPrice!.toStringAsFixed(2)} JOD',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
+                      if (hasPrice && widget.item.deliveredTotal != null)
+                        Text(
+                          'Subtotal: ${widget.item.deliveredTotal!.toStringAsFixed(2)} JOD',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: hasDiscrepancy ? Colors.orange : Colors.green,
+                          ),
+                        ),
                     ],
                   ),
                 ),

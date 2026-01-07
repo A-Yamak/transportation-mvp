@@ -14,10 +14,13 @@ class DestinationModel {
   final String? contactName;
   final String? contactPhone;
   final String? notes;
+  final double? amountToCollect;
+  final double? amountCollected;
   final String? signatureUrl;
   final String? photoUrl;
   final List<DeliveryItemModel> items;
   final bool hasItemTracking;
+  final double? itemsTotal;
 
   DestinationModel({
     required this.id,
@@ -32,11 +35,17 @@ class DestinationModel {
     this.contactName,
     this.contactPhone,
     this.notes,
+    this.amountToCollect,
+    this.amountCollected,
     this.signatureUrl,
     this.photoUrl,
     this.items = const [],
     this.hasItemTracking = false,
+    this.itemsTotal,
   });
+
+  /// Get the total amount to collect (from items or explicit amount)
+  double? get totalToCollect => amountToCollect ?? itemsTotal;
 
   /// Factory to create from API JSON response
   factory DestinationModel.fromJson(Map<String, dynamic> json) {
@@ -67,10 +76,19 @@ class DestinationModel {
       contactName: json['contact_name'],
       contactPhone: json['contact_phone'],
       notes: json['notes'],
+      amountToCollect: json['amount_to_collect'] != null
+          ? (json['amount_to_collect'] as num).toDouble()
+          : null,
+      amountCollected: json['amount_collected'] != null
+          ? (json['amount_collected'] as num).toDouble()
+          : null,
       signatureUrl: json['signature_url'],
       photoUrl: json['photo_url'],
       items: itemsList,
       hasItemTracking: json['has_item_tracking'] == true || itemsList.isNotEmpty,
+      itemsTotal: json['items_total'] != null
+          ? (json['items_total'] as num).toDouble()
+          : null,
     );
   }
 
@@ -106,10 +124,13 @@ class DestinationModel {
     String? contactName,
     String? contactPhone,
     String? notes,
+    double? amountToCollect,
+    double? amountCollected,
     String? signatureUrl,
     String? photoUrl,
     List<DeliveryItemModel>? items,
     bool? hasItemTracking,
+    double? itemsTotal,
   }) {
     return DestinationModel(
       id: id ?? this.id,
@@ -124,10 +145,13 @@ class DestinationModel {
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,
       notes: notes ?? this.notes,
+      amountToCollect: amountToCollect ?? this.amountToCollect,
+      amountCollected: amountCollected ?? this.amountCollected,
       signatureUrl: signatureUrl ?? this.signatureUrl,
       photoUrl: photoUrl ?? this.photoUrl,
       items: items ?? this.items,
       hasItemTracking: hasItemTracking ?? this.hasItemTracking,
+      itemsTotal: itemsTotal ?? this.itemsTotal,
     );
   }
 

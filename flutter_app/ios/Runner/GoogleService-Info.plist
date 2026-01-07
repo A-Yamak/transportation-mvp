@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.alsabiqoon.transportation</string>
+	<string>com.alsabiqoon.driverApp</string>
 	<key>PROJECT_ID</key>
 	<string>transporation-app-b5f26</string>
 	<key>STORAGE_BUCKET</key>

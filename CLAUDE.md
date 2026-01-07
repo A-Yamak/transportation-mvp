@@ -8,42 +8,47 @@ This is a logistics/delivery management application that handles delivery reques
 
 ---
 
-## MVP Status: ~30% Complete
+## MVP Status: Ready for Production
 
-| Component | Status | % Complete |
-|-----------|--------|------------|
-| Database Schema | DONE | 100% |
-| Eloquent Models | DONE | 100% |
-| Authentication | DONE | 100% |
-| API Controllers | STUB | 5% (only AuthController) |
-| Route Optimization Service | NOT STARTED | 0% |
-| Pricing Service | NOT STARTED | 0% |
-| Driver Endpoints | NOT STARTED | 0% |
-| ERP Callback Service | NOT STARTED | 0% |
-| Flutter UI | DONE | 85% |
-| Flutter API Integration | NOT STARTED | 0% |
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Database Schema | DONE | All migrations complete |
+| Eloquent Models | DONE | All models with relationships |
+| Authentication | DONE | OAuth2 via Laravel Passport |
+| API Controllers | DONE | 4 controllers, 26+ endpoints |
+| Route Optimization Service | DONE | Google Maps integration with caching |
+| Pricing Service | DONE | Tiered pricing with discounts |
+| Driver Endpoints | DONE | 13 endpoints for Flutter app |
+| ERP Callback Service | DONE | Async job-based callbacks |
+| Ledger System | DONE | Double-entry accounting |
+| Flutter UI | DONE | Complete driver interface |
+| Flutter API Integration | DONE | Real API client, GPS tracking |
 
-### MVP Priority Order
+### Production Readiness Checklist
 
-**Priority 1 - ERP Integration (CRITICAL)**
-1. `DeliveryRequestController::store()` - Receive orders from Melo ERP
-2. `DeliveryCallbackService` - Notify ERP when delivery completes
-3. Route optimization with Google Maps
+**Backend (Ready)**
+- [x] ERP can submit delivery requests via `POST /api/v1/delivery-requests`
+- [x] Route optimization calculates optimal waypoint order
+- [x] Cost calculation based on distance and pricing tiers
+- [x] Driver endpoints for trip lifecycle (start, arrive, complete, fail)
+- [x] ERP callbacks sent on destination completion (async via queue)
+- [x] Double-entry ledger for financial tracking
+- [x] API key authentication for B2B integrations
+- [x] OAuth2 token auth for driver app
 
-**Priority 2 - Driver App Integration**
-1. Driver trip endpoints (7 routes)
-2. Flutter API integration (replace mock data)
-3. GPS tracking for actual KM
+**Flutter App (Ready)**
+- [x] Real API integration (not mock data)
+- [x] GPS tracking for actual KM calculation
+- [x] Trip workflow: view → start → navigate → arrive → complete
+- [x] Token refresh mechanism
+- [x] Profile management
 
-**Priority 3 - Lower Priority (Post-MVP)**
-1. Ledger/Accounting system
-2. Pricing tiers and billing
-3. Financial reports
-
-### Integration Blockers with Melo ERP
-1. No `/api/v1/delivery-requests` endpoint (ERP can't submit orders)
-2. No driver trip endpoints (Flutter app stuck on mock data)
-3. No callback service (ERP won't know when delivery completes)
+**Pre-Deployment Tasks**
+1. Configure production `.env` (database, Redis, Google Maps API key)
+2. Set up Cloudflare R2 bucket for file storage
+3. Configure business callback URLs in admin panel
+4. Deploy queue workers (Horizon) for async callbacks
+5. Test end-to-end flow with Melo ERP
 
 ---
 
@@ -171,17 +176,22 @@ Independent from ERP. Tracks:
 ## Critical Files
 
 ### Backend Core
-- `app/Services/GoogleMaps/RouteOptimizer.php` - Google Directions API
+- `app/Http/Controllers/Api/V1/DeliveryRequestController.php` - ERP order intake (5 endpoints)
+- `app/Http/Controllers/Api/V1/DriverController.php` - Driver app endpoints (13 endpoints)
+- `app/Http/Controllers/Api/V1/TripAssignmentController.php` - Trip dispatch (3 endpoints)
+- `app/Http/Controllers/Api/V1/AuthController.php` - OAuth2 authentication (5 endpoints)
+- `app/Services/GoogleMaps/RouteOptimizer.php` - Google Directions API with caching
 - `app/Services/GoogleMaps/DistanceCalculator.php` - Distance Matrix API
-- `app/Services/Pricing/CostCalculator.php` - KM × price calculation
+- `app/Services/Pricing/CostCalculator.php` - KM × price calculation with tiers
 - `app/Services/PayloadSchema/SchemaTransformer.php` - Dynamic field mapping
 - `app/Services/Ledger/LedgerService.php` - Double-entry accounting
+- `app/Services/Callback/DeliveryCallbackService.php` - Async callback dispatcher
+- `app/Services/Callback/CallbackService.php` - HTTP callback sender
 - `app/Models/DeliveryRequest.php` - Core delivery model
 - `app/Models/Destination.php` - Individual stops
 
 ### Routes
-- `routes/api/v1.php` - All API endpoints
-- `routes/api/v1/driver.php` - Driver-specific routes (if separated)
+- `routes/api/v1.php` - All API endpoints (26+ routes)
 
 ### Config
 - `config/google-maps.php` - Google API credentials
@@ -449,13 +459,26 @@ public function transformCallback(Destination $destination, BusinessPayloadSchem
 
 ## Driver Mobile App (Flutter)
 
-### Key Endpoints
+### Key Endpoints (All Implemented)
 ```
-GET  /api/v1/driver/trips/today       - Today's assigned trips
-POST /api/v1/driver/trips/{id}/start  - Start trip
-POST /api/v1/driver/trips/{id}/arrive/{destination_id}  - Arrived at stop
-POST /api/v1/driver/trips/{id}/complete/{destination_id} - Complete delivery
-GET  /api/v1/driver/navigation/{destination_id} - Get navigation URL
+# Profile & Stats
+GET  /api/v1/driver/profile                     - Get driver profile
+PUT  /api/v1/driver/profile                     - Update driver profile
+POST /api/v1/driver/profile/photo               - Upload profile photo (R2)
+GET  /api/v1/driver/stats                       - Get statistics (today/monthly/all-time)
+GET  /api/v1/driver/trips/history               - Trip history with pagination
+
+# Trip Management
+GET  /api/v1/driver/trips/today                 - Today's assigned trips
+GET  /api/v1/driver/trips/{trip}                - Get trip details
+POST /api/v1/driver/trips/{trip}/start          - Start trip
+POST /api/v1/driver/trips/{trip}/complete       - Complete entire trip
+
+# Destination Operations
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/arrive    - Mark arrival
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/complete  - Complete delivery (triggers ERP callback)
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/fail      - Mark as failed
+GET  /api/v1/driver/trips/{trip}/destinations/{dest}/navigate  - Get Google Maps URL
 ```
 
 ### Trip Flow

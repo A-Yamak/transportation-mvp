@@ -57,5 +57,13 @@
 	<array>
 		<string>location</string>
 	</array>
+	<!-- URL schemes the app can open (for Google Maps navigation) -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>googlemaps</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>

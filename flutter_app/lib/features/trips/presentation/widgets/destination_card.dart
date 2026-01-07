@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/destination_model.dart';
 import '../../data/models/destination_status.dart';
 import '../../providers/trip_actions_provider.dart';
@@ -101,22 +102,33 @@ class DestinationCard extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        // Navigate button - always available for pending and arrived
+        // Navigate button - opens Google Maps with directions
         ElevatedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Navigate to: ${destination.address}'),
-                action: SnackBarAction(
-                  label: 'URL',
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(destination.navigationUrl)),
-                    );
-                  },
-                ),
-              ),
-            );
+          onPressed: () async {
+            final url = Uri.parse(destination.navigationUrl);
+            try {
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not open Google Maps'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error opening maps: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
           },
           icon: const Icon(Icons.navigation, size: 16),
           label: const Text('Navigate'),

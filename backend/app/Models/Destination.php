@@ -23,9 +23,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $address Delivery address
  * @property float $lat Latitude
  * @property float $lng Longitude
+ * @property string|null $contact_name Customer contact name
+ * @property string|null $contact_phone Customer contact phone
  * @property int $sequence_order Optimized sequence (1, 2, 3...)
  * @property DestinationStatus $status Current status
  * @property string|null $notes Additional notes
+ * @property float|null $amount_to_collect Total cash to collect from customer
+ * @property float|null $amount_collected Actual amount collected
  * @property string|null $recipient_name Name of person who received
  * @property FailureReason|null $failure_reason Reason for failure
  * @property string|null $failure_notes Additional failure notes
@@ -45,9 +49,13 @@ class Destination extends Model
         'address',
         'lat',
         'lng',
+        'contact_name',
+        'contact_phone',
         'sequence_order',
         'status',
         'notes',
+        'amount_to_collect',
+        'amount_collected',
         'recipient_name',
         'failure_reason',
         'failure_notes',
@@ -62,10 +70,28 @@ class Destination extends Model
             'lng' => 'decimal:7',
             'sequence_order' => 'integer',
             'status' => DestinationStatus::class,
+            'amount_to_collect' => 'decimal:2',
+            'amount_collected' => 'decimal:2',
             'failure_reason' => FailureReason::class,
             'arrived_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Calculate total from items if items exist.
+     */
+    public function calculateTotalFromItems(): ?float
+    {
+        if (!$this->relationLoaded('items') && !$this->items()->exists()) {
+            return null;
+        }
+
+        $total = $this->items->sum(function ($item) {
+            return $item->line_total ?? 0;
+        });
+
+        return $total > 0 ? round($total, 2) : null;
     }
 
     /**

@@ -103,8 +103,11 @@ class DeliveryRequestController extends Controller
                     'address' => $dest['address'],
                     'lat' => $dest['lat'],
                     'lng' => $dest['lng'],
+                    'contact_name' => $dest['contact_name'] ?? null,
+                    'contact_phone' => $dest['contact_phone'] ?? null,
                     'sequence_order' => $sequenceIndex + 1, // 1-based sequence
                     'notes' => $dest['notes'] ?? null,
+                    'amount_to_collect' => $dest['amount_to_collect'] ?? null,
                 ]);
 
                 // Create destination items if provided (for partial delivery tracking)
@@ -113,6 +116,7 @@ class DeliveryRequestController extends Controller
                         $destination->items()->create([
                             'order_item_id' => $item['order_item_id'],
                             'name' => $item['name'] ?? null,
+                            'unit_price' => $item['unit_price'] ?? null,
                             'quantity_ordered' => $item['quantity_ordered'],
                             'quantity_delivered' => 0, // Will be updated by driver on completion
                         ]);

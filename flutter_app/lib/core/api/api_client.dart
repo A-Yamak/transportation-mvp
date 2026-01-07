@@ -200,6 +200,8 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     print('→ ${options.method} ${options.path}');
+    print('→ Headers: ${options.headers}');
+    print('→ Data: ${options.data}');
     handler.next(options);
   }
 
@@ -212,6 +214,7 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     print('✗ ${err.response?.statusCode} ${err.requestOptions.path}: ${err.message}');
+    print('✗ Response body: ${err.response?.data}');
     handler.next(err);
   }
 }

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $destination_id FK to destinations
  * @property string $order_item_id External item ID from client ERP
  * @property string|null $name Human-readable item name
+ * @property float|null $unit_price Price per unit
  * @property int $quantity_ordered Original quantity expected
  * @property int $quantity_delivered Actual quantity delivered
  * @property ItemDeliveryReason|null $delivery_reason Reason for discrepancy
@@ -36,6 +37,7 @@ class DestinationItem extends Model
         'destination_id',
         'order_item_id',
         'name',
+        'unit_price',
         'quantity_ordered',
         'quantity_delivered',
         'delivery_reason',
@@ -45,10 +47,33 @@ class DestinationItem extends Model
     protected function casts(): array
     {
         return [
+            'unit_price' => 'decimal:2',
             'quantity_ordered' => 'integer',
             'quantity_delivered' => 'integer',
             'delivery_reason' => ItemDeliveryReason::class,
         ];
+    }
+
+    /**
+     * Get the line total (unit_price * quantity_ordered).
+     */
+    public function getLineTotalAttribute(): ?float
+    {
+        if ($this->unit_price === null) {
+            return null;
+        }
+        return round((float) $this->unit_price * $this->quantity_ordered, 2);
+    }
+
+    /**
+     * Get the delivered total (unit_price * quantity_delivered).
+     */
+    public function getDeliveredTotalAttribute(): ?float
+    {
+        if ($this->unit_price === null) {
+            return null;
+        }
+        return round((float) $this->unit_price * $this->quantity_delivered, 2);
     }
 
     /**

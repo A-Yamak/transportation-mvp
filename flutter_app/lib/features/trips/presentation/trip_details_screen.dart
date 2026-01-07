@@ -20,52 +20,57 @@ class TripDetailsScreen extends ConsumerWidget {
       ),
       body: tripAsync.when(
         data: (trip) {
-          return Column(
-            children: [
-              // Trip Header
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16),
-                color: Colors.blue.shade50,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trip.businessName,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    Text('${l10n.trip} #${trip.id}'),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, size: 16),
-                        SizedBox(width: 4),
-                        Text(
-                            '${trip.completedDestinationsCount}/${trip.totalDestinations} ${l10n.completed}'),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    LinearProgressIndicator(value: trip.progress),
-                  ],
-                ),
-              ),
-
-              // Destinations List
-              Expanded(
-                child: ListView.builder(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(tripDetailsProvider(tripId));
+            },
+            child: Column(
+              children: [
+                // Trip Header
+                Container(
+                  width: double.infinity,
                   padding: EdgeInsets.all(16),
-                  itemCount: trip.destinations.length,
-                  itemBuilder: (context, index) {
-                    return DestinationCard(
-                      destination: trip.destinations[index],
-                      tripId: trip.id,
-                    );
-                  },
+                  color: Colors.blue.shade50,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        trip.businessName,
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      Text('${l10n.trip} #${trip.id}'),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                              '${trip.completedDestinationsCount}/${trip.totalDestinations} ${l10n.completed}'),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      LinearProgressIndicator(value: trip.progress),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+
+                // Destinations List
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(16),
+                    itemCount: trip.destinations.length,
+                    itemBuilder: (context, index) {
+                      return DestinationCard(
+                        destination: trip.destinations[index],
+                        tripId: trip.id,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           );
         },
         loading: () => Center(child: CircularProgressIndicator()),

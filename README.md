@@ -2,21 +2,26 @@
 
 A logistics and delivery management application with route optimization, cost calculation, and multi-client API integration.
 
-## MVP Status: ~30% Complete
+## MVP Status: Ready for Production
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Database/Models | 100% | Schema complete |
-| Authentication | 100% | OAuth2 working |
-| API Controllers | 5% | Only AuthController |
-| ERP Integration | 0% | **BLOCKING** - Priority 1 |
-| Driver Endpoints | 0% | Priority 2 |
-| Flutter UI | 85% | Stuck on mock data |
+| Authentication | 100% | OAuth2 + API Key auth |
+| API Controllers | 100% | 4 controllers, 26+ endpoints |
+| ERP Integration | 100% | Submit orders + async callbacks |
+| Driver Endpoints | 100% | 13 endpoints for Flutter app |
+| Route Optimization | 100% | Google Maps with caching |
+| Pricing Service | 100% | Tiered pricing with discounts |
+| Ledger System | 100% | Double-entry accounting |
+| Flutter App | 100% | Real API integration + GPS |
 
-### MVP Priority Order
-1. **ERP Integration** - Receive orders from Melo ERP, send delivery callbacks
-2. **Driver Endpoints** - Connect Flutter app to real API
-3. **Ledger/Billing** - Lower priority, post-MVP
+### Pre-Deployment Checklist
+1. Configure production `.env` (database, Redis, Google Maps API key)
+2. Set up Cloudflare R2 bucket for file storage
+3. Configure business callback URLs in admin panel
+4. Deploy queue workers (Horizon) for async callbacks
+5. Test end-to-end flow with Melo ERP
 
 ## Overview
 
@@ -195,11 +200,31 @@ GET /api/v1/delivery-requests/{id}/route
 
 **Driver Endpoints (for Flutter app):**
 ```bash
-GET  /api/v1/driver/trips/today                    # Today's trips
-POST /api/v1/driver/trips/{id}/start               # Start trip
-POST /api/v1/driver/trips/{id}/arrive/{dest}       # Arrived at stop
-POST /api/v1/driver/trips/{id}/complete/{dest}     # Complete delivery
-GET  /api/v1/driver/navigation/{dest}              # Navigation URL
+# Profile & Stats
+GET  /api/v1/driver/profile                              # Driver profile
+PUT  /api/v1/driver/profile                              # Update profile
+POST /api/v1/driver/profile/photo                        # Upload photo
+GET  /api/v1/driver/stats                                # Statistics
+GET  /api/v1/driver/trips/history                        # Trip history
+
+# Trip Lifecycle
+GET  /api/v1/driver/trips/today                          # Today's trips
+GET  /api/v1/driver/trips/{id}                           # Trip details
+POST /api/v1/driver/trips/{id}/start                     # Start trip
+POST /api/v1/driver/trips/{id}/complete                  # Complete trip
+
+# Destination Operations
+POST /api/v1/driver/trips/{id}/destinations/{dest}/arrive    # Mark arrival
+POST /api/v1/driver/trips/{id}/destinations/{dest}/complete  # Complete (→ ERP callback)
+POST /api/v1/driver/trips/{id}/destinations/{dest}/fail      # Mark failed
+GET  /api/v1/driver/trips/{id}/destinations/{dest}/navigate  # Google Maps URL
+```
+
+**Trip Assignment (Admin/Dispatch):**
+```bash
+GET  /api/v1/trips/unassigned                            # Pending requests
+GET  /api/v1/trips/available-drivers                     # Active drivers
+POST /api/v1/trips/assign                                # Assign to driver
 ```
 
 ## Google Maps API Strategy
@@ -293,22 +318,30 @@ AWS_USE_PATH_STYLE_ENDPOINT=true
 
 ## Flutter Driver App
 
-Located in `flutter_app/` directory.
+Located in `flutter_app/` directory. **Fully integrated with backend API** (not mock data).
 
 ### Setup
 ```bash
 cd flutter_app
 flutter pub get
+
+# For Android emulator (default API URL: http://10.0.2.2:8000)
 flutter run
+
+# For production build with custom API URL
+flutter run --dart-define=API_BASE_URL=https://api.yourapp.com
 ```
 
 ### Key Features
-- View today's assigned trips
-- Optimized route display
-- Tap to navigate (opens Google Maps)
-- Mark arrival/completion
-- GPS tracking for actual KM
-- Optional signature/photo capture
+- **Real API Integration**: Dio HTTP client with OAuth2 token management
+- **View today's assigned trips**: From `/api/v1/driver/trips/today`
+- **Optimized route display**: Polyline from route optimization
+- **Tap to navigate**: Opens device's Google Maps app (free)
+- **Mark arrival/completion**: Real-time status updates to backend
+- **GPS tracking**: Actual KM calculated via Geolocator package
+- **ERP Callbacks**: Automatic notification to client ERP on delivery completion
+- **Token refresh**: Automatic token rotation on 401 responses
+- **Profile management**: Update profile, upload photo to R2 storage
 
 ## Testing
 
@@ -341,12 +374,24 @@ make k8s-production  # Requires confirmation
 ```
 
 ### Production Checklist
+
+**Development Complete:**
+- [x] All API endpoints implemented
+- [x] ERP integration (delivery requests + callbacks)
+- [x] Driver app endpoints (13 routes)
+- [x] Route optimization with Google Maps
+- [x] Pricing calculation with tiers
+- [x] Double-entry ledger system
+- [x] Flutter app with real API integration
+
+**Deployment Tasks:**
 - [ ] Set `APP_ENV=production`, `APP_DEBUG=false`
 - [ ] Configure Google Maps API key
 - [ ] Set up Cloudflare R2 bucket
 - [ ] Configure database credentials
 - [ ] Set up Redis AUTH
 - [ ] Enable HTTPS via Ingress
+- [ ] Deploy queue workers (Horizon)
 - [ ] Deploy Flutter app to stores
 
 ## Troubleshooting

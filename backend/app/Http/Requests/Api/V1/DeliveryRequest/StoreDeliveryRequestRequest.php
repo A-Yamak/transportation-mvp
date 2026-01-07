@@ -88,10 +88,14 @@ class StoreDeliveryRequestRequest extends ApiRequest
             // Notes for this destination (optional)
             'destinations.*.notes' => ['nullable', 'string', 'max:500'],
 
+            // Amount to collect from customer (optional - for COD)
+            'destinations.*.amount_to_collect' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+
             // Items for this destination (optional - for partial delivery tracking)
             'destinations.*.items' => ['nullable', 'array'],
             'destinations.*.items.*.order_item_id' => ['required_with:destinations.*.items', 'string', 'max:100'],
             'destinations.*.items.*.name' => ['nullable', 'string', 'max:255'],
+            'destinations.*.items.*.unit_price' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'destinations.*.items.*.quantity_ordered' => ['required_with:destinations.*.items', 'integer', 'min:1'],
 
             // Override callback URL for this request (optional)

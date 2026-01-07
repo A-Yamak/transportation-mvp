@@ -30,6 +30,7 @@ class DeliveryItemModel {
   final String orderItemId;
   final String? name;
   final String? sku;
+  final double? unitPrice;
   final int quantityOrdered;
   int quantityDelivered;
   ItemDiscrepancyReason? discrepancyReason;
@@ -40,11 +41,20 @@ class DeliveryItemModel {
     required this.orderItemId,
     this.name,
     this.sku,
+    this.unitPrice,
     required this.quantityOrdered,
     this.quantityDelivered = 0,
     this.discrepancyReason,
     this.notes,
   });
+
+  /// Get the line total (unit_price * quantity_ordered)
+  double? get lineTotal =>
+      unitPrice != null ? unitPrice! * quantityOrdered : null;
+
+  /// Get the delivered total (unit_price * quantity_delivered)
+  double? get deliveredTotal =>
+      unitPrice != null ? unitPrice! * quantityDelivered : null;
 
   /// Factory to create from API JSON response
   factory DeliveryItemModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +63,9 @@ class DeliveryItemModel {
       orderItemId: json['order_item_id']?.toString() ?? '',
       name: json['name']?.toString(),
       sku: json['sku']?.toString(),
+      unitPrice: json['unit_price'] != null
+          ? (json['unit_price'] as num).toDouble()
+          : null,
       quantityOrdered: (json['quantity_ordered'] ?? 0) as int,
       quantityDelivered: (json['quantity_delivered'] ?? 0) as int,
       discrepancyReason: ItemDiscrepancyReason.fromString(
@@ -89,6 +102,7 @@ class DeliveryItemModel {
     String? orderItemId,
     String? name,
     String? sku,
+    double? unitPrice,
     int? quantityOrdered,
     int? quantityDelivered,
     ItemDiscrepancyReason? discrepancyReason,
@@ -99,6 +113,7 @@ class DeliveryItemModel {
       orderItemId: orderItemId ?? this.orderItemId,
       name: name ?? this.name,
       sku: sku ?? this.sku,
+      unitPrice: unitPrice ?? this.unitPrice,
       quantityOrdered: quantityOrdered ?? this.quantityOrdered,
       quantityDelivered: quantityDelivered ?? this.quantityDelivered,
       discrepancyReason: discrepancyReason ?? this.discrepancyReason,

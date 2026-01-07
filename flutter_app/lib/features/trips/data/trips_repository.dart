@@ -53,9 +53,17 @@ class TripsRepository {
 
       final Map<String, dynamic> tripJson;
       if (data is Map && data.containsKey('data')) {
-        tripJson = data['data'] as Map<String, dynamic>;
-      } else if (data is Map) {
-        tripJson = data as Map<String, dynamic>;
+        final dataContent = data['data'];
+        if (dataContent is Map<String, dynamic>) {
+          tripJson = dataContent;
+        } else if (dataContent is List && dataContent.isNotEmpty) {
+          // Handle case where API returns array with single trip
+          tripJson = dataContent.first as Map<String, dynamic>;
+        } else {
+          throw TripException('Invalid trip data format');
+        }
+      } else if (data is Map<String, dynamic>) {
+        tripJson = data;
       } else {
         throw TripException('Invalid response format');
       }
