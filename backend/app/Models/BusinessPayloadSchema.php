@@ -130,12 +130,14 @@ class BusinessPayloadSchema extends Model
         $orderItemIdPath = $schema['items.order_item_id'] ?? 'order_item_id';
         $namePath = $schema['items.name'] ?? 'name';
         $quantityPath = $schema['items.quantity_ordered'] ?? 'quantity_ordered';
+        $unitPricePath = $schema['items.unit_price'] ?? 'unit_price';
 
-        return array_map(function ($item) use ($orderItemIdPath, $namePath, $quantityPath) {
+        return array_map(function ($item) use ($orderItemIdPath, $namePath, $quantityPath, $unitPricePath) {
             return [
                 'order_item_id' => data_get($item, $orderItemIdPath),
                 'name' => data_get($item, $namePath),
                 'quantity_ordered' => data_get($item, $quantityPath),
+                'unit_price' => data_get($item, $unitPricePath),
             ];
         }, $items);
     }

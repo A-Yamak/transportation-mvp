@@ -38,6 +38,8 @@ class SchemaTransformer
             'notes' => $schema->getFromRequest($data, 'notes'),
             'contact_name' => $schema->getFromRequest($data, 'contact_name'),
             'contact_phone' => $schema->getFromRequest($data, 'contact_phone'),
+            // Price/payment fields (pass through directly - not schema-mapped)
+            'amount_to_collect' => $data['amount_to_collect'] ?? null,
         ];
 
         // Transform items if present
