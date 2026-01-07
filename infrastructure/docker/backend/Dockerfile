@@ -48,8 +48,8 @@ WORKDIR /app
 # Copy package files
 COPY backend/package*.json ./
 
-# Install dependencies
-RUN npm ci --include=optional --omit=dev
+# Install dependencies (use npm install instead of ci due to rollup optional deps bug)
+RUN npm install --omit=dev --prefer-offline --no-audit
 
 # Copy source files
 COPY backend/ .
