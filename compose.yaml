@@ -67,8 +67,8 @@ services:
       MAIL_PORT: 1025
       OCTANE_SERVER: frankenphp
       # Passport OAuth - password grant client
-      PASSPORT_PASSWORD_CLIENT_ID: "019b9803-3a9f-7182-8e39-41a038b94441"
-      PASSPORT_PASSWORD_CLIENT_SECRET: "2UuBw94Lqj48hPOsiqkRqP37sMANaWQHiGSrVfpU"
+      PASSPORT_PASSWORD_CLIENT_ID: "019b9856-f50c-735a-9064-da5769e8d79f"
+      PASSPORT_PASSWORD_CLIENT_SECRET: "ayzZgeeUKKTNGSU784CeU7okBoHu4DbprV6nQERc"
       # Xdebug: Set to "debug" to enable, "off" to disable
       XDEBUG_MODE: "off"
       # Sentry error tracking (set DSN in production)
