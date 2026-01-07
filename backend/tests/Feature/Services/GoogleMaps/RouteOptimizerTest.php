@@ -30,11 +30,8 @@ class RouteOptimizerTest extends TestCase
         ]);
 
         Cache::flush();
-    }
 
-    protected function createOptimizer(): RouteOptimizer
-    {
-        return new RouteOptimizer();
+        $this->optimizer = new RouteOptimizer();
     }
 
     #[Test]
@@ -65,8 +62,7 @@ class RouteOptimizerTest extends TestCase
 
         $startPoint = ['lat' => 31.9539, 'lng' => 35.9106];
 
-        $optimizer = $this->createOptimizer();
-        $result = $optimizer->optimize($destinations, $startPoint);
+        $result = $this->optimizer->optimize($destinations, $startPoint);
 
         $this->assertEquals([1, 0, 2], $result['optimized_order']);
         $this->assertEquals(10000, $result['total_distance_meters']);
@@ -221,7 +217,9 @@ class RouteOptimizerTest extends TestCase
         $this->expectException(GoogleMapsApiException::class);
         $this->expectExceptionMessage('Failed after 2 attempts');
 
-        $this->optimizer->optimize($destinations, $start);
+        // Create new optimizer with updated config
+        $optimizer = new RouteOptimizer();
+        $optimizer->optimize($destinations, $start);
     }
 
     #[Test]

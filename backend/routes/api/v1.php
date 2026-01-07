@@ -63,6 +63,13 @@ Route::middleware('auth:api')->group(function () {
     // Driver Routes - Trip Management (for mobile app)
     // -----------------------------------------------------------------------------
     Route::prefix('driver')->group(function () {
+        // Driver Profile & Dashboard
+        Route::get('profile', [DriverController::class, 'profile']);
+        Route::put('profile', [DriverController::class, 'updateProfile']);
+        Route::post('profile/photo', [DriverController::class, 'uploadProfilePhoto']);
+        Route::get('stats', [DriverController::class, 'stats']);
+        Route::get('trips/history', [DriverController::class, 'tripHistory']);
+
         // Today's trips for driver
         Route::get('trips/today', [DriverController::class, 'todaysTrips']);
 

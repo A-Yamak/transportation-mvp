@@ -82,5 +82,25 @@
   "arrivedSuccess": "تم التمييز كوصول",
   "completedSuccess": "تم التسليم!",
   "navigateTo": "انتقل إلى: {address}",
-  "tripId": "معرف الرحلة"
+  "tripId": "معرف الرحلة",
+
+  "profile": "الملف الشخصي",
+  "statistics": "الإحصائيات",
+  "today": "اليوم",
+  "thisMonth": "هذا الشهر",
+  "allTime": "الإجمالي",
+  "deliveries": "التوصيلات",
+  "distance": "المسافة",
+  "tripHistory": "سجل الرحلات",
+  "noTripHistory": "لا يوجد سجل رحلات",
+  "allStatuses": "جميع الحالات",
+  "duration": "المدة",
+  "retry": "إعادة المحاولة",
+
+  "odometer": "عداد المسافات",
+  "currentOdometer": "القراءة الحالية",
+  "acquisitionKm": "كم عند الاستلام",
+  "appTrackedKm": "عبر التطبيق",
+  "trackedViaApp": "مسجل عبر التطبيق",
+  "noVehicleAssigned": "لا توجد مركبة مخصصة"
 }

@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -9,6 +12,7 @@ final locationServiceProvider = Provider<LocationService>((ref) {
 
 /// Service for handling GPS location tracking during trips.
 /// Tracks distance traveled using real-time GPS updates.
+/// Supports background tracking with foreground service on Android.
 class LocationService {
   StreamSubscription<Position>? _locationSubscription;
   Position? _lastPosition;
@@ -28,7 +32,10 @@ class LocationService {
   Position? get lastPosition => _lastPosition;
 
   /// Check and request location permissions
-  Future<LocationPermission> checkAndRequestPermission() async {
+  /// For background tracking, also requests background location permission
+  Future<LocationPermission> checkAndRequestPermission({
+    bool requestBackground = false,
+  }) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw LocationServiceException(
@@ -55,14 +62,23 @@ class LocationService {
       );
     }
 
+    // On Android, request background permission if needed for background tracking
+    if (requestBackground &&
+        Platform.isAndroid &&
+        permission == LocationPermission.whileInUse) {
+      // For Android 10+, need to request background permission separately
+      permission = await Geolocator.requestPermission();
+    }
+
     return permission;
   }
 
   /// Start tracking location and calculating distance
-  Future<void> startTracking() async {
+  /// [enableBackground] - If true, enables background tracking with foreground service
+  Future<void> startTracking({bool enableBackground = true}) async {
     if (_isTracking) return;
 
-    await checkAndRequestPermission();
+    await checkAndRequestPermission(requestBackground: enableBackground);
 
     _totalDistanceMeters = 0;
     _lastPosition = null;
@@ -73,12 +89,48 @@ class LocationService {
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    // Start continuous tracking
-    _locationSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
+    // Configure location settings based on platform
+    late LocationSettings locationSettings;
+
+    if (Platform.isAndroid && enableBackground) {
+      // Android: Use foreground service for background tracking
+      locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 10, // Update every 10 meters moved
-      ),
+        // Foreground notification keeps tracking alive when app is in background
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationTitle: 'تتبع الرحلة نشط',
+          notificationText: 'يتم تتبع موقعك أثناء الرحلة',
+          notificationIcon:
+              AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
+          notificationChannelName: 'Location Tracking',
+          enableWakeLock: true,
+          enableWifiLock: true,
+          setOngoing: true,
+        ),
+        // Keep tracking accurate even in background
+        intervalDuration: const Duration(seconds: 5),
+      );
+    } else if (Platform.isIOS && enableBackground) {
+      // iOS: Use background modes (configured in Info.plist)
+      locationSettings = AppleSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+        pauseLocationUpdatesAutomatically: false,
+        showBackgroundLocationIndicator: true,
+        allowBackgroundLocationUpdates: true,
+      );
+    } else {
+      // Default: Foreground only
+      locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      );
+    }
+
+    // Start continuous tracking
+    _locationSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
     ).listen(
       _onPositionUpdate,
       onError: _onLocationError,
@@ -107,10 +159,11 @@ class LocationService {
   /// Handle location errors
   void _onLocationError(dynamic error) {
     // Log error but keep tracking active
-    print('Location error: $error');
+    debugPrint('Location error: $error');
   }
 
   /// Stop tracking location
+  /// This also stops the foreground service on Android
   Future<void> stopTracking() async {
     _isTracking = false;
     await _locationSubscription?.cancel();
@@ -156,6 +209,18 @@ class LocationService {
       destLng,
     );
     return distance <= thresholdMeters;
+  }
+
+  /// Open device location settings
+  /// Useful when permission is denied permanently
+  Future<bool> openLocationSettings() async {
+    return await Geolocator.openLocationSettings();
+  }
+
+  /// Open app settings
+  /// Useful when permission is denied permanently
+  Future<bool> openAppSettings() async {
+    return await Geolocator.openAppSettings();
   }
 
   /// Clean up resources

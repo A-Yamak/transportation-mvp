@@ -80,7 +80,14 @@ class BusinessPayloadSchema extends Model
             'external_id' => 'external_id',
             'status' => 'status',
             'completed_at' => 'completed_at',
+            'delivered_at' => 'delivered_at', // Alias for Melo ERP
             'recipient_name' => 'recipient_name',
+            // Item-level callback fields
+            'items' => 'items',
+            'items.order_item_id' => 'order_item_id',
+            'items.quantity_delivered' => 'quantity_delivered',
+            'items.reason' => 'reason',
+            'items.notes' => 'notes',
         ];
     }
 
@@ -102,21 +109,69 @@ class BusinessPayloadSchema extends Model
         $schema = $this->callback_schema ?? self::defaultCallbackSchema();
         $result = [];
 
-        foreach ($schema as $internalField => $externalField) {
+        // Transform base fields
+        // Schema format: internalField => outputField (what we send in callback)
+        // e.g., 'external_id' => 'order_id' means result['order_id'] = destination.external_id
+        foreach ($schema as $internalField => $outputField) {
+            // Skip item-related fields (handled separately)
+            if (str_starts_with($internalField, 'items.') || $internalField === 'items') {
+                continue;
+            }
+
             $value = match ($internalField) {
                 'external_id' => $destination->external_id,
                 'status' => $destination->status->value,
                 'completed_at' => $destination->completed_at?->toIso8601String(),
+                'delivered_at' => $destination->completed_at?->toIso8601String(), // Alias
                 'recipient_name' => $destination->recipient_name,
                 'failure_reason' => $destination->failure_reason?->value,
                 default => null,
             };
 
             if ($value !== null) {
-                data_set($result, $externalField, $value);
+                data_set($result, $outputField, $value);
             }
         }
 
+        // Transform items if destination has item tracking
+        if ($destination->relationLoaded('items') && $destination->items->isNotEmpty()) {
+            $itemsField = $schema['items'] ?? 'items';
+            $result[$itemsField] = $this->transformItemsForCallback($destination, $schema);
+        }
+
         return $result;
+    }
+
+    /**
+     * Transform destination items for callback payload.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function transformItemsForCallback(Destination $destination, array $schema): array
+    {
+        // Get field mappings from schema
+        $orderItemIdField = $schema['items.order_item_id'] ?? 'order_item_id';
+        $quantityField = $schema['items.quantity_delivered'] ?? 'quantity_delivered';
+        $reasonField = $schema['items.reason'] ?? 'reason';
+        $notesField = $schema['items.notes'] ?? 'notes';
+
+        return $destination->items->map(function ($item) use ($orderItemIdField, $quantityField, $reasonField, $notesField) {
+            $itemData = [
+                $orderItemIdField => $item->order_item_id,
+                $quantityField => $item->quantity_delivered,
+            ];
+
+            // Only include reason and notes if there's a discrepancy
+            if ($item->hasDiscrepancy()) {
+                if ($item->delivery_reason) {
+                    $itemData[$reasonField] = $item->delivery_reason->value;
+                }
+                if ($item->notes) {
+                    $itemData[$notesField] = $item->notes;
+                }
+            }
+
+            return $itemData;
+        })->toArray();
     }
 }

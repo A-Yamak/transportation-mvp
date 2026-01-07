@@ -36,6 +36,12 @@ class DestinationResource extends ApiResource
             'failure_notes' => $this->resource->failure_notes,
             'arrived_at' => $this->resource->arrived_at?->toIso8601String(),
             'completed_at' => $this->resource->completed_at?->toIso8601String(),
+            // Item-level delivery tracking
+            'items' => DestinationItemResource::collection($this->whenLoaded('items')),
+            'has_item_tracking' => $this->when(
+                $this->resource->relationLoaded('items'),
+                fn () => $this->resource->items->isNotEmpty()
+            ),
         ];
     }
 }

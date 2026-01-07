@@ -35,6 +35,7 @@ class Driver extends Model
         'vehicle_id',
         'phone',
         'license_number',
+        'profile_photo_path',
         'is_active',
     ];
 
@@ -75,6 +76,21 @@ class Driver extends Model
     public function getNameAttribute(): string
     {
         return $this->user?->name ?? 'Unknown';
+    }
+
+    /**
+     * Get the URL to the driver's profile photo.
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if (! $this->profile_photo_path) {
+            return null;
+        }
+
+        // Use the configured filesystem disk (r2 in production, local in dev)
+        $disk = config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->profile_photo_path);
     }
 
     /**

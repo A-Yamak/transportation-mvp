@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:driver_app/generated/l10n/app_localizations.dart';
 import '../providers/trips_provider.dart';
 import 'widgets/trip_card.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../router/app_router.dart';
 
 class TripsListScreen extends ConsumerWidget {
   const TripsListScreen({Key? key}) : super(key: key);
@@ -37,6 +39,10 @@ class TripsListScreen extends ConsumerWidget {
             onSelected: (value) async {
               if (value == 'logout') {
                 await ref.read(authProvider.notifier).logout();
+              } else if (value == 'profile') {
+                context.push(Routes.profile);
+              } else if (value == 'history') {
+                context.push(Routes.tripHistory);
               }
             },
             itemBuilder: (context) => [
@@ -59,6 +65,27 @@ class TripsListScreen extends ConsumerWidget {
                         color: Colors.grey[600],
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, color: AppTheme.primaryColor),
+                    const SizedBox(width: 8),
+                    Text(l10n.profile),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'history',
+                child: Row(
+                  children: [
+                    const Icon(Icons.history, color: AppTheme.primaryColor),
+                    const SizedBox(width: 8),
+                    Text(l10n.tripHistory),
                   ],
                 ),
               ),

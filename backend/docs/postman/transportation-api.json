@@ -1,0 +1,294 @@
+{
+  "info": {
+    "name": "Transportation MVP API",
+    "description": "API collection for Transportation MVP - Melo ERP Integration\n\n## Overview\nThis collection contains all API endpoints for the Transportation MVP system, including:\n- Driver trip management\n- Delivery completion with item-level tracking\n- ERP integration endpoints\n\n## Authentication\nMost endpoints require Bearer token authentication. Use the Login endpoint to obtain an access token.\n\n## Callback Format for Melo ERP\nWhen deliveries are completed, the system sends callbacks to Melo ERP at:\n`POST https://api.melo-erp.com/api/v1/deliveries/callback`\n\n### Simple Format (Full Delivery):\n```json\n{\n  \"external_id\": \"123\",\n  \"delivered_at\": \"2026-01-07T14:30:00Z\"\n}\n```\n\n### Detailed Format (Partial Delivery):\n```json\n{\n  \"external_id\": \"123\",\n  \"delivered_at\": \"2026-01-07T14:30:00Z\",\n  \"items\": [\n    {\"order_item_id\": \"101\", \"quantity_delivered\": 20},\n    {\"order_item_id\": \"102\", \"quantity_delivered\": 15, \"reason\": \"damaged_in_transit\", \"notes\": \"5 damaged\"}\n  ]\n}\n```",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": "your_access_token_here"
+    },
+    {
+      "key": "tripId",
+      "value": "trip_uuid_here"
+    },
+    {
+      "key": "destinationId",
+      "value": "destination_uuid_here"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for drivers and API users",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"driver@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate and obtain access token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Driver - Trip Management",
+      "description": "Endpoints used by the Flutter driver app",
+      "item": [
+        {
+          "name": "Get Today's Trips",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "today"]
+            },
+            "description": "Get all trips assigned to the authenticated driver for today"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trip Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}"]
+            },
+            "description": "Get detailed trip information including all destinations"
+          },
+          "response": []
+        },
+        {
+          "name": "Start Trip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "start"]
+            },
+            "description": "Start a trip - driver begins their route"
+          },
+          "response": []
+        },
+        {
+          "name": "Arrive at Destination",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/arrive",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "arrive"]
+            },
+            "description": "Mark arrival at a destination"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Destination (Simple)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Ahmad Hassan\",\n  \"notes\": \"Left at reception\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "complete"]
+            },
+            "description": "Complete delivery without item-level tracking (backward compatible)"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Destination (With Items - Full Delivery)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Ahmad Hassan\",\n  \"items\": [\n    {\"order_item_id\": \"101\", \"quantity_delivered\": 20},\n    {\"order_item_id\": \"102\", \"quantity_delivered\": 15}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "complete"]
+            },
+            "description": "Complete delivery with item-level tracking - all items fully delivered"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Destination (With Items - Partial Delivery)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Ahmad Hassan\",\n  \"items\": [\n    {\"order_item_id\": \"101\", \"quantity_delivered\": 20},\n    {\n      \"order_item_id\": \"102\",\n      \"quantity_delivered\": 15,\n      \"reason\": \"damaged_in_transit\",\n      \"notes\": \"5 units were damaged when box fell\"\n    },\n    {\n      \"order_item_id\": \"103\",\n      \"quantity_delivered\": 0,\n      \"reason\": \"customer_refused\",\n      \"notes\": \"Shop was closed\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "complete"]
+            },
+            "description": "Complete delivery with partial delivery - some items with discrepancies.\n\nReason codes:\n- damaged_in_transit: Product damaged during transportation\n- customer_refused: Customer refused to accept delivery\n- quality_issue: Product didn't meet quality standards\n- wrong_product: Incorrect product was delivered\n- shortage: Not enough product available\n- other: Other reason (explain in notes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Fail Destination",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"not_home\",\n  \"notes\": \"Customer was not available after 3 attempts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/fail",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "fail"]
+            },
+            "description": "Mark destination as failed (entire delivery could not be completed).\n\nReason codes:\n- not_home: Customer not home\n- refused: Refused delivery\n- wrong_address: Wrong address\n- inaccessible: Location inaccessible\n- other: Other reason"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Navigation URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/destinations/{{destinationId}}/navigate",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "destinations", "{{destinationId}}", "navigate"]
+            },
+            "description": "Get Google Maps navigation URL for a destination"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Trip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_km\": 45.5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/driver/trips/{{tripId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["driver", "trips", "{{tripId}}", "complete"]
+            },
+            "description": "Complete the entire trip (all destinations must be completed or failed)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ERP Integration",
+      "description": "Endpoints for ERP systems to submit delivery requests",
+      "item": [
+        {
+          "name": "Create Delivery Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinations\": [\n    {\n      \"external_id\": \"ORDER-123\",\n      \"address\": \"123 Main St, Amman\",\n      \"lat\": 31.9539,\n      \"lng\": 35.9106,\n      \"notes\": \"Ring doorbell twice\"\n    },\n    {\n      \"external_id\": \"ORDER-124\",\n      \"address\": \"456 Oak Ave, Amman\",\n      \"lat\": 31.9600,\n      \"lng\": 35.9200,\n      \"notes\": \"Leave at reception\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/delivery-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["delivery-requests"]
+            },
+            "description": "Submit a new delivery request with multiple destinations. The system will optimize the route using Google Maps API."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

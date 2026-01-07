@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/models/delivery_item_model.dart';
 import '../data/trips_repository.dart';
 import '../services/location_service.dart';
 import 'trips_provider.dart';
@@ -33,13 +34,15 @@ class TripActionsNotifier {
     }
   }
 
-  /// Complete delivery at a destination
+  /// Complete delivery at a destination with optional item-level data
   Future<void> markCompleted(
     String tripId,
     String destId, {
+    String? recipientName,
     String? notes,
     String? signatureBase64,
     String? photoBase64,
+    List<DeliveryItemModel>? items,
   }) async {
     try {
       // Get current GPS position
@@ -49,9 +52,11 @@ class TripActionsNotifier {
       await _repository.completeDestination(
         tripId,
         destId,
+        recipientName: recipientName,
         notes: notes,
         signatureBase64: signatureBase64,
         photoBase64: photoBase64,
+        items: items,
         lat: position.latitude,
         lng: position.longitude,
       );

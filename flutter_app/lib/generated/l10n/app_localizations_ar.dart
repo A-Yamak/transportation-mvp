@@ -207,4 +207,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tripId => 'معرف الرحلة';
+
+  @override
+  String get profile => 'الملف الشخصي';
+
+  @override
+  String get statistics => 'الإحصائيات';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get allTime => 'الإجمالي';
+
+  @override
+  String get deliveries => 'التوصيلات';
+
+  @override
+  String get distance => 'المسافة';
+
+  @override
+  String get tripHistory => 'سجل الرحلات';
+
+  @override
+  String get noTripHistory => 'لا يوجد سجل رحلات';
+
+  @override
+  String get allStatuses => 'جميع الحالات';
+
+  @override
+  String get duration => 'المدة';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get odometer => 'عداد المسافات';
+
+  @override
+  String get currentOdometer => 'القراءة الحالية';
+
+  @override
+  String get acquisitionKm => 'كم عند الاستلام';
+
+  @override
+  String get appTrackedKm => 'عبر التطبيق';
+
+  @override
+  String get trackedViaApp => 'مسجل عبر التطبيق';
+
+  @override
+  String get noVehicleAssigned => 'لا توجد مركبة مخصصة';
 }

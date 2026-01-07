@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -17,13 +19,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ChartOfAccountsSeeder::class,
-        ]);
-
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            MvpSeeder::class,
         ]);
     }
 }

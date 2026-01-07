@@ -5,6 +5,8 @@ import '../core/auth/auth_provider.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/trips/presentation/trips_list_screen.dart';
 import '../features/trips/presentation/trip_details_screen.dart';
+import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/trip_history_screen.dart';
 
 /// Route names
 class Routes {
@@ -12,6 +14,8 @@ class Routes {
   static const String login = '/login';
   static const String home = '/home';
   static const String tripDetails = '/trips/:id';
+  static const String profile = '/profile';
+  static const String tripHistory = '/trips/history';
 
   static String tripDetailsPath(String id) => '/trips/$id';
 }
@@ -75,6 +79,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           final tripId = state.pathParameters['id']!;
           return TripDetailsScreen(tripId: tripId);
         },
+      ),
+
+      // Profile
+      GoRoute(
+        path: Routes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+
+      // Trip History
+      GoRoute(
+        path: Routes.tripHistory,
+        builder: (context, state) => const TripHistoryScreen(),
       ),
     ],
   );

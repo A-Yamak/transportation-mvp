@@ -1,6 +1,7 @@
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_config.dart';
 import '../../../core/api/api_exceptions.dart';
+import 'models/delivery_item_model.dart';
 import 'models/trip_model.dart';
 import 'models/destination_model.dart';
 
@@ -130,13 +131,15 @@ class TripsRepository {
     }
   }
 
-  /// Complete delivery at a destination with optional notes and proof.
+  /// Complete delivery at a destination with optional notes, proof, and item-level data.
   Future<DestinationModel> completeDestination(
     String tripId,
     String destinationId, {
+    String? recipientName,
     String? notes,
     String? signatureBase64,
     String? photoBase64,
+    List<DeliveryItemModel>? items,
     double? lat,
     double? lng,
   }) async {
@@ -144,9 +147,12 @@ class TripsRepository {
       final response = await _apiClient.post(
         ApiEndpoints.completeDestination(tripId, destinationId),
         data: {
+          if (recipientName != null) 'recipient_name': recipientName,
           if (notes != null) 'notes': notes,
           if (signatureBase64 != null) 'signature': signatureBase64,
           if (photoBase64 != null) 'photo': photoBase64,
+          if (items != null && items.isNotEmpty)
+            'items': items.map((item) => item.toJson()).toList(),
           if (lat != null) 'lat': lat,
           if (lng != null) 'lng': lng,
         },

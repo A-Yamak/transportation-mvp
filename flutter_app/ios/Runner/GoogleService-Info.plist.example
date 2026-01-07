@@ -1,0 +1,42 @@
+<!--
+  Replace this file with GoogleService-Info.plist from Firebase Console
+
+  Instructions:
+  1. Go to Firebase Console: https://console.firebase.google.com
+  2. Create or select your project
+  3. Click 'Add app' and select iOS
+  4. Bundle ID: com.alsabiqoon.driver
+  5. Download GoogleService-Info.plist
+  6. Replace this file with the downloaded one (rename to GoogleService-Info.plist)
+  7. Update lib/firebase_options.dart with the values from this file
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>YOUR_API_KEY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>YOUR_SENDER_ID</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.alsabiqoon.driver</string>
+	<key>PROJECT_ID</key>
+	<string>YOUR_PROJECT_ID</string>
+	<key>STORAGE_BUCKET</key>
+	<string>YOUR_PROJECT_ID.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:YOUR_SENDER_ID:ios:YOUR_APP_ID</string>
+</dict>
+</plist>

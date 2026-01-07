@@ -19,6 +19,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mock Mode (for testing without API key)
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, returns mock route optimization data without calling
+    | the Google Maps API. Useful for local testing and development.
+    |
+    */
+    'mock_mode' => env('GOOGLE_MAPS_MOCK_MODE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Base URLs
     |--------------------------------------------------------------------------
     |

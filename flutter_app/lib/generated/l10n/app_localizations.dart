@@ -493,6 +493,114 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'معرف الرحلة'**
   String get tripId;
+
+  /// No description provided for @profile.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف الشخصي'**
+  String get profile;
+
+  /// No description provided for @statistics.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإحصائيات'**
+  String get statistics;
+
+  /// No description provided for @today.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم'**
+  String get today;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الشهر'**
+  String get thisMonth;
+
+  /// No description provided for @allTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get allTime;
+
+  /// No description provided for @deliveries.
+  ///
+  /// In ar, this message translates to:
+  /// **'التوصيلات'**
+  String get deliveries;
+
+  /// No description provided for @distance.
+  ///
+  /// In ar, this message translates to:
+  /// **'المسافة'**
+  String get distance;
+
+  /// No description provided for @tripHistory.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجل الرحلات'**
+  String get tripHistory;
+
+  /// No description provided for @noTripHistory.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد سجل رحلات'**
+  String get noTripHistory;
+
+  /// No description provided for @allStatuses.
+  ///
+  /// In ar, this message translates to:
+  /// **'جميع الحالات'**
+  String get allStatuses;
+
+  /// No description provided for @duration.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدة'**
+  String get duration;
+
+  /// No description provided for @retry.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة المحاولة'**
+  String get retry;
+
+  /// No description provided for @odometer.
+  ///
+  /// In ar, this message translates to:
+  /// **'عداد المسافات'**
+  String get odometer;
+
+  /// No description provided for @currentOdometer.
+  ///
+  /// In ar, this message translates to:
+  /// **'القراءة الحالية'**
+  String get currentOdometer;
+
+  /// No description provided for @acquisitionKm.
+  ///
+  /// In ar, this message translates to:
+  /// **'كم عند الاستلام'**
+  String get acquisitionKm;
+
+  /// No description provided for @appTrackedKm.
+  ///
+  /// In ar, this message translates to:
+  /// **'عبر التطبيق'**
+  String get appTrackedKm;
+
+  /// No description provided for @trackedViaApp.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسجل عبر التطبيق'**
+  String get trackedViaApp;
+
+  /// No description provided for @noVehicleAssigned.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مركبة مخصصة'**
+  String get noVehicleAssigned;
 }
 
 class _AppLocalizationsDelegate

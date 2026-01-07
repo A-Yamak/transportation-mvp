@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Callback;
 
+use App\Jobs\SendDeliveryCallbackJob;
 use App\Models\Destination;
 
 /**
  * Delivery Callback Service
  *
  * Sends callbacks to client ERPs when deliveries are completed.
+ * Uses async job queue by default for reliability and retry logic.
  * Delegates to CallbackService for actual HTTP communication.
  *
+ * @see \App\Jobs\SendDeliveryCallbackJob for async processing
  * @see \App\Services\Callback\CallbackService for HTTP implementation
  * @see \App\Models\BusinessPayloadSchema for callback field mapping
  */
@@ -22,19 +25,32 @@ class DeliveryCallbackService
     ) {}
 
     /**
-     * Send delivery completion callback to business ERP.
+     * Send delivery completion callback to business ERP (async via queue).
      *
      * Called by DriverController when a destination is completed or failed.
-     * Transforms the destination data according to the business's
-     * payload schema and sends to their callback URL.
+     * Dispatches a job to the 'callbacks' queue for reliable delivery
+     * with retry logic and exponential backoff.
      */
     public function sendCallback(Destination $destination): void
     {
-        $this->callbackService->sendCompletionCallback($destination);
+        SendDeliveryCallbackJob::dispatch($destination->id);
+    }
+
+    /**
+     * Send delivery completion callback synchronously (for testing/immediate feedback).
+     *
+     * Use this when you need immediate confirmation of callback success,
+     * such as in admin testing interfaces.
+     */
+    public function sendCallbackSync(Destination $destination): bool
+    {
+        return $this->callbackService->sendCompletionCallback($destination);
     }
 
     /**
      * Send batch callbacks for multiple completed destinations.
+     *
+     * Each callback is dispatched as a separate job for independent retry handling.
      *
      * @param  \Illuminate\Support\Collection<Destination>  $destinations
      */

@@ -212,7 +212,7 @@ return [
     'defaults' => [
         'supervisor-default' => [
             'connection' => 'redis',
-            'queue' => ['high', 'default', 'low'],
+            'queue' => ['high', 'callbacks', 'default', 'low'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -240,7 +240,7 @@ return [
         'production' => [
             'supervisor-default' => [
                 'connection' => 'redis',
-                'queue' => ['high', 'default', 'low'],
+                'queue' => ['high', 'callbacks', 'default', 'low'],
                 'balance' => 'auto',
                 'autoScalingStrategy' => 'time',
                 'maxProcesses' => 10,
@@ -258,7 +258,7 @@ return [
         'staging' => [
             'supervisor-default' => [
                 'connection' => 'redis',
-                'queue' => ['high', 'default', 'low'],
+                'queue' => ['high', 'callbacks', 'default', 'low'],
                 'balance' => 'auto',
                 'autoScalingStrategy' => 'time',
                 'maxProcesses' => 5,
@@ -276,7 +276,7 @@ return [
         'local' => [
             'supervisor-default' => [
                 'connection' => 'redis',
-                'queue' => ['high', 'default', 'low'],
+                'queue' => ['high', 'callbacks', 'default', 'low'],
                 'balance' => 'simple',
                 'maxProcesses' => 3,
                 'maxTime' => 0,

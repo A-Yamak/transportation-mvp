@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../api/api_client.dart';
 import '../api/api_config.dart';
-import 'mock_auth_service.dart';
+import '../api/api_exceptions.dart';
 
 /// User model
 class User {
@@ -54,16 +54,12 @@ class AuthState {
   }
 }
 
-/// Mock auth service provider
-final mockAuthServiceProvider = Provider((ref) => MockAuthService());
-
 /// Auth state notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _apiClient;
   final FlutterSecureStorage _storage;
-  final MockAuthService _mockAuth;
 
-  AuthNotifier(this._apiClient, this._storage, this._mockAuth)
+  AuthNotifier(this._apiClient, this._storage)
       : super(const AuthState()) {
     _checkAuth();
   }
@@ -98,27 +94,60 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // USE MOCK SERVICE (comment out real API for now)
-      final result = await _mockAuth.login(email, password);
+      final response = await _apiClient.post(
+        ApiEndpoints.login,
+        data: {
+          'email': email,
+          'password': password,
+        },
+      );
 
-      if (result.success) {
-        // Store mock tokens
-        await _storage.write(key: 'access_token', value: result.accessToken!);
-        await _storage.write(key: 'refresh_token', value: result.refreshToken!);
+      final data = response.data;
+      final accessToken = data['access_token'] as String?;
+      final refreshToken = data['refresh_token'] as String?;
 
-        state = AuthState(
-          user: result.user,
-          isAuthenticated: true,
-          isLoading: false,
-        );
-        return true;
-      } else {
+      if (accessToken == null) {
         state = state.copyWith(
           isLoading: false,
-          error: result.error,
+          error: 'فشل تسجيل الدخول - لم يتم استلام رمز الوصول',
         );
         return false;
       }
+
+      // Store tokens
+      await _storage.write(key: 'access_token', value: accessToken);
+      if (refreshToken != null) {
+        await _storage.write(key: 'refresh_token', value: refreshToken);
+      }
+
+      // Parse user from response
+      final userData = data['user'] as Map<String, dynamic>?;
+      final user = userData != null ? User.fromJson(userData) : null;
+
+      state = AuthState(
+        user: user,
+        isAuthenticated: true,
+        isLoading: false,
+      );
+      return true;
+    } on ApiException catch (e) {
+      String errorMessage;
+      if (e.code == 'UNAUTHORIZED') {
+        errorMessage = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      } else if (e.code == 'VALIDATION_ERROR') {
+        errorMessage = e.message;
+      } else if (e.code == 'NETWORK_ERROR') {
+        errorMessage = 'لا يوجد اتصال بالإنترنت';
+      } else if (e.code == 'TIMEOUT') {
+        errorMessage = 'انتهت مهلة الاتصال';
+      } else {
+        errorMessage = e.message;
+      }
+      state = state.copyWith(
+        isLoading: false,
+        error: errorMessage,
+      );
+      return false;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -152,8 +181,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final storage = ref.watch(secureStorageProvider);
-  final mockAuth = ref.watch(mockAuthServiceProvider);
-  return AuthNotifier(apiClient, storage, mockAuth);
+  return AuthNotifier(apiClient, storage);
 });
 
 /// Convenience provider for checking if authenticated

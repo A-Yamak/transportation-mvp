@@ -207,4 +207,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tripId => 'Trip ID';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get deliveries => 'Deliveries';
+
+  @override
+  String get distance => 'Distance';
+
+  @override
+  String get tripHistory => 'Trip History';
+
+  @override
+  String get noTripHistory => 'No trip history';
+
+  @override
+  String get allStatuses => 'All Statuses';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get odometer => 'Odometer';
+
+  @override
+  String get currentOdometer => 'Current Odometer';
+
+  @override
+  String get acquisitionKm => 'Acquisition KM';
+
+  @override
+  String get appTrackedKm => 'App Tracked';
+
+  @override
+  String get trackedViaApp => 'Tracked via app';
+
+  @override
+  String get noVehicleAssigned => 'No vehicle assigned';
 }

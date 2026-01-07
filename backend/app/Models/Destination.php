@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Destination Model
@@ -73,6 +74,36 @@ class Destination extends Model
     public function deliveryRequest(): BelongsTo
     {
         return $this->belongsTo(DeliveryRequest::class);
+    }
+
+    /**
+     * Items within this destination (for partial delivery tracking).
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(DestinationItem::class);
+    }
+
+    /**
+     * Check if this destination has items tracked.
+     */
+    public function hasItemTracking(): bool
+    {
+        return $this->items()->exists();
+    }
+
+    /**
+     * Check if all items were fully delivered.
+     */
+    public function allItemsFullyDelivered(): bool
+    {
+        if (! $this->hasItemTracking()) {
+            return true; // No items = assume full delivery
+        }
+
+        return $this->items()
+            ->whereColumn('quantity_delivered', '<', 'quantity_ordered')
+            ->doesntExist();
     }
 
     /**

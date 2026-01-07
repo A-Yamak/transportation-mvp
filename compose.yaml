@@ -47,7 +47,7 @@ services:
       APP_NAME: Transportation MVP
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_URL: http://localhost:8001
+      APP_URL: http://backend:8000
       LOG_CHANNEL: stack
       LOG_LEVEL: debug
       DB_CONNECTION: mysql
@@ -66,8 +66,13 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
       OCTANE_SERVER: frankenphp
+      # Passport OAuth - password grant client
+      PASSPORT_PASSWORD_CLIENT_ID: "019b9803-3a9f-7182-8e39-41a038b94441"
+      PASSPORT_PASSWORD_CLIENT_SECRET: "2UuBw94Lqj48hPOsiqkRqP37sMANaWQHiGSrVfpU"
       # Xdebug: Set to "debug" to enable, "off" to disable
       XDEBUG_MODE: "off"
+      # Sentry error tracking (set DSN in production)
+      SENTRY_LARAVEL_DSN: "${SENTRY_LARAVEL_DSN:-}"
     depends_on:
       mysql:
         condition: service_healthy

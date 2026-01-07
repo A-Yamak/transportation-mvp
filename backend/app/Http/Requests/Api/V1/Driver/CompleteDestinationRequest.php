@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1\Driver;
 
+use App\Enums\ItemDeliveryReason;
 use App\Http\Requests\Api\V1\ApiRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Complete Destination Request
@@ -26,6 +28,14 @@ class CompleteDestinationRequest extends ApiRequest
             'notes' => ['nullable', 'string', 'max:500'],
             'signature' => ['nullable', 'string'], // Base64 encoded
             'photo' => ['nullable', 'string'], // Base64 encoded
+
+            // Item-level delivery data (optional for backward compatibility)
+            'items' => ['nullable', 'array'],
+            'items.*.order_item_id' => ['required_with:items', 'string', 'max:100'],
+            'items.*.quantity_ordered' => ['nullable', 'integer', 'min:0'],
+            'items.*.quantity_delivered' => ['required_with:items', 'integer', 'min:0'],
+            'items.*.reason' => ['nullable', 'string', Rule::enum(ItemDeliveryReason::class)],
+            'items.*.notes' => ['nullable', 'string', 'max:500'],
         ];
     }
 
@@ -60,5 +70,23 @@ class CompleteDestinationRequest extends ApiRequest
     public function getPhoto(): ?string
     {
         return $this->validated('photo');
+    }
+
+    /**
+     * Check if request includes item-level data.
+     */
+    public function hasItemData(): bool
+    {
+        return ! empty($this->validated('items'));
+    }
+
+    /**
+     * Get items array.
+     *
+     * @return array<int, array{order_item_id: string, quantity_ordered?: int, quantity_delivered: int, reason?: string, notes?: string}>
+     */
+    public function getItems(): array
+    {
+        return $this->validated('items') ?? [];
     }
 }

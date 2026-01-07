@@ -41,6 +41,7 @@ class Vehicle extends Model
         'total_km_driven',
         'monthly_km_app',
         'acquisition_date',
+        'acquisition_km',
         'is_active',
     ];
 
@@ -50,9 +51,18 @@ class Vehicle extends Model
             'year' => 'integer',
             'total_km_driven' => 'decimal:2',
             'monthly_km_app' => 'decimal:2',
+            'acquisition_km' => 'decimal:2',
             'acquisition_date' => 'date',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get kilometers tracked by the app (total - acquisition).
+     */
+    public function getAppTrackedKmAttribute(): float
+    {
+        return (float) $this->total_km_driven - (float) $this->acquisition_km;
     }
 
     /**

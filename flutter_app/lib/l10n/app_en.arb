@@ -78,5 +78,25 @@
   "arrivedSuccess": "Marked as arrived",
   "completedSuccess": "Delivery completed!",
   "navigateTo": "Navigate to: {address}",
-  "tripId": "Trip ID"
+  "tripId": "Trip ID",
+
+  "profile": "Profile",
+  "statistics": "Statistics",
+  "today": "Today",
+  "thisMonth": "This Month",
+  "allTime": "All Time",
+  "deliveries": "Deliveries",
+  "distance": "Distance",
+  "tripHistory": "Trip History",
+  "noTripHistory": "No trip history",
+  "allStatuses": "All Statuses",
+  "duration": "Duration",
+  "retry": "Retry",
+
+  "odometer": "Odometer",
+  "currentOdometer": "Current Odometer",
+  "acquisitionKm": "Acquisition KM",
+  "appTrackedKm": "App Tracked",
+  "trackedViaApp": "Tracked via app",
+  "noVehicleAssigned": "No vehicle assigned"
 }

@@ -1,0 +1,42 @@
+{
+  "_README": "Replace this file with google-services.json from Firebase Console",
+  "_INSTRUCTIONS": [
+    "1. Go to Firebase Console: https://console.firebase.google.com",
+    "2. Create or select your project",
+    "3. Click 'Add app' and select Android",
+    "4. Package name: com.alsabiqoon.driver_app",
+    "5. Download google-services.json",
+    "6. Replace this file with the downloaded one (rename to google-services.json)",
+    "7. Uncomment the google-services plugin in:",
+    "   - android/settings.gradle.kts",
+    "   - android/app/build.gradle.kts",
+    "8. Update lib/firebase_options.dart with the values from google-services.json"
+  ],
+  "project_info": {
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_ID",
+        "android_client_info": {
+          "package_name": "com.alsabiqoon.driver_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

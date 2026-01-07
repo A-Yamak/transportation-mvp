@@ -27,12 +27,16 @@ class VehicleFactory extends Factory
         $make = fake()->randomElement(array_keys($makes));
         $model = fake()->randomElement($makes[$make]);
 
+        $acquisitionKm = fake()->randomFloat(2, 0, 100000);
+        $totalKmDriven = $acquisitionKm + fake()->randomFloat(2, 0, 50000);
+
         return [
             'make' => $make,
             'model' => $model,
             'year' => fake()->numberBetween(2015, 2024),
             'license_plate' => strtoupper(fake()->bothify('??-###-??')),
-            'total_km_driven' => fake()->randomFloat(2, 0, 150000),
+            'acquisition_km' => $acquisitionKm,
+            'total_km_driven' => $totalKmDriven,
             'monthly_km_app' => fake()->randomFloat(2, 0, 3000),
             'acquisition_date' => fake()->optional(0.8)->dateTimeBetween('-5 years', 'now'),
             'is_active' => true,
@@ -48,8 +52,9 @@ class VehicleFactory extends Factory
             'make' => 'Volkswagen',
             'model' => 'Caddy',
             'year' => 2019,
-            'license_plate' => 'JO-123-VW',
-            'total_km_driven' => 45000,
+            'license_plate' => 'AMN-1234',
+            'acquisition_km' => 45000,
+            'total_km_driven' => 52500,
             'monthly_km_app' => 1200,
             'acquisition_date' => '2019-06-15',
         ]);
@@ -66,11 +71,12 @@ class VehicleFactory extends Factory
     }
 
     /**
-     * New vehicle with zero kilometers.
+     * New vehicle with zero app-tracked kilometers.
      */
     public function withZeroKilometers(): static
     {
         return $this->state(fn () => [
+            'acquisition_km' => 0,
             'total_km_driven' => 0,
             'monthly_km_app' => 0,
             'acquisition_date' => now(),

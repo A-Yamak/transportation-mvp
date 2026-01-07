@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/destination_model.dart';
 import '../../data/models/destination_status.dart';
 import '../../providers/trip_actions_provider.dart';
+import 'delivery_completion_dialog.dart';
 
 /// Failure reasons matching backend enum
 enum FailureReason {
@@ -145,16 +146,7 @@ class DestinationCard extends ConsumerWidget {
         // Mark Complete - only if arrived
         if (destination.status == DestinationStatus.arrived)
           ElevatedButton.icon(
-            onPressed: () async {
-              await ref
-                  .read(tripActionsProvider)
-                  .markCompleted(tripId, destination.id);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delivery completed!')),
-                );
-              }
-            },
+            onPressed: () => _showCompletionDialog(context, ref),
             icon: const Icon(Icons.check, size: 16),
             label: const Text('Complete'),
             style: ElevatedButton.styleFrom(
@@ -174,6 +166,39 @@ class DestinationCard extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// Show completion dialog for item-level delivery
+  void _showCompletionDialog(BuildContext context, WidgetRef ref) {
+    DeliveryCompletionDialog.show(
+      context: context,
+      destination: destination,
+      onComplete: (result) async {
+        try {
+          await ref.read(tripActionsProvider).markCompleted(
+                tripId,
+                destination.id,
+                recipientName: result.recipientName,
+                notes: result.notes,
+                items: result.items.isNotEmpty ? result.items : null,
+              );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Delivery completed!')),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
     );
   }
 

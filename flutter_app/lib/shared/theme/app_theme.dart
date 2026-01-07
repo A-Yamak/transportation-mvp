@@ -5,6 +5,7 @@ class AppTheme {
   // Brand Colors
   static const Color primaryColor = Color(0xFF1E88E5); // Blue
   static const Color secondaryColor = Color(0xFF43A047); // Green (success)
+  static const Color successColor = Color(0xFF43A047); // Green (same as secondary)
   static const Color errorColor = Color(0xFFE53935);
   static const Color warningColor = Color(0xFFFFA000);
 

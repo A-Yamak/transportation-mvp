@@ -6,6 +6,7 @@ namespace Tests\Feature\Services\GoogleMaps;
 
 use App\Exceptions\GoogleMapsApiException;
 use App\Services\GoogleMaps\DistanceCalculator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,6 +27,8 @@ class DistanceCalculatorTest extends TestCase
             'google-maps.api_key' => 'test_api_key',
             'google-maps.cache.enabled' => true,
         ]);
+
+        Cache::flush();
 
         $this->calculator = new DistanceCalculator();
     }

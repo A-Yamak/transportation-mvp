@@ -147,10 +147,11 @@ class SchemaTransformerTest extends TestCase
         $schema = BusinessPayloadSchema::factory()->create([
             'business_id' => $business->id,
             'callback_schema' => [
-                'order_id' => 'external_id',
-                'delivery_status' => 'status',
-                'delivered_at' => 'completed_at',
-                'received_by' => 'recipient_name',
+                // Format: internal_field => output_field
+                'external_id' => 'order_id',
+                'status' => 'delivery_status',
+                'completed_at' => 'delivered_at',
+                'recipient_name' => 'received_by',
             ],
         ]);
 

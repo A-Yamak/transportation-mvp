@@ -6,6 +6,7 @@ namespace App\Http\Requests\Api\V1\DeliveryRequest;
 
 use App\Http\Requests\Api\V1\ApiRequest;
 use App\Models\Business;
+use App\Services\PayloadSchema\SchemaTransformer;
 
 /**
  * Validates incoming delivery request creation from ERP systems.
@@ -27,6 +28,36 @@ class StoreDeliveryRequestRequest extends ApiRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * Transforms incoming data using the business's payload schema,
+     * allowing different ERPs to send data with their own field names.
+     */
+    protected function prepareForValidation(): void
+    {
+        $business = $this->get('business');
+
+        if (! $business || ! $business->payloadSchema) {
+            return;
+        }
+
+        $schema = $business->payloadSchema;
+        $transformer = app(SchemaTransformer::class);
+
+        // Transform destinations using the schema
+        $destinations = $this->input('destinations', []);
+        $transformedDestinations = [];
+
+        foreach ($destinations as $dest) {
+            $transformedDestinations[] = $transformer->transformIncoming($dest, $schema);
+        }
+
+        $this->merge([
+            'destinations' => $transformedDestinations,
+        ]);
     }
 
     /**

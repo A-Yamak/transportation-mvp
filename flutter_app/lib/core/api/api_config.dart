@@ -1,8 +1,12 @@
 /// API Configuration
 class ApiConfig {
   /// Base URL for the API
-  /// TODO: Update with production URL
-  static const String baseUrl = 'http://localhost:8000';
+  /// Uses dart-define for production: --dart-define=API_BASE_URL=https://api.example.com
+  /// Defaults to localhost for development
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:8000', // Android emulator -> host machine
+  );
 
   /// API version prefix
   static const String apiPrefix = '/api/v1';
@@ -12,6 +16,20 @@ class ApiConfig {
 
   /// Receive timeout
   static const Duration receiveTimeout = Duration(seconds: 30);
+
+  /// Check if running in production mode
+  static bool get isProduction =>
+      const String.fromEnvironment('FLUTTER_ENV') == 'production';
+
+  /// Sentry DSN for error tracking
+  /// Uses dart-define for production: --dart-define=SENTRY_DSN=https://xxx@sentry.io/xxx
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '', // Empty disables Sentry in development
+  );
+
+  /// Check if Sentry is enabled
+  static bool get sentryEnabled => sentryDsn.isNotEmpty;
 }
 
 /// API Endpoints

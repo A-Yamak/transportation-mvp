@@ -1,3 +1,4 @@
+import 'delivery_item_model.dart';
 import 'destination_status.dart';
 
 class DestinationModel {
@@ -15,6 +16,8 @@ class DestinationModel {
   final String? notes;
   final String? signatureUrl;
   final String? photoUrl;
+  final List<DeliveryItemModel> items;
+  final bool hasItemTracking;
 
   DestinationModel({
     required this.id,
@@ -31,10 +34,22 @@ class DestinationModel {
     this.notes,
     this.signatureUrl,
     this.photoUrl,
+    this.items = const [],
+    this.hasItemTracking = false,
   });
 
   /// Factory to create from API JSON response
   factory DestinationModel.fromJson(Map<String, dynamic> json) {
+    // Parse items array if present
+    final List<DeliveryItemModel> itemsList;
+    if (json['items'] != null && json['items'] is List) {
+      itemsList = (json['items'] as List)
+          .map((item) => DeliveryItemModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      itemsList = [];
+    }
+
     return DestinationModel(
       id: json['id'].toString(),
       address: json['address'] ?? '',
@@ -54,6 +69,8 @@ class DestinationModel {
       notes: json['notes'],
       signatureUrl: json['signature_url'],
       photoUrl: json['photo_url'],
+      items: itemsList,
+      hasItemTracking: json['has_item_tracking'] == true || itemsList.isNotEmpty,
     );
   }
 
@@ -91,6 +108,8 @@ class DestinationModel {
     String? notes,
     String? signatureUrl,
     String? photoUrl,
+    List<DeliveryItemModel>? items,
+    bool? hasItemTracking,
   }) {
     return DestinationModel(
       id: id ?? this.id,
@@ -107,6 +126,8 @@ class DestinationModel {
       notes: notes ?? this.notes,
       signatureUrl: signatureUrl ?? this.signatureUrl,
       photoUrl: photoUrl ?? this.photoUrl,
+      items: items ?? this.items,
+      hasItemTracking: hasItemTracking ?? this.hasItemTracking,
     );
   }
 
