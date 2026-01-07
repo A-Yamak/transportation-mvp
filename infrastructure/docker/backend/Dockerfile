@@ -4,8 +4,8 @@
 # Multi-stage build for Laravel 12 with FrankenPHP and Octane
 # Base: PHP 8.4 with FrankenPHP for high-performance request handling
 #
-# Build: docker build -t alsabiqoon/backend:latest -f infrastructure/docker/backend/Dockerfile ./backend
-# Run:   docker run -p 8000:8000 alsabiqoon/backend:latest
+# Build: docker build -t transportation/backend:latest -f infrastructure/docker/backend/Dockerfile .
+# Run:   docker run -p 8000:8000 transportation/backend:latest
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ FROM composer:2 AS composer
 WORKDIR /app
 
 # Copy only composer files first for better cache utilization
-COPY composer.json composer.lock ./
+COPY backend/composer.json backend/composer.lock ./
 
 # Install dependencies without dev packages
 RUN composer install \
@@ -29,10 +29,12 @@ RUN composer install \
     --ignore-platform-reqs
 
 # Copy the rest of the application
-COPY . .
+COPY backend/ .
 
 # Generate optimized autoloader
-RUN composer dump-autoload \
+# Remove cached packages file to avoid dev dependencies being registered
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php && \
+    composer dump-autoload \
     --no-dev \
     --optimize \
     --classmap-authoritative
@@ -46,13 +48,13 @@ FROM node:22-alpine AS assets
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY backend/package*.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev
+# Install ALL dependencies (devDependencies needed for build)
+RUN npm install
 
 # Copy source files
-COPY . .
+COPY backend/ .
 
 # Build assets
 RUN npm run build
@@ -87,7 +89,7 @@ RUN addgroup -g 1000 -S alsabiqoon && \
 
 # Copy application from composer stage
 COPY --from=composer /app/vendor /app/vendor
-COPY --chown=alsabiqoon:alsabiqoon . /app
+COPY --chown=alsabiqoon:alsabiqoon backend/ /app
 
 # Copy built assets
 COPY --from=assets /app/public/build /app/public/build
