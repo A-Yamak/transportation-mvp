@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "995313936622",
+    "project_id": "transporation-app-b5f26",
+    "storage_bucket": "transporation-app-b5f26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995313936622:android:f28a6a447f7001c0a0abff",
+        "android_client_info": {
+          "package_name": "com.alsabiqoon.driver_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYPMWSGIZyK3eZDDn1ZytuZNJu7UnTCWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
