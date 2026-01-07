@@ -49,7 +49,8 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install dependencies (use npm install instead of ci due to rollup optional deps bug)
-RUN npm install --omit=dev --prefer-offline --no-audit
+RUN npm install --omit=dev --prefer-offline --no-audit && \
+    npm install --no-save @rollup/rollup-linux-x64-musl
 
 # Copy source files
 COPY backend/ .
