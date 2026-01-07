@@ -67,6 +67,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('profile', [DriverController::class, 'profile']);
         Route::put('profile', [DriverController::class, 'updateProfile']);
         Route::post('profile/photo', [DriverController::class, 'uploadProfilePhoto']);
+        Route::put('vehicle/odometer', [DriverController::class, 'updateOdometer']);
         Route::get('stats', [DriverController::class, 'stats']);
         Route::get('trips/history', [DriverController::class, 'tripHistory']);
 

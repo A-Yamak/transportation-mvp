@@ -261,4 +261,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noVehicleAssigned => 'No vehicle assigned';
+
+  @override
+  String get fuelEfficiency => 'Fuel Efficiency';
+
+  @override
+  String get tankCapacity => 'Tank';
+
+  @override
+  String get fullTankRange => 'Range';
+
+  @override
+  String get kmPerLiter => 'km/L';
+
+  @override
+  String get pricePerKm => 'Price/km';
 }

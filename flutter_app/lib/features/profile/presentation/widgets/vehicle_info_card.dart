@@ -129,6 +129,58 @@ class VehicleInfoCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                // Fuel Efficiency Section (if data available)
+                if (vehicle.kmPerLiter != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.fuelEfficiency,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _FuelInfoTile(
+                          icon: Icons.local_gas_station,
+                          value: '${vehicle.tankCapacityLiters?.toStringAsFixed(1) ?? '-'} L',
+                          label: l10n.tankCapacity,
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 50,
+                        color: Colors.grey[300],
+                      ),
+                      Expanded(
+                        child: _FuelInfoTile(
+                          icon: Icons.route,
+                          value: '${vehicle.fullTankRangeKm?.toStringAsFixed(0) ?? '-'} ${l10n.km}',
+                          label: l10n.fullTankRange,
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 50,
+                        color: Colors.grey[300],
+                      ),
+                      Expanded(
+                        child: _FuelInfoTile(
+                          icon: Icons.eco,
+                          value: '${vehicle.kmPerLiter?.toStringAsFixed(2) ?? '-'}',
+                          label: l10n.kmPerLiter,
+                          highlight: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -271,6 +323,54 @@ class _KmInfoTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fuel info tile for tank capacity, range, and efficiency
+class _FuelInfoTile extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final bool highlight;
+
+  const _FuelInfoTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: highlight ? AppTheme.successColor : Colors.grey[600],
+            size: 20,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: highlight ? AppTheme.successColor : Colors.black87,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey[600],
             ),
             textAlign: TextAlign.center,
           ),

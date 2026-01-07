@@ -12,8 +12,10 @@ use App\Models\Driver;
 use App\Models\Trip;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\GoogleMaps\RouteOptimizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
+use Mockery;
 use Tests\TestCase;
 
 /**
@@ -51,6 +53,29 @@ class DeliveryRequestPriceTrackingTest extends TestCase
 
         // Create vehicle
         $this->vehicle = Vehicle::factory()->create();
+
+        // Mock RouteOptimizer to avoid Google Maps API calls
+        $this->mockRouteOptimizer();
+    }
+
+    /**
+     * Mock the RouteOptimizer service.
+     */
+    protected function mockRouteOptimizer(): void
+    {
+        $mock = Mockery::mock(RouteOptimizer::class);
+        $mock->shouldReceive('optimize')
+            ->andReturn([
+                'optimized_order' => [0],
+                'total_distance_meters' => 10000,
+                'total_distance_km' => 10.0,
+                'total_duration_seconds' => 900,
+                'total_duration_minutes' => 15,
+                'polyline' => 'mock_polyline',
+                'legs' => [],
+            ]);
+
+        $this->app->instance(RouteOptimizer::class, $mock);
     }
 
     /** @test */
@@ -111,7 +136,7 @@ class DeliveryRequestPriceTrackingTest extends TestCase
         ]);
 
         $response->assertStatus(201);
-        $response->assertJsonPath('data.destinations.0.amount_to_collect', 45.00);
+        $response->assertJsonPath('data.destinations.0.amount_to_collect', 45);
         $response->assertJsonPath('data.destinations.0.has_item_tracking', true);
 
         // Check items were created with prices
@@ -223,11 +248,11 @@ class DeliveryRequestPriceTrackingTest extends TestCase
         $response = $this->getJson("/api/v1/driver/trips/{$trip->id}");
 
         $response->assertStatus(200);
-        $response->assertJsonPath('data.destinations.0.amount_to_collect', 75.00);
+        $response->assertJsonPath('data.destinations.0.amount_to_collect', 75);
         $response->assertJsonPath('data.destinations.0.items.0.name', 'Sweet Box');
-        $response->assertJsonPath('data.destinations.0.items.0.unit_price', 25.00);
+        $response->assertJsonPath('data.destinations.0.items.0.unit_price', 25);
         $response->assertJsonPath('data.destinations.0.items.0.quantity_ordered', 3);
-        $response->assertJsonPath('data.destinations.0.items.0.line_total', 75.00);
+        $response->assertJsonPath('data.destinations.0.items.0.line_total', 75);
     }
 
     /** @test */

@@ -5,6 +5,7 @@ class DriverProfileModel {
   final String email;
   final String phone;
   final String licenseNumber;
+  final double? pricePerKm;
   final String? profilePhotoUrl;
   final bool isActive;
   final VehicleModel? vehicle;
@@ -15,6 +16,7 @@ class DriverProfileModel {
     required this.email,
     required this.phone,
     required this.licenseNumber,
+    this.pricePerKm,
     this.profilePhotoUrl,
     required this.isActive,
     this.vehicle,
@@ -27,6 +29,9 @@ class DriverProfileModel {
       email: json['email'] as String,
       phone: json['phone'] as String? ?? '',
       licenseNumber: json['license_number'] as String? ?? '',
+      pricePerKm: json['price_per_km'] != null
+          ? (json['price_per_km'] as num).toDouble()
+          : null,
       profilePhotoUrl: json['profile_photo_url'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       vehicle: json['vehicle'] != null
@@ -36,7 +41,7 @@ class DriverProfileModel {
   }
 }
 
-/// Vehicle Model with odometer tracking
+/// Vehicle Model with odometer tracking and fuel efficiency
 class VehicleModel {
   final String id;
   final String make;
@@ -49,6 +54,10 @@ class VehicleModel {
   final double totalKmDriven;
   final double monthlyKmApp;
   final double appTrackedKm;
+  // Fuel efficiency fields
+  final double? tankCapacityLiters;
+  final double? fullTankRangeKm;
+  final double? kmPerLiter;
 
   const VehicleModel({
     required this.id,
@@ -62,6 +71,9 @@ class VehicleModel {
     required this.totalKmDriven,
     required this.monthlyKmApp,
     required this.appTrackedKm,
+    this.tankCapacityLiters,
+    this.fullTankRangeKm,
+    this.kmPerLiter,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -77,6 +89,15 @@ class VehicleModel {
       totalKmDriven: (json['total_km_driven'] as num).toDouble(),
       monthlyKmApp: (json['monthly_km_app'] as num).toDouble(),
       appTrackedKm: (json['app_tracked_km'] as num).toDouble(),
+      tankCapacityLiters: json['tank_capacity_liters'] != null
+          ? (json['tank_capacity_liters'] as num).toDouble()
+          : null,
+      fullTankRangeKm: json['full_tank_range_km'] != null
+          ? (json['full_tank_range_km'] as num).toDouble()
+          : null,
+      kmPerLiter: json['km_per_liter'] != null
+          ? (json['km_per_liter'] as num).toDouble()
+          : null,
     );
   }
 }

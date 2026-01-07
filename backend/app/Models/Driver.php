@@ -35,6 +35,7 @@ class Driver extends Model
         'vehicle_id',
         'phone',
         'license_number',
+        'price_per_km',
         'profile_photo_path',
         'is_active',
     ];
@@ -42,6 +43,7 @@ class Driver extends Model
     protected function casts(): array
     {
         return [
+            'price_per_km' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

@@ -67,7 +67,7 @@ class DriverController extends Controller
         $this->authorizeTrip($trip);
 
         return new TripResource(
-            $trip->load(['deliveryRequest.destinations', 'vehicle'])
+            $trip->load(['deliveryRequest.destinations.items', 'vehicle'])
         );
     }
 
@@ -367,6 +367,33 @@ class DriverController extends Controller
         return new DriverProfileResource(
             $driver->fresh(['vehicle', 'user'])
         );
+    }
+
+    /**
+     * Update vehicle odometer reading.
+     *
+     * PUT /api/v1/driver/vehicle/odometer
+     */
+    public function updateOdometer(Request $request): JsonResponse
+    {
+        $driver = $this->getAuthenticatedDriver();
+
+        if (! $driver->vehicle) {
+            return $this->error('No vehicle assigned to this driver', 404);
+        }
+
+        $validated = $request->validate([
+            'total_km_driven' => 'required|numeric|min:0',
+        ]);
+
+        $driver->vehicle->update([
+            'total_km_driven' => $validated['total_km_driven'],
+        ]);
+
+        return $this->success([
+            'total_km_driven' => (float) $driver->vehicle->fresh()->total_km_driven,
+            'app_tracked_km' => (float) $driver->vehicle->fresh()->app_tracked_km,
+        ], 'Odometer updated successfully');
     }
 
     /**

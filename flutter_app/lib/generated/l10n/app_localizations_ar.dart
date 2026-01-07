@@ -261,4 +261,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noVehicleAssigned => 'لا توجد مركبة مخصصة';
+
+  @override
+  String get fuelEfficiency => 'استهلاك الوقود';
+
+  @override
+  String get tankCapacity => 'الخزان';
+
+  @override
+  String get fullTankRange => 'المدى';
+
+  @override
+  String get kmPerLiter => 'كم/لتر';
+
+  @override
+  String get pricePerKm => 'سعر/كم';
 }

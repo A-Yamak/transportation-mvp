@@ -98,5 +98,11 @@
   "acquisitionKm": "Acquisition KM",
   "appTrackedKm": "App Tracked",
   "trackedViaApp": "Tracked via app",
-  "noVehicleAssigned": "No vehicle assigned"
+  "noVehicleAssigned": "No vehicle assigned",
+
+  "fuelEfficiency": "Fuel Efficiency",
+  "tankCapacity": "Tank",
+  "fullTankRange": "Range",
+  "kmPerLiter": "km/L",
+  "pricePerKm": "Price/km"
 }

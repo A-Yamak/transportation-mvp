@@ -88,6 +88,8 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -160,6 +162,22 @@ class _ProfileHeader extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (profile.pricePerKm != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.attach_money, size: 16, color: Colors.green[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${profile.pricePerKm!.toStringAsFixed(2)} JOD/${l10n.km}',
+                          style: TextStyle(
+                            color: Colors.green[600],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

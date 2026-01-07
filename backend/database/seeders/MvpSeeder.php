@@ -81,7 +81,9 @@ class MvpSeeder extends Seeder
         $this->command->info('Created Melo payload schema');
 
         // =========================================================================
-        // Create Vehicle
+        // Create Vehicle - VW Caddy 2019
+        // Fuel data: 671 km range on 51.1 liters = 13.131 km/liter
+        // Acquired December 2024 at 181,400 km, current: 226,436 km
         // =========================================================================
         $vehicle = Vehicle::updateOrCreate(
             ['license_plate' => 'AMN-1234'],
@@ -89,15 +91,20 @@ class MvpSeeder extends Seeder
                 'make' => 'Volkswagen',
                 'model' => 'Caddy',
                 'year' => 2019,
-                'acquisition_km' => 45000.00,  // Odometer reading when acquired
-                'total_km_driven' => 45000.00, // Current odometer (will increase with trips)
+                'acquisition_km' => 181400.00,    // Odometer when acquired (Dec 2024)
+                'total_km_driven' => 226436.00,   // Current odometer reading
                 'monthly_km_app' => 0.00,
-                'acquisition_date' => '2019-06-15',
+                'tank_capacity_liters' => 51.10,  // Full tank capacity
+                'full_tank_range_km' => 671.00,   // Range on full tank
+                'acquisition_date' => '2024-12-01',
                 'is_active' => true,
             ]
         );
 
         $this->command->info("Created vehicle: VW Caddy ({$vehicle->license_plate})");
+        $this->command->info("  - Acquisition: Dec 2024 at {$vehicle->acquisition_km} km");
+        $this->command->info("  - Current odometer: {$vehicle->total_km_driven} km");
+        $this->command->info("  - Fuel efficiency: {$vehicle->km_per_liter} km/L");
 
         // =========================================================================
         // Create Driver User
@@ -117,11 +124,13 @@ class MvpSeeder extends Seeder
                 'vehicle_id' => $vehicle->id,
                 'phone' => '+962791111111',
                 'license_number' => 'DL-12345',
+                'price_per_km' => 0.50,  // Driver charges 0.50 JOD per km
                 'is_active' => true,
             ]
         );
 
         $this->command->info("Created driver: {$driverUser->name} (driver@alsabiqoon.com / driver123)");
+        $this->command->info("  - Price per KM: {$driver->price_per_km} JOD");
 
         // =========================================================================
         // Create Admin User (for Filament)

@@ -601,6 +601,36 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لا توجد مركبة مخصصة'**
   String get noVehicleAssigned;
+
+  /// No description provided for @fuelEfficiency.
+  ///
+  /// In ar, this message translates to:
+  /// **'استهلاك الوقود'**
+  String get fuelEfficiency;
+
+  /// No description provided for @tankCapacity.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخزان'**
+  String get tankCapacity;
+
+  /// No description provided for @fullTankRange.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدى'**
+  String get fullTankRange;
+
+  /// No description provided for @kmPerLiter.
+  ///
+  /// In ar, this message translates to:
+  /// **'كم/لتر'**
+  String get kmPerLiter;
+
+  /// No description provided for @pricePerKm.
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر/كم'**
+  String get pricePerKm;
 }
 
 class _AppLocalizationsDelegate

@@ -102,5 +102,11 @@
   "acquisitionKm": "كم عند الاستلام",
   "appTrackedKm": "عبر التطبيق",
   "trackedViaApp": "مسجل عبر التطبيق",
-  "noVehicleAssigned": "لا توجد مركبة مخصصة"
+  "noVehicleAssigned": "لا توجد مركبة مخصصة",
+
+  "fuelEfficiency": "استهلاك الوقود",
+  "tankCapacity": "الخزان",
+  "fullTankRange": "المدى",
+  "kmPerLiter": "كم/لتر",
+  "pricePerKm": "سعر/كم"
 }

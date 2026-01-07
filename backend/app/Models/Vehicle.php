@@ -40,6 +40,8 @@ class Vehicle extends Model
         'license_plate',
         'total_km_driven',
         'monthly_km_app',
+        'tank_capacity_liters',
+        'full_tank_range_km',
         'acquisition_date',
         'acquisition_km',
         'is_active',
@@ -51,6 +53,8 @@ class Vehicle extends Model
             'year' => 'integer',
             'total_km_driven' => 'decimal:2',
             'monthly_km_app' => 'decimal:2',
+            'tank_capacity_liters' => 'decimal:2',
+            'full_tank_range_km' => 'decimal:2',
             'acquisition_km' => 'decimal:2',
             'acquisition_date' => 'date',
             'is_active' => 'boolean',
@@ -63,6 +67,19 @@ class Vehicle extends Model
     public function getAppTrackedKmAttribute(): float
     {
         return (float) $this->total_km_driven - (float) $this->acquisition_km;
+    }
+
+    /**
+     * Get fuel efficiency (km per liter).
+     * Calculated from full_tank_range_km / tank_capacity_liters.
+     */
+    public function getKmPerLiterAttribute(): ?float
+    {
+        if ($this->tank_capacity_liters && $this->full_tank_range_km) {
+            return round((float) $this->full_tank_range_km / (float) $this->tank_capacity_liters, 3);
+        }
+
+        return null;
     }
 
     /**
