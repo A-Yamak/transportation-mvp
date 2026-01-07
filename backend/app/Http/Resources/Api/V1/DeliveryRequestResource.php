@@ -42,6 +42,16 @@ class DeliveryRequestResource extends ApiResource
                 $this->resource->relationLoaded('destinations'),
                 fn () => DestinationResource::collection($this->resource->destinations)
             ),
+
+            // Include trip/assignment info when loaded
+            'assigned_driver' => $this->when(
+                $this->resource->relationLoaded('trip') && $this->resource->trip,
+                fn () => [
+                    'trip_id' => $this->resource->trip->id,
+                    'driver_name' => $this->resource->trip->driver?->user?->name,
+                    'assigned_at' => $this->resource->trip->created_at->toIso8601String(),
+                ]
+            ),
         ];
     }
 }

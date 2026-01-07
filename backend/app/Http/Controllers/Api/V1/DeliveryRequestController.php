@@ -12,6 +12,7 @@ use App\Models\DeliveryRequest;
 use App\Models\Destination;
 use App\Services\GoogleMaps\RouteOptimizer;
 use App\Services\Pricing\CostCalculator;
+use App\Services\TripAssignment\AutoAssignmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ class DeliveryRequestController extends Controller
     public function __construct(
         protected readonly RouteOptimizer $routeOptimizer,
         protected readonly CostCalculator $costCalculator,
+        protected readonly AutoAssignmentService $autoAssignmentService,
     ) {}
 
     /**
@@ -127,8 +129,16 @@ class DeliveryRequestController extends Controller
             return $deliveryRequest;
         });
 
+        // Auto-assign to driver if enabled
+        $trip = $this->autoAssignmentService->assign($deliveryRequest);
+
         // Load destinations with items for response
         $deliveryRequest->load('destinations.items');
+
+        // Include trip info in response if auto-assigned
+        if ($trip) {
+            $deliveryRequest->load('trip.driver.user');
+        }
 
         return (new DeliveryRequestResource($deliveryRequest))
             ->response()
