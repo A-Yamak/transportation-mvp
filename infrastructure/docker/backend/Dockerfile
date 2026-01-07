@@ -32,7 +32,9 @@ RUN composer install \
 COPY backend/ .
 
 # Generate optimized autoloader
-RUN composer dump-autoload \
+# Remove cached package discovery files first to ensure dont-discover works
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php && \
+    composer dump-autoload \
     --no-dev \
     --optimize \
     --classmap-authoritative
