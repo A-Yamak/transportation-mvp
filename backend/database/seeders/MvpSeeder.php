@@ -56,6 +56,11 @@ class MvpSeeder extends Seeder
                     'contact_name' => 'customer_name',
                     'contact_phone' => 'customer_phone',
                     'notes' => 'delivery_notes',
+                    // Item field mapping (Melo sends items with these field names)
+                    'items' => 'items',
+                    'items.order_item_id' => 'sku',
+                    'items.name' => 'product_name',
+                    'items.quantity_ordered' => 'qty',
                 ],
                 'callback_schema' => [
                     'external_id' => 'order_id',
@@ -63,7 +68,12 @@ class MvpSeeder extends Seeder
                     'completed_at' => 'delivered_at',
                     'recipient_name' => 'received_by',
                     'notes' => 'driver_notes',
+                    // Item callback field mapping
                     'items' => 'delivered_items',
+                    'items.order_item_id' => 'sku',
+                    'items.quantity_delivered' => 'qty_received',
+                    'items.reason' => 'discrepancy_reason',
+                    'items.notes' => 'item_notes',
                 ],
             ]
         );

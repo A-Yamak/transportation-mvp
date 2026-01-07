@@ -68,6 +68,13 @@ class BusinessPayloadSchema extends Model
             'lat' => 'lat',
             'lng' => 'lng',
             'notes' => 'notes',
+            'contact_name' => 'contact_name',
+            'contact_phone' => 'contact_phone',
+            // Item-level request fields
+            'items' => 'items',
+            'items.order_item_id' => 'order_item_id',
+            'items.name' => 'name',
+            'items.quantity_ordered' => 'quantity_ordered',
         ];
     }
 
@@ -99,6 +106,38 @@ class BusinessPayloadSchema extends Model
         $path = $this->request_schema[$field] ?? $field;
 
         return data_get($data, $path, $default);
+    }
+
+    /**
+     * Transform incoming items array from request using schema mapping.
+     *
+     * @param  array  $data  Incoming destination data that may contain items
+     * @return array|null Transformed items array or null if no items
+     */
+    public function transformItemsFromRequest(array $data): ?array
+    {
+        $schema = $this->request_schema ?? self::defaultRequestSchema();
+
+        // Get the items array using schema mapping
+        $itemsPath = $schema['items'] ?? 'items';
+        $items = data_get($data, $itemsPath);
+
+        if (empty($items) || ! is_array($items)) {
+            return null;
+        }
+
+        // Get field mappings for item properties
+        $orderItemIdPath = $schema['items.order_item_id'] ?? 'order_item_id';
+        $namePath = $schema['items.name'] ?? 'name';
+        $quantityPath = $schema['items.quantity_ordered'] ?? 'quantity_ordered';
+
+        return array_map(function ($item) use ($orderItemIdPath, $namePath, $quantityPath) {
+            return [
+                'order_item_id' => data_get($item, $orderItemIdPath),
+                'name' => data_get($item, $namePath),
+                'quantity_ordered' => data_get($item, $quantityPath),
+            ];
+        }, $items);
     }
 
     /**

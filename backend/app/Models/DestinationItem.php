@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $id UUID
  * @property string $destination_id FK to destinations
  * @property string $order_item_id External item ID from client ERP
+ * @property string|null $name Human-readable item name
  * @property int $quantity_ordered Original quantity expected
  * @property int $quantity_delivered Actual quantity delivered
  * @property ItemDeliveryReason|null $delivery_reason Reason for discrepancy
@@ -34,6 +35,7 @@ class DestinationItem extends Model
     protected $fillable = [
         'destination_id',
         'order_item_id',
+        'name',
         'quantity_ordered',
         'quantity_delivered',
         'delivery_reason',

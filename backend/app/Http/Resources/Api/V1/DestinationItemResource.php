@@ -23,6 +23,7 @@ class DestinationItemResource extends ApiResource
         return [
             'id' => $this->resource->id,
             'order_item_id' => $this->resource->order_item_id,
+            'name' => $this->resource->name,
             'quantity_ordered' => $this->resource->quantity_ordered,
             'quantity_delivered' => $this->resource->quantity_delivered,
             'shortage' => $this->resource->shortage,

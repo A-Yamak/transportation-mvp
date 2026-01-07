@@ -30,14 +30,23 @@ class SchemaTransformer
     public function transformIncoming(array $data, BusinessPayloadSchema $schema): array
     {
         // Delegate to model's method for field mapping
-        return [
+        $transformed = [
             'external_id' => $schema->getFromRequest($data, 'external_id'),
             'address' => $schema->getFromRequest($data, 'address'),
             'lat' => $schema->getFromRequest($data, 'lat'),
             'lng' => $schema->getFromRequest($data, 'lng'),
             'notes' => $schema->getFromRequest($data, 'notes'),
-            'recipient_name' => $schema->getFromRequest($data, 'recipient_name'),
+            'contact_name' => $schema->getFromRequest($data, 'contact_name'),
+            'contact_phone' => $schema->getFromRequest($data, 'contact_phone'),
         ];
+
+        // Transform items if present
+        $items = $schema->transformItemsFromRequest($data);
+        if ($items !== null) {
+            $transformed['items'] = $items;
+        }
+
+        return $transformed;
     }
 
     /**

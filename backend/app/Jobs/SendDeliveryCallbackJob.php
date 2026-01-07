@@ -61,7 +61,7 @@ class SendDeliveryCallbackJob implements ShouldQueue
      */
     public function handle(CallbackService $callbackService): void
     {
-        $destination = Destination::with(['deliveryRequest.business.payloadSchema'])
+        $destination = Destination::with(['deliveryRequest.business.payloadSchema', 'items'])
             ->find($this->destinationId);
 
         if (! $destination) {

@@ -161,22 +161,40 @@ class DriverController extends Controller
     /**
      * Save item-level delivery data for a destination.
      *
+     * Updates existing items (created from ERP) or creates new ones.
+     * Preserves original quantity_ordered if item already exists.
+     *
      * @param  array<int, array{order_item_id: string, quantity_ordered?: int, quantity_delivered: int, reason?: string, notes?: string}>  $items
      */
     private function saveItemDeliveryData(Destination $destination, array $items): void
     {
         foreach ($items as $itemData) {
-            $destination->items()->updateOrCreate(
-                ['order_item_id' => $itemData['order_item_id']],
-                [
+            // Check if item already exists (created when ERP submitted the delivery request)
+            $existingItem = $destination->items()
+                ->where('order_item_id', $itemData['order_item_id'])
+                ->first();
+
+            if ($existingItem) {
+                // Update existing item - preserve original quantity_ordered
+                $existingItem->update([
+                    'quantity_delivered' => $itemData['quantity_delivered'],
+                    'delivery_reason' => isset($itemData['reason'])
+                        ? ItemDeliveryReason::from($itemData['reason'])
+                        : null,
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            } else {
+                // Create new item (fallback if ERP didn't send items upfront)
+                $destination->items()->create([
+                    'order_item_id' => $itemData['order_item_id'],
                     'quantity_ordered' => $itemData['quantity_ordered'] ?? $itemData['quantity_delivered'],
                     'quantity_delivered' => $itemData['quantity_delivered'],
                     'delivery_reason' => isset($itemData['reason'])
                         ? ItemDeliveryReason::from($itemData['reason'])
                         : null,
                     'notes' => $itemData['notes'] ?? null,
-                ]
-            );
+                ]);
+            }
         }
     }
 

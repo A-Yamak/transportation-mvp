@@ -134,6 +134,11 @@ class TestMeloIntegration extends Command
                     'customer_name' => 'Al-Quds Sweets',
                     'customer_phone' => '+962791234567',
                     'delivery_notes' => 'Back entrance, ask for Abu Ahmad',
+                    // Items using Melo's field names (sku, product_name, qty)
+                    'items' => [
+                        ['sku' => 'CHOC-001', 'product_name' => 'Premium Chocolate Box', 'qty' => 10],
+                        ['sku' => 'CAKE-002', 'product_name' => 'Birthday Cake Assortment', 'qty' => 5],
+                    ],
                 ],
                 [
                     'order_id' => 'MELO-' . date('Ymd') . '-002',
@@ -145,6 +150,11 @@ class TestMeloIntegration extends Command
                     'customer_name' => 'Sweet Palace',
                     'customer_phone' => '+962797654321',
                     'delivery_notes' => 'Morning delivery preferred',
+                    // Items using Melo's field names
+                    'items' => [
+                        ['sku' => 'PAST-003', 'product_name' => 'Baklava Selection', 'qty' => 20],
+                        ['sku' => 'COOK-004', 'product_name' => 'Butter Cookies', 'qty' => 15],
+                    ],
                 ],
             ],
         ];
@@ -250,7 +260,7 @@ class TestMeloIntegration extends Command
         $this->info('STEP 5: Driver Completes Destinations (Triggers Callbacks)');
         $this->line('─────────────────────────────────────────');
 
-        $trip->load('deliveryRequest.destinations');
+        $trip->load('deliveryRequest.destinations.items');
         $destinations = $trip->deliveryRequest->destinations;
 
         foreach ($destinations as $index => $destination) {
@@ -269,19 +279,61 @@ class TestMeloIntegration extends Command
                 $this->info("    ✓ Arrived");
             }
 
-            // Complete with delivery details
+            // Prepare item-level completion data
+            // First destination: Full delivery
+            // Second destination: Partial delivery (demonstrating discrepancy reporting)
+            $items = [];
+            if ($destination->items->isNotEmpty()) {
+                $this->info("    Items for this destination:");
+                foreach ($destination->items as $itemIndex => $item) {
+                    $this->line("      - {$item->name} (SKU: {$item->order_item_id}): {$item->quantity_ordered} ordered");
+
+                    if ($index === 0) {
+                        // First destination: deliver all items fully
+                        $items[] = [
+                            'order_item_id' => $item->order_item_id,
+                            'quantity_delivered' => $item->quantity_ordered,
+                        ];
+                    } else {
+                        // Second destination: partial delivery for first item
+                        if ($itemIndex === 0) {
+                            $items[] = [
+                                'order_item_id' => $item->order_item_id,
+                                'quantity_delivered' => max(0, $item->quantity_ordered - 5),
+                                'reason' => 'damaged_in_transit',
+                                'notes' => '5 boxes damaged during transport',
+                            ];
+                        } else {
+                            $items[] = [
+                                'order_item_id' => $item->order_item_id,
+                                'quantity_delivered' => $item->quantity_ordered,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Complete with delivery details and items
+            $completePayload = [
+                'recipient_name' => $index === 0 ? 'Abu Ahmad' : 'Um Omar',
+                'notes' => $index === 0 ? 'Delivered successfully' : 'Partial delivery - some items damaged',
+                'lat' => $destination->lat,
+                'lng' => $destination->lng,
+            ];
+
+            if (!empty($items)) {
+                $completePayload['items'] = $items;
+                $this->line("    Submitting " . count($items) . " item(s) with delivery data");
+            }
+
             $response = Http::withToken($this->driverToken)
-                ->post($this->baseUrl . "/driver/trips/{$trip->id}/destinations/{$destination->id}/complete", [
-                    'recipient_name' => 'Test Recipient',
-                    'notes' => 'Delivered successfully',
-                    'lat' => $destination->lat,
-                    'lng' => $destination->lng,
-                ]);
+                ->post($this->baseUrl . "/driver/trips/{$trip->id}/destinations/{$destination->id}/complete", $completePayload);
 
             if (!$response->successful()) {
                 $this->error("    ✗ Complete failed: " . $response->body());
             } else {
-                $this->info("    ✓ Completed - CALLBACK SHOULD BE SENT!");
+                $completionType = $index === 0 ? 'FULL DELIVERY' : 'PARTIAL DELIVERY';
+                $this->info("    ✓ Completed ({$completionType}) - CALLBACK SHOULD BE SENT!");
             }
 
             $this->newLine();
@@ -296,7 +348,7 @@ class TestMeloIntegration extends Command
         $this->newLine();
 
         $trip->refresh();
-        $trip->load('deliveryRequest.destinations');
+        $trip->load('deliveryRequest.destinations.items');
 
         $this->info('Summary:');
         $this->line("  Trip ID: {$trip->id}");
@@ -304,12 +356,29 @@ class TestMeloIntegration extends Command
         $this->line("  Destinations completed: " . $trip->deliveryRequest->destinations->where('status', 'completed')->count());
         $this->newLine();
 
+        // Show item-level summary
+        $this->info('Item Delivery Summary:');
+        foreach ($trip->deliveryRequest->destinations as $index => $dest) {
+            $this->line("  Destination " . ($index + 1) . ": {$dest->external_id}");
+            foreach ($dest->items as $item) {
+                $status = $item->quantity_delivered === $item->quantity_ordered
+                    ? '✓ Full'
+                    : "⚠ Partial ({$item->quantity_delivered}/{$item->quantity_ordered})";
+                $this->line("    - {$item->order_item_id}: {$status}");
+                if ($item->delivery_reason) {
+                    $this->line("      Reason: {$item->delivery_reason->value}");
+                }
+            }
+        }
+        $this->newLine();
+
         $this->info('Check the webhook receiver terminal for callbacks!');
-        $this->info('Callbacks should contain:');
+        $this->info('Callbacks should contain (using Melo field names):');
         $this->line('  - order_id (external_id)');
         $this->line('  - delivery_status');
         $this->line('  - delivered_at');
         $this->line('  - received_by');
+        $this->line('  - delivered_items[] (with sku, qty_received, discrepancy_reason)');
 
         $this->newLine();
     }

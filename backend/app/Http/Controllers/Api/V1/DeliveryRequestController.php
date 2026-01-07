@@ -97,7 +97,7 @@ class DeliveryRequestController extends Controller
 
                 $dest = $destinations[$originalIndex];
 
-                Destination::create([
+                $destination = Destination::create([
                     'delivery_request_id' => $deliveryRequest->id,
                     'external_id' => $dest['external_id'],
                     'address' => $dest['address'],
@@ -106,13 +106,25 @@ class DeliveryRequestController extends Controller
                     'sequence_order' => $sequenceIndex + 1, // 1-based sequence
                     'notes' => $dest['notes'] ?? null,
                 ]);
+
+                // Create destination items if provided (for partial delivery tracking)
+                if (! empty($dest['items'])) {
+                    foreach ($dest['items'] as $item) {
+                        $destination->items()->create([
+                            'order_item_id' => $item['order_item_id'],
+                            'name' => $item['name'] ?? null,
+                            'quantity_ordered' => $item['quantity_ordered'],
+                            'quantity_delivered' => 0, // Will be updated by driver on completion
+                        ]);
+                    }
+                }
             }
 
             return $deliveryRequest;
         });
 
-        // Load destinations for response
-        $deliveryRequest->load('destinations');
+        // Load destinations with items for response
+        $deliveryRequest->load('destinations.items');
 
         return (new DeliveryRequestResource($deliveryRequest))
             ->response()

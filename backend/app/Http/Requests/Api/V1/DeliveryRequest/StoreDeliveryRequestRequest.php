@@ -88,6 +88,12 @@ class StoreDeliveryRequestRequest extends ApiRequest
             // Notes for this destination (optional)
             'destinations.*.notes' => ['nullable', 'string', 'max:500'],
 
+            // Items for this destination (optional - for partial delivery tracking)
+            'destinations.*.items' => ['nullable', 'array'],
+            'destinations.*.items.*.order_item_id' => ['required_with:destinations.*.items', 'string', 'max:100'],
+            'destinations.*.items.*.name' => ['nullable', 'string', 'max:255'],
+            'destinations.*.items.*.quantity_ordered' => ['required_with:destinations.*.items', 'integer', 'min:1'],
+
             // Override callback URL for this request (optional)
             'callback_url' => ['nullable', 'url', 'max:500'],
 
@@ -116,6 +122,9 @@ class StoreDeliveryRequestRequest extends ApiRequest
             'destinations.*.lng.between' => 'Longitude must be between -180 and 180.',
             'callback_url.url' => 'Callback URL must be a valid URL.',
             'scheduled_date.after_or_equal' => 'Scheduled date must be today or in the future.',
+            'destinations.*.items.*.order_item_id.required_with' => 'Each item must have an order_item_id.',
+            'destinations.*.items.*.quantity_ordered.required_with' => 'Each item must have a quantity_ordered.',
+            'destinations.*.items.*.quantity_ordered.min' => 'Item quantity must be at least 1.',
         ];
     }
 
