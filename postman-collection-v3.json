@@ -1,0 +1,543 @@
+{
+  "info": {
+    "name": "Transportation MVP - Phase 3 (Payment & Reconciliation)",
+    "description": "Complete API collection for Transportation MVP including payment collection, tupperware tracking, and daily reconciliation endpoints. Updated January 2026 with Phase 3 implementation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login (Driver)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"driver@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/auth/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/auth/user",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "auth", "user"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Collection (NEW)",
+      "item": [
+        {
+          "name": "Collect Cash Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_collected\": 1000.00,\n  \"payment_method\": \"cash\",\n  \"notes\": \"Full payment received in cash\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-payment",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-payment"]
+            }
+          }
+        },
+        {
+          "name": "Collect Partial Payment (Shortage)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_collected\": 750.00,\n  \"payment_method\": \"cash\",\n  \"shortage_reason\": \"customer_absent\",\n  \"notes\": \"Customer not home, will try again tomorrow\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-payment",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-payment"]
+            }
+          }
+        },
+        {
+          "name": "Collect CliQ Now Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_collected\": 1000.00,\n  \"payment_method\": \"cliq_now\",\n  \"cliq_reference\": \"CLIQ-TXN-123456\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-payment",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-payment"]
+            }
+          }
+        },
+        {
+          "name": "Collect CliQ Later Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_collected\": 1000.00,\n  \"payment_method\": \"cliq_later\",\n  \"cliq_reference\": \"CLIQ-LATER-789\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-payment",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-payment"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tupperware Collection (NEW)",
+      "item": [
+        {
+          "name": "Get Shop Tupperware Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/shops/{{SHOP_ID}}/tupperware-balance",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "shops", "{{SHOP_ID}}", "tupperware-balance"]
+            }
+          }
+        },
+        {
+          "name": "Pickup Tupperware (Containers)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tupperware\": [\n    {\n      \"product_type\": \"boxes\",\n      \"quantity\": 5\n    },\n    {\n      \"product_type\": \"trays\",\n      \"quantity\": 3\n    }\n  ],\n  \"notes\": \"Containers in good condition, no damage\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-tupperware",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-tupperware"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Route Reordering (NEW)",
+      "item": [
+        {
+          "name": "Reorder Trip Destinations (Drag & Drop)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destination_ids\": [\n    \"{{DEST_3_ID}}\",\n    \"{{DEST_1_ID}}\",\n    \"{{DEST_2_ID}}\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/reorder-destinations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "reorder-destinations"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Daily Reconciliation (NEW)",
+      "item": [
+        {
+          "name": "End Day - Generate Reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Day completed successfully, all collections verified\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/day/end",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "day", "end"]
+            }
+          }
+        },
+        {
+          "name": "Get Today's Reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/day/reconciliation",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "day", "reconciliation"]
+            }
+          }
+        },
+        {
+          "name": "Submit Reconciliation to Melo ERP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reconciliation_id\": \"{{RECONCILIATION_ID}}\",\n  \"notes\": \"Reconciliation ready for admin review\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/reconciliation/submit",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "reconciliation", "submit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Complete Workflow - Example",
+      "item": [
+        {
+          "name": "1. Get Today's Trips",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/today",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "today"]
+            }
+          }
+        },
+        {
+          "name": "2. Start Trip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/start",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "3. Arrive at Destination",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/arrive",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "arrive"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Shop Tupperware Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/shops/{{SHOP_ID}}/tupperware-balance",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "shops", "{{SHOP_ID}}", "tupperware-balance"]
+            }
+          }
+        },
+        {
+          "name": "5. Pickup Tupperware (if needed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tupperware\": [\n    {\n      \"product_type\": \"boxes\",\n      \"quantity\": 3\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-tupperware",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-tupperware"]
+            }
+          }
+        },
+        {
+          "name": "6. Complete Delivery",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/complete",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "7. Collect Payment (Cash)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_collected\": 1000.00,\n  \"payment_method\": \"cash\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/trips/{{TRIP_ID}}/destinations/{{DESTINATION_ID}}/collect-payment",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "trips", "{{TRIP_ID}}", "destinations", "{{DESTINATION_ID}}", "collect-payment"]
+            }
+          }
+        },
+        {
+          "name": "8. End Day - Generate Reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Day completed\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/day/end",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "day", "end"]
+            }
+          }
+        },
+        {
+          "name": "9. Submit Reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reconciliation_id\": \"{{RECONCILIATION_ID}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/driver/reconciliation/submit",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "driver", "reconciliation", "submit"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TRIP_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DESTINATION_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "SHOP_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "RECONCILIATION_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DEST_1_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DEST_2_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DEST_3_ID",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

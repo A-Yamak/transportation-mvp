@@ -92,6 +92,21 @@ Route::middleware('auth:api')->group(function () {
         Route::get('shops', [DriverController::class, 'listShops']);
         Route::get('shops/{shop}/waste-expected', [DriverController::class, 'getExpectedWaste']);
         Route::post('trips/{trip}/shops/{shop}/waste-collected', [DriverController::class, 'logWasteCollection']);
+        Route::get('shops/{shop}/tupperware-balance', [DriverController::class, 'getShopTupperwareBalance']);
+
+        // Payment collection
+        Route::post('trips/{trip}/destinations/{destination}/collect-payment', [DriverController::class, 'collectPayment']);
+
+        // Tupperware collection
+        Route::post('trips/{trip}/destinations/{destination}/collect-tupperware', [DriverController::class, 'collectTupperware']);
+
+        // Route reordering
+        Route::post('trips/{trip}/reorder-destinations', [DriverController::class, 'reorderDestinations']);
+
+        // Daily reconciliation
+        Route::post('day/end', [DriverController::class, 'endDay']);
+        Route::get('day/reconciliation', [DriverController::class, 'getDayReconciliation']);
+        Route::post('reconciliation/submit', [DriverController::class, 'submitReconciliation']);
 
         // Notification management
         Route::prefix('notifications')->group(function () {

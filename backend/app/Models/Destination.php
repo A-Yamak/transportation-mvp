@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\DestinationStatus;
 use App\Enums\FailureReason;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +61,10 @@ class Destination extends Model
         'notes',
         'amount_to_collect',
         'amount_collected',
+        'payment_method',
+        'payment_status',
+        'payment_reference',
+        'payment_collected_at',
         'recipient_name',
         'failure_reason',
         'failure_notes',
@@ -75,6 +81,9 @@ class Destination extends Model
             'status' => DestinationStatus::class,
             'amount_to_collect' => 'decimal:2',
             'amount_collected' => 'decimal:2',
+            'payment_method' => PaymentMethod::class,
+            'payment_status' => PaymentStatus::class,
+            'payment_collected_at' => 'datetime',
             'failure_reason' => FailureReason::class,
             'arrived_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -119,6 +128,22 @@ class Destination extends Model
     public function items(): HasMany
     {
         return $this->hasMany(DestinationItem::class);
+    }
+
+    /**
+     * Payment collection for this destination.
+     */
+    public function paymentCollections(): HasMany
+    {
+        return $this->hasMany(PaymentCollection::class);
+    }
+
+    /**
+     * Tupperware movements for this destination.
+     */
+    public function tupperwareMovements(): HasMany
+    {
+        return $this->hasMany(TupperwareMovement::class);
     }
 
     /**

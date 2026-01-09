@@ -44,6 +44,9 @@ class Trip extends Model
         'started_at',
         'completed_at',
         'actual_km',
+        'start_odometer_km',
+        'end_odometer_km',
+        'actual_km_driven',
     ];
 
     protected function casts(): array
@@ -54,6 +57,9 @@ class Trip extends Model
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
             'actual_km' => 'decimal:2',
+            'start_odometer_km' => 'decimal:2',
+            'end_odometer_km' => 'decimal:2',
+            'actual_km_driven' => 'decimal:2',
         ];
     }
 
@@ -87,6 +93,31 @@ class Trip extends Model
     public function wasteCollections(): HasMany
     {
         return $this->hasMany(WasteCollection::class);
+    }
+
+    /**
+     * Payment collections for destinations in this trip.
+     */
+    public function paymentCollections(): HasMany
+    {
+        return $this->hasMany(PaymentCollection::class);
+    }
+
+    /**
+     * Tupperware movements during this trip.
+     */
+    public function tupperwareMovements(): HasMany
+    {
+        return $this->hasMany(TupperwareMovement::class);
+    }
+
+    /**
+     * Daily reconciliation summary for this trip's driver and date.
+     */
+    public function dailyReconciliation()
+    {
+        return $this->belongsTo(DailyReconciliation::class, 'driver_id', 'driver_id')
+            ->where('reconciliation_date', $this->started_at?->toDateString());
     }
 
     /**

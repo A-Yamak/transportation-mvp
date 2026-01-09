@@ -8,26 +8,40 @@ use App\Enums\DestinationStatus;
 use App\Enums\ItemDeliveryReason;
 use App\Enums\TripStatus;
 use App\Http\Requests\Api\V1\Driver\ArriveAtDestinationRequest;
+use App\Http\Requests\Api\V1\Driver\CollectPaymentRequest;
+use App\Http\Requests\Api\V1\Driver\CollectTupperwareRequest;
 use App\Http\Requests\Api\V1\Driver\CompleteDestinationRequest;
 use App\Http\Requests\Api\V1\Driver\CompleteTripRequest;
+use App\Http\Requests\Api\V1\Driver\EndDayRequest;
 use App\Http\Requests\Api\V1\Driver\FailDestinationRequest;
+use App\Http\Requests\Api\V1\Driver\ReorderDestinationsRequest;
 use App\Http\Requests\Api\V1\Driver\StartTripRequest;
+use App\Http\Requests\Api\V1\Driver\SubmitReconciliationRequest;
 use App\Http\Requests\Api\V1\Driver\UpdateProfileRequest;
 use App\Http\Requests\Api\V1\Driver\UploadProfilePhotoRequest;
+use App\Http\Resources\Api\V1\DailyReconciliationResource;
 use App\Http\Resources\Api\V1\DestinationResource;
 use App\Http\Resources\Api\V1\DriverProfileResource;
 use App\Http\Resources\Api\V1\DriverStatsResource;
+use App\Http\Resources\Api\V1\PaymentCollectionResource;
 use App\Http\Resources\Api\V1\TripHistoryResource;
 use App\Http\Resources\Api\V1\TripResource;
+use App\Http\Resources\Api\V1\TupperwareMovementResource;
+use App\Models\DailyReconciliation;
 use App\Models\Destination;
 use App\Models\Driver;
-use App\Models\Trip;
-use App\Http\Requests\Api\V1\Driver\LogWasteCollectionRequest;
+use App\Models\PaymentCollection;
 use App\Models\Shop;
+use App\Models\Trip;
+use App\Models\TupperwareMovement;
 use App\Models\WasteCollection;
 use App\Models\WasteCollectionItem;
 use App\Services\Callback\DeliveryCallbackService;
 use App\Services\Callback\WasteCallbackService;
+use App\Services\DailyReconciliationService;
+use App\Services\PaymentCollectionService;
+use App\Services\TupperwareService;
+use App\Http\Requests\Api\V1\Driver\LogWasteCollectionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -43,6 +57,9 @@ class DriverController extends Controller
     public function __construct(
         private readonly DeliveryCallbackService $callbackService,
         private readonly WasteCallbackService $wasteCallbackService,
+        private readonly PaymentCollectionService $paymentService,
+        private readonly TupperwareService $tupperwareService,
+        private readonly DailyReconciliationService $reconciliationService,
     ) {}
 
     /**
@@ -736,6 +753,229 @@ class DriverController extends Controller
                 'collected_at' => $wasteCollection->collected_at?->toIso8601String(),
             ],
             'message' => "Waste collection logged successfully for {$shop->name}",
+        ]);
+    }
+
+    /**
+     * Collect payment at destination.
+     * POST /api/v1/driver/trips/{trip}/destinations/{destination}/collect-payment
+     */
+    public function collectPayment(
+        CollectPaymentRequest $request,
+        Trip $trip,
+        Destination $destination,
+    ): JsonResponse {
+        // Validate destination belongs to trip
+        if ($destination->deliveryRequest->trip_id !== $trip->id) {
+            return $this->error('Destination does not belong to this trip', 422);
+        }
+
+        $amountCollected = $request->getAmountCollected();
+        $amountExpected = (float) $destination->amount_to_collect;
+
+        // Check if shortage reason is provided when needed
+        if ($amountCollected < $amountExpected && !$request->getShortageReason()) {
+            return $this->error('Shortage reason is required when amount collected is less than expected', 422);
+        }
+
+        // Validate CliQ reference if CliQ payment
+        if ($request->isCliQPayment() && !$request->getCliQReference()) {
+            return $this->error('CliQ reference is required for CliQ payments', 422);
+        }
+
+        // Record payment collection
+        $payment = $this->paymentService->collectPayment(
+            $destination,
+            $amountCollected,
+            $request->getPaymentMethod()->value,
+            $request->getCliQReference(),
+            $request->getShortageReason()?->value,
+            $request->getNotes(),
+        );
+
+        return response()->json([
+            'data' => new PaymentCollectionResource($payment),
+            'message' => 'Payment collected successfully',
+        ], 201);
+    }
+
+    /**
+     * Collect tupperware at destination.
+     * POST /api/v1/driver/trips/{trip}/destinations/{destination}/collect-tupperware
+     */
+    public function collectTupperware(
+        CollectTupperwareRequest $request,
+        Trip $trip,
+        Destination $destination,
+    ): JsonResponse {
+        // Validate destination belongs to trip
+        if ($destination->deliveryRequest->trip_id !== $trip->id) {
+            return $this->error('Destination does not belong to this trip', 422);
+        }
+
+        $shop = $destination->shop;
+        if (!$shop) {
+            return $this->error('Destination is not linked to a shop', 422);
+        }
+
+        $movements = [];
+        foreach ($request->getTupperwareItems() as $item) {
+            $movement = $this->tupperwareService->recordPickup(
+                $shop,
+                $item['product_type'],
+                (int) $item['quantity'],
+                [
+                    'trip_id' => $trip->id,
+                    'destination_id' => $destination->id,
+                    'driver_id' => auth()->id(),
+                    'business_id' => $trip->deliveryRequest->business_id,
+                ],
+                $request->getNotes(),
+            );
+            $movements[] = $movement;
+        }
+
+        return response()->json([
+            'data' => TupperwareMovementResource::collection(collect($movements)),
+            'message' => 'Tupperware collected successfully',
+        ], 201);
+    }
+
+    /**
+     * Reorder destinations (drag-drop).
+     * POST /api/v1/driver/trips/{trip}/reorder-destinations
+     */
+    public function reorderDestinations(
+        ReorderDestinationsRequest $request,
+        Trip $trip,
+    ): JsonResponse {
+        // Validate trip hasn't started
+        if ($trip->status === TripStatus::InProgress || $trip->status === TripStatus::Completed) {
+            return $this->error('Cannot reorder destinations after trip has started', 422);
+        }
+
+        $destinationIds = $request->getDestinationIds();
+
+        // Validate all destinations belong to this trip
+        $tripDestinations = $trip->deliveryRequest->destinations->pluck('id')->toArray();
+        if (count(array_diff($destinationIds, $tripDestinations)) > 0) {
+            return $this->error('Some destinations do not belong to this trip', 422);
+        }
+
+        // Update sequence order
+        foreach ($request->getDestinationsWithSequence() as $item) {
+            Destination::where('id', $item['id'])->update([
+                'sequence_order' => $item['sequence_order'],
+            ]);
+        }
+
+        return response()->json([
+            'data' => [
+                'trip_id' => $trip->id,
+                'destinations_reordered' => count($destinationIds),
+                'destinations' => DestinationResource::collection(
+                    $trip->deliveryRequest->destinations()->orderBy('sequence_order')->get()
+                ),
+            ],
+            'message' => 'Destinations reordered successfully',
+        ]);
+    }
+
+    /**
+     * End driver's day and generate reconciliation.
+     * POST /api/v1/driver/day/end
+     */
+    public function endDay(EndDayRequest $request): JsonResponse
+    {
+        $driver = auth()->user();
+        $date = $request->getReconciliationDate();
+
+        // Generate or get reconciliation for today
+        $reconciliation = $this->reconciliationService->getOrCreateReconciliation($driver, $date);
+
+        return response()->json([
+            'data' => new DailyReconciliationResource($reconciliation),
+            'message' => 'Day ended successfully',
+        ]);
+    }
+
+    /**
+     * Get today's reconciliation status.
+     * GET /api/v1/driver/day/reconciliation
+     */
+    public function getDayReconciliation(): JsonResponse
+    {
+        $driver = auth()->user();
+        $date = now();
+
+        $reconciliation = DailyReconciliation::where('driver_id', $driver->id)
+            ->where('reconciliation_date', $date->toDateString())
+            ->first();
+
+        if (!$reconciliation) {
+            return $this->error('No reconciliation found for today', 404);
+        }
+
+        return response()->json([
+            'data' => new DailyReconciliationResource($reconciliation),
+        ]);
+    }
+
+    /**
+     * Submit reconciliation to Melo ERP.
+     * POST /api/v1/driver/reconciliation/submit
+     */
+    public function submitReconciliation(SubmitReconciliationRequest $request): JsonResponse
+    {
+        $reconciliation = DailyReconciliation::find($request->getReconciliationId());
+
+        if (!$reconciliation) {
+            return $this->error('Reconciliation not found', 404);
+        }
+
+        if ($reconciliation->driver_id !== auth()->id()) {
+            return $this->error('Unauthorized', 403);
+        }
+
+        // Submit reconciliation
+        $this->reconciliationService->submitReconciliation($reconciliation);
+
+        return response()->json([
+            'data' => new DailyReconciliationResource($reconciliation),
+            'message' => 'Reconciliation submitted successfully',
+        ]);
+    }
+
+    /**
+     * Get shop tupperware balance.
+     * GET /api/v1/driver/shops/{shop}/tupperware-balance
+     */
+    public function getShopTupperwareBalance(Shop $shop): JsonResponse
+    {
+        $balances = $this->tupperwareService->getShopAllBalances($shop);
+
+        if (empty($balances)) {
+            return response()->json([
+                'data' => [
+                    'shop_id' => $shop->id,
+                    'shop_name' => $shop->name,
+                    'balances' => [],
+                ],
+                'message' => 'No tupperware tracked for this shop',
+            ]);
+        }
+
+        return response()->json([
+            'data' => [
+                'shop_id' => $shop->id,
+                'shop_name' => $shop->name,
+                'balances' => collect($balances)->map(function ($balance, $productType) {
+                    return [
+                        'product_type' => $productType,
+                        'current_balance' => $balance,
+                    ];
+                })->values(),
+            ],
         ]);
     }
 }
