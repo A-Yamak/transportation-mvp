@@ -15,16 +15,19 @@ This is a logistics/delivery management application that handles delivery reques
 | Database Schema | DONE | All migrations complete |
 | Eloquent Models | DONE | All models with relationships |
 | Authentication | DONE | OAuth2 via Laravel Passport |
-| API Controllers | DONE | 4 controllers, 26+ endpoints |
+| API Controllers | DONE | 7 controllers, 32+ endpoints |
 | Route Optimization Service | DONE | Google Maps integration with caching |
 | Pricing Service | DONE | Tiered pricing with discounts |
-| Driver Endpoints | DONE | 13 endpoints for Flutter app |
-| ERP Callback Service | DONE | Async job-based callbacks |
+| Driver Endpoints | DONE | 17 endpoints for Flutter app |
+| ERP Callback Service | DONE | Async job-based callbacks with retry |
 | Ledger System | DONE | Double-entry accounting |
 | Auto-Assignment | DONE | Single driver MVP, round-robin for multi |
 | Price Tracking | DONE | amount_to_collect, item prices, line totals |
-| Flutter UI | DONE | Complete driver interface |
-| Flutter API Integration | DONE | Real API client, GPS tracking |
+| **Shop Management** | **DONE** | **Persistent shop locations, sync from ERP** |
+| **Waste Tracking** | **DONE** | **Driver waste logging, auto-calculation, callbacks** |
+| **External API** | **DONE** | **Separate namespace for B2B integration** |
+| Flutter UI | DONE | Complete driver interface with waste collection |
+| Flutter API Integration | DONE | Real API client, GPS tracking, waste logging |
 
 ### Production Readiness Checklist
 
@@ -39,6 +42,11 @@ This is a logistics/delivery management application that handles delivery reques
 - [x] OAuth2 token auth for driver app
 - [x] Auto-assignment of trips to drivers (configurable)
 - [x] Price tracking: amount_to_collect, item unit_price, line totals
+- [x] **Shop synchronization from Melo ERP via `/api/external/v1/shops/sync`**
+- [x] **Waste collection tracking with driver validation**
+- [x] **Automatic pieces_sold calculation (delivered - waste)**
+- [x] **Waste callbacks sent to Melo ERP with exponential backoff retry**
+- [x] **Expected waste date management**
 
 **Flutter App (Ready)**
 - [x] Real API integration (not mock data)
@@ -46,13 +54,21 @@ This is a logistics/delivery management application that handles delivery reques
 - [x] Trip workflow: view → start → navigate → arrive → complete
 - [x] Token refresh mechanism
 - [x] Profile management
+- [x] **Shop card display with waste status**
+- [x] **Waste collection dialog with item-level controls**
+- [x] **Real-time sold quantity calculation**
+- [x] **Driver notes for waste items**
 
 **Pre-Deployment Tasks**
 1. Configure production `.env` (database, Redis, Google Maps API key)
 2. Set up Cloudflare R2 bucket for file storage
 3. Configure business callback URLs in admin panel
 4. Deploy queue workers (Horizon) for async callbacks
-5. Test end-to-end flow with Melo ERP
+5. **Exchange API keys with Melo ERP team**
+6. **Set up Melo ERP webhook receiver for waste callbacks**
+7. **Configure webhook signature secret (HMAC-SHA256)**
+8. **Schedule daily shop sync cron job (2 AM)**
+9. **Test end-to-end flow with Melo ERP**
 
 ---
 
@@ -157,6 +173,226 @@ Track prices at destination and item level for COD (Cash on Delivery) operations
 - Shows amount to collect per destination
 - Shows item list with prices and quantities
 - Tracks partial deliveries (quantity_delivered vs quantity_ordered)
+
+---
+
+## Shop Management & Waste Tracking
+
+Persistent shop locations with waste collection tracking for expired/returned items.
+
+### Architecture
+
+**Pull Model**: Transportation MVP pulls shop data from Melo ERP
+```
+Melo ERP → POST /api/external/v1/shops/sync → Transportation MVP
+```
+
+**Push Model**: Waste data pushed back to Melo ERP after collection
+```
+Transportation MVP → POST /api/v1/waste/callback → Melo ERP Webhook
+```
+
+### Shops Table
+
+Persistent shop locations (not per-order):
+```sql
+shops
+├── id (UUID)
+├── business_id (FK)
+├── external_shop_id (unique per business)
+├── name, address, lat, lng
+├── contact_name, contact_phone
+├── track_waste (boolean)
+├── is_active
+├── last_synced_at
+└── sync_metadata (JSON)
+```
+
+### Waste Collection Tables
+
+Track waste items per shop per collection event:
+```sql
+waste_collections
+├── id (UUID)
+├── shop_id (FK)
+├── trip_id (FK, nullable - for waste_collection trips)
+├── driver_id (FK)
+├── business_id (FK)
+├── collection_date
+├── collected_at (nullable)
+└── driver_notes
+
+waste_collection_items
+├── id (UUID)
+├── waste_collection_id (FK)
+├── destination_item_id (FK, nullable)
+├── order_item_id
+├── product_name
+├── quantity_delivered
+├── delivered_at, expires_at
+├── pieces_waste
+├── pieces_sold (GENERATED: quantity_delivered - pieces_waste)
+└── notes
+```
+
+### External API Endpoints (`/api/external/v1`)
+
+All require `X-API-Key` header. Used by Melo ERP integration.
+
+**Shop Management**
+```
+POST   /api/external/v1/shops/sync              - Bulk sync shops
+GET    /api/external/v1/shops                   - List all shops
+GET    /api/external/v1/shops/{externalShopId}  - Get shop details
+PUT    /api/external/v1/shops/{externalShopId}  - Update shop
+DELETE /api/external/v1/shops/{externalShopId}  - Deactivate shop
+```
+
+**Waste Collection**
+```
+GET    /api/external/v1/waste/expected          - Get shops with expected waste
+POST   /api/external/v1/waste/expected          - Set expected waste dates
+```
+
+### Driver API Endpoints (`/api/v1/driver`)
+
+Driver app uses these endpoints to log waste.
+
+```
+GET    /api/v1/driver/shops/{shop}/waste-expected             - Get uncollected waste items
+POST   /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected - Log waste
+```
+
+### Waste Collection Flow
+
+1. **Shop Sync** (Daily 2 AM)
+   - Melo ERP → POST `/api/external/v1/shops/sync` with shop list
+   - Creates/updates shops in Transportation MVP
+   - Drivers see shops in their app
+
+2. **Expected Waste** (Daily 3 AM)
+   - Transportation MVP calculates shops with expected waste
+   - Creates `waste_collection` trips and assigns to drivers
+   - Drivers see waste collection tasks
+
+3. **Driver Logs Waste**
+   - Driver opens shop details
+   - Clicks "Log Waste" → Opens dialog
+   - Adjusts quantities for each item
+   - Enters optional notes
+   - Submits → API validates waste ≤ delivered
+   - `pieces_sold` auto-calculated = delivered - waste
+
+4. **Callback Sent** (Async via queue)
+   - SendWasteCallbackJob dispatched
+   - Sends waste data to Melo ERP webhook
+   - 5 retries with exponential backoff: [10s, 30s, 1m, 2m, 5m]
+   - Includes all item details with sold/waste split
+
+### Services
+
+**ShopSyncService** (`app/Services/Shop/ShopSyncService.php`)
+- `syncShops(Business, array, options)` - Bulk upsert
+- `findAndLinkShop(Business, externalShopId)` - Get active shop
+- `setExpectedWasteDates(Business, array)` - Mark shops with expected waste
+
+**WasteCollectionService** (`app/Services/Waste/WasteCollectionService.php`)
+- `calculateSoldQuantity(Shop, itemId, from, to)` - Sold calculation
+- `getShopWasteReport(Shop, from, to)` - Waste statistics
+- `getExpectedWaste(?businessId)` - Shops with expected waste
+
+**WasteCallbackService** (`app/Services/Callback/WasteCallbackService.php`)
+- `sendWasteCallback(WasteCollection)` - Async via queue
+- `sendWasteCallbackSync(WasteCollection)` - Synchronous (testing)
+- `buildCallbackPayload(WasteCollection)` - Payload construction
+
+### Callback Format
+
+```json
+{
+  "event": "waste_collected",
+  "shop_id": "SHOP-001",
+  "shop_name": "Ahmad's Supermarket",
+  "collection_date": "2026-01-09",
+  "collected_at": "2026-01-09T14:30:00Z",
+  "collected_by_user_id": 789,
+  "waste_items": [
+    {
+      "order_item_id": "ITEM-456",
+      "product_name": "Baklava Box",
+      "quantity_delivered": 10,
+      "pieces_returned": 3,
+      "pieces_sold": 7,
+      "waste_date": "2026-01-01",
+      "notes": "Packaging damaged"
+    }
+  ]
+}
+```
+
+### Flutter Integration
+
+**Models** (`lib/features/shops/data/models/`)
+- `ShopModel` - Shop with waste context
+- `WasteCollectionModel` - Collection event
+- `WasteItemModel` - Individual waste item
+
+**Repository** (`lib/features/shops/data/shops_repository.dart`)
+- `getExpectedWaste(shopId)` - Fetch uncollected waste
+- `logWasteCollection(tripId, shopId, items, notes)` - Submit waste
+
+**Providers** (`lib/features/shops/providers/shops_provider.dart`)
+- `shopsRepositoryProvider` - Dependency injection
+- `expectedWasteProvider(shopId)` - Fetch waste data
+- `wasteCollectionProvider` - Manage logging state
+- `wasteItemsEditingProvider` - Build waste before submit
+- `wastePercentageProvider` - Calculated stats
+
+**Widgets** (`lib/features/shops/presentation/widgets/`)
+- `ShopCard` - Display shop with waste status
+- `WasteCollectionDialog` - Log waste items
+
+### Key Files
+
+**Backend**
+```
+app/Models/
+  ├── Shop.php
+  ├── WasteCollection.php
+  └── WasteCollectionItem.php
+
+app/Services/Shop/ShopSyncService.php
+app/Services/Waste/WasteCollectionService.php
+app/Services/Callback/WasteCallbackService.php
+app/Jobs/SendWasteCallbackJob.php
+app/Http/Controllers/Api/External/V1/ShopController.php
+app/Http/Controllers/Api/External/V1/WasteCollectionController.php
+
+routes/api/external/v1.php
+```
+
+**Flutter**
+```
+lib/features/shops/data/
+  ├── models/shop_model.dart
+  ├── models/waste_collection_model.dart
+  ├── models/waste_item_model.dart
+  └── shops_repository.dart
+
+lib/features/shops/providers/shops_provider.dart
+lib/features/shops/presentation/widgets/
+  ├── shop_card.dart
+  └── waste_collection_dialog.dart
+```
+
+**Documentation**
+```
+docs/
+├── melo-erp-integration-guide.md        - Phase-by-phase setup
+├── api-specifications.md                - Complete API docs
+├── postman-collection-external-api.json - Ready-to-import collection
+└── testing-guide.md                     - Test scenarios & results
+```
 
 ---
 
@@ -273,10 +509,35 @@ Individual driver trips:
 - Tracks actual KM (GPS)
 - Start/end time
 - Creates journal entry for accounting
+- Can be `delivery` type (normal orders) or `waste_collection` type (waste pickup)
+
+### Shops
+Persistent shop locations (not per-order):
+- Synced from Melo ERP via external API
+- Address with GPS coordinates
+- Contact information
+- `track_waste` flag enables waste collection
+- Multiple deliveries and waste collections per shop over time
+
+### Waste Collections
+Waste collection events at a shop:
+- Links shop, trip (if part of waste collection trip), driver
+- Collection date and timestamp when collected
+- Driver notes for observations
+- Contains multiple waste items
+
+### Waste Items
+Individual items with waste tracking:
+- Links to original delivery item (optional)
+- Quantity delivered vs quantity as waste
+- Auto-calculated `pieces_sold = quantity_delivered - pieces_waste`
+- Expiration date for expired items
+- Notes about waste reason (packaging damaged, expired, etc.)
 
 ### Ledger (Double-Entry Accounting)
 Independent from ERP. Tracks:
 - Trip revenue (billing to businesses)
+- Waste collection revenue/credits
 - Fuel costs
 - Driver payments
 - Vehicle maintenance

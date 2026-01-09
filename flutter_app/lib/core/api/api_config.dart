@@ -55,4 +55,10 @@ class ApiEndpoints {
       '${ApiConfig.apiPrefix}/driver/trips/$tripId/destinations/$destId/fail';
   static String navigationUrl(String tripId, String destId) =>
       '${ApiConfig.apiPrefix}/driver/trips/$tripId/destinations/$destId/navigate';
+
+  // Driver - Shop and waste collection endpoints
+  static String getExpectedWaste(String shopId) =>
+      '${ApiConfig.apiPrefix}/driver/shops/$shopId/waste-expected';
+  static String logWasteCollection(String tripId, String shopId) =>
+      '${ApiConfig.apiPrefix}/driver/trips/$tripId/shops/$shopId/waste-collected';
 }

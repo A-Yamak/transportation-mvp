@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TripStatus;
+use App\Enums\TripType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Trip Model
  *
- * A driver's execution of a delivery request.
+ * A driver's execution of a delivery request or waste collection.
  * Tracks actual kilometers driven via GPS.
  *
  * @property string $id UUID
  * @property string $delivery_request_id FK to delivery_requests
  * @property string $driver_id FK to drivers
  * @property string $vehicle_id FK to vehicles
+ * @property TripType $trip_type Type: 'delivery' or 'waste_collection'
  * @property TripStatus $status Current status
  * @property \Carbon\Carbon|null $started_at When trip started
  * @property \Carbon\Carbon|null $completed_at When trip completed
@@ -36,6 +39,7 @@ class Trip extends Model
         'delivery_request_id',
         'driver_id',
         'vehicle_id',
+        'trip_type',
         'status',
         'started_at',
         'completed_at',
@@ -45,6 +49,7 @@ class Trip extends Model
     protected function casts(): array
     {
         return [
+            'trip_type' => TripType::class,
             'status' => TripStatus::class,
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -77,11 +82,35 @@ class Trip extends Model
     }
 
     /**
+     * Waste items collected during this trip (if waste collection trip).
+     */
+    public function wasteCollections(): HasMany
+    {
+        return $this->hasMany(WasteCollection::class);
+    }
+
+    /**
      * Get destinations through delivery request.
      */
     public function getDestinationsAttribute()
     {
         return $this->deliveryRequest?->destinations;
+    }
+
+    /**
+     * Check if this is a delivery trip.
+     */
+    public function isDelivery(): bool
+    {
+        return $this->trip_type === TripType::Delivery;
+    }
+
+    /**
+     * Check if this is a waste collection trip.
+     */
+    public function isWasteCollection(): bool
+    {
+        return $this->trip_type === TripType::WasteCollection;
     }
 
     /**
@@ -161,5 +190,21 @@ class Trip extends Model
     public function scopeCompleted($query)
     {
         return $query->where('status', TripStatus::Completed);
+    }
+
+    /**
+     * Scope for delivery trips only.
+     */
+    public function scopeDelivery($query)
+    {
+        return $query->where('trip_type', TripType::Delivery->value);
+    }
+
+    /**
+     * Scope for waste collection trips only.
+     */
+    public function scopeWasteCollection($query)
+    {
+        return $query->where('trip_type', TripType::WasteCollection->value);
     }
 }

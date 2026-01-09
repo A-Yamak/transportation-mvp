@@ -41,6 +41,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('api/v3')
                 ->name('api.v3.')
                 ->group(base_path('routes/api/v3.php'));
+
+            // External B2B Integration API
+            Route::middleware('api')
+                ->prefix('api/external/v1')
+                ->name('api.external.v1.')
+                ->group(base_path('routes/api/external/v1.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

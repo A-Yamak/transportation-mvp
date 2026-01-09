@@ -16,9 +16,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Destination Model
  *
  * An individual stop within a delivery request.
+ * Can be linked to a persistent Shop for aggregation.
  *
  * @property string $id UUID
  * @property string $delivery_request_id FK to delivery_requests
+ * @property string|null $shop_id FK to shops (persistent location)
  * @property string $external_id External ID from client ERP (e.g., "order-123")
  * @property string $address Delivery address
  * @property float $lat Latitude
@@ -45,6 +47,7 @@ class Destination extends Model
 
     protected $fillable = [
         'delivery_request_id',
+        'shop_id',
         'external_id',
         'address',
         'lat',
@@ -100,6 +103,14 @@ class Destination extends Model
     public function deliveryRequest(): BelongsTo
     {
         return $this->belongsTo(DeliveryRequest::class);
+    }
+
+    /**
+     * Shop this destination is linked to (if any).
+     */
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
     }
 
     /**

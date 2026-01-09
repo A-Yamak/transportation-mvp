@@ -8,20 +8,25 @@ A logistics and delivery management application with route optimization, cost ca
 |-----------|--------|-------|
 | Database/Models | 100% | Schema complete |
 | Authentication | 100% | OAuth2 + API Key auth |
-| API Controllers | 100% | 4 controllers, 26+ endpoints |
+| API Controllers | 100% | 7 controllers, 32+ endpoints |
 | ERP Integration | 100% | Submit orders + async callbacks |
-| Driver Endpoints | 100% | 13 endpoints for Flutter app |
+| **Shop Management** | **100%** | **Persistent locations, ERP sync** |
+| **Waste Tracking** | **100%** | **Driver logging, auto-calculation** |
+| Driver Endpoints | 100% | 17 endpoints for Flutter app |
 | Route Optimization | 100% | Google Maps with caching |
 | Pricing Service | 100% | Tiered pricing with discounts |
 | Ledger System | 100% | Double-entry accounting |
-| Flutter App | 100% | Real API integration + GPS |
+| Flutter App | 100% | Real API integration + GPS + waste |
 
 ### Pre-Deployment Checklist
 1. Configure production `.env` (database, Redis, Google Maps API key)
 2. Set up Cloudflare R2 bucket for file storage
 3. Configure business callback URLs in admin panel
 4. Deploy queue workers (Horizon) for async callbacks
-5. Test end-to-end flow with Melo ERP
+5. **Exchange API keys with Melo ERP**
+6. **Configure webhook signature secret (HMAC-SHA256)**
+7. **Set up Melo ERP webhook receiver for waste callbacks**
+8. **Test end-to-end flow with Melo ERP**
 
 ## Overview
 
@@ -53,6 +58,10 @@ Manual Orders ─────┘    └────────┬────�
 - **GPS Tracking**: Actual KM tracked via Flutter app for accurate billing
 - **Single-Destination Navigation**: Opens device's Google Maps (free) instead of in-app navigation
 - **Double-Entry Accounting**: Independent ledger for revenue, expenses, driver payments
+- **Shop Management**: Persistent shop locations synced from Melo ERP
+- **Waste Tracking**: Drivers log expired/returned items per shop with auto-calculated sold quantities
+- **Waste Callbacks**: Async job-based callbacks to Melo ERP with exponential backoff retry
+- **External API**: Separate `/api/external/v1` namespace for B2B integrations (pull/push model)
 
 ## Tech Stack
 
@@ -163,7 +172,104 @@ Financial System (Independent Ledger)
     ├── LedgerAccount (Chart of Accounts)
     ├── JournalEntry (Transaction headers)
     └── JournalEntryItem (Debit/Credit lines)
+
+Shops (NEW)
+    ├── Persistent locations (synced from Melo ERP)
+    ├── track_waste flag
+    └── WasteCollections
+          ├── WasteCollectionItems (delivered vs waste)
+          ├── pieces_sold (auto-calculated)
+          └── Callbacks to ERP
 ```
+
+## Shop Management & Waste Tracking
+
+### Overview
+
+Persistent shop locations with waste tracking for expired/damaged items.
+
+**Pull Model (Melo ERP → Transportation MVP):**
+```
+POST /api/external/v1/shops/sync ← Bulk shop synchronization
+```
+
+**Push Model (Transportation MVP → Melo ERP):**
+```
+POST {melo_webhook_url}/api/v1/waste/callback ← Waste collection data
+```
+
+### External API Endpoints
+
+**Shop Management** (requires `X-API-Key` header):
+```bash
+POST   /api/external/v1/shops/sync                    # Bulk sync shops
+GET    /api/external/v1/shops                         # List shops
+GET    /api/external/v1/shops/{externalShopId}        # Get shop
+PUT    /api/external/v1/shops/{externalShopId}        # Update shop
+DELETE /api/external/v1/shops/{externalShopId}        # Deactivate shop
+```
+
+**Waste Collection** (requires `X-API-Key` header):
+```bash
+GET    /api/external/v1/waste/expected                # Get shops with expected waste
+POST   /api/external/v1/waste/expected                # Set expected waste dates
+```
+
+### Driver API Endpoints
+
+**Waste Collection** (requires Bearer token):
+```bash
+GET    /api/v1/driver/shops/{shop}/waste-expected                         # Get uncollected waste
+POST   /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected           # Log waste
+```
+
+### Daily Workflow
+
+1. **2 AM** - Melo ERP syncs shops: `POST /api/external/v1/shops/sync`
+2. **3 AM** - Transportation MVP marks shops with expected waste
+3. **Morning** - Driver sees waste collection tasks in Flutter app
+4. **During Day** - Driver logs waste at each shop
+5. **Async** - Waste data sent to Melo ERP webhook with retry logic
+
+### Waste Callback Format
+
+```json
+{
+  "event": "waste_collected",
+  "shop_id": "SHOP-001",
+  "collection_date": "2026-01-09",
+  "collected_at": "2026-01-09T14:30:00Z",
+  "waste_items": [
+    {
+      "order_item_id": "ITEM-456",
+      "product_name": "Baklava Box",
+      "quantity_delivered": 10,
+      "pieces_returned": 3,
+      "pieces_sold": 7,
+      "notes": "Packaging damaged"
+    }
+  ]
+}
+```
+
+### Key Features
+
+- **Automatic pieces_sold calculation**: `delivered - waste`
+- **Expiry tracking**: Days expired, expired items warning
+- **Validation**: Waste quantity cannot exceed delivered quantity
+- **Retry logic**: 5 attempts with exponential backoff [10s, 30s, 1m, 2m, 5m]
+- **Driver notes**: Optional observations per waste item
+- **Real-time UI**: Updates waste % and sold count as driver adjusts quantities
+
+### Documentation
+
+Complete integration documentation available:
+- `docs/melo-erp-integration-guide.md` - Phase-by-phase setup
+- `docs/api-specifications.md` - Complete API reference
+- `docs/postman-collection-external-api.json` - Ready-to-import Postman collection
+- `docs/testing-guide.md` - Test scenarios and results
+
+---
 
 ## API Documentation
 
@@ -218,6 +324,10 @@ POST /api/v1/driver/trips/{id}/destinations/{dest}/arrive    # Mark arrival
 POST /api/v1/driver/trips/{id}/destinations/{dest}/complete  # Complete (→ ERP callback)
 POST /api/v1/driver/trips/{id}/destinations/{dest}/fail      # Mark failed
 GET  /api/v1/driver/trips/{id}/destinations/{dest}/navigate  # Google Maps URL
+
+# Waste Collection Operations (NEW)
+GET  /api/v1/driver/shops/{shop}/waste-expected                         # Get uncollected waste
+POST /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected           # Log waste
 ```
 
 **Trip Assignment (Admin/Dispatch):**
@@ -342,6 +452,10 @@ flutter run --dart-define=API_BASE_URL=https://api.yourapp.com
 - **ERP Callbacks**: Automatic notification to client ERP on delivery completion
 - **Token refresh**: Automatic token rotation on 401 responses
 - **Profile management**: Update profile, upload photo to R2 storage
+- **Shop cards**: Display persistent shop info with waste status
+- **Waste logging**: Dialog to log expired/damaged items with real-time sold calculation
+- **Waste validation**: Prevents logging waste > delivered quantity
+- **Driver notes**: Optional observations per waste item
 
 ## Testing
 
@@ -376,13 +490,16 @@ make k8s-production  # Requires confirmation
 ### Production Checklist
 
 **Development Complete:**
-- [x] All API endpoints implemented
+- [x] All API endpoints implemented (32+ routes)
 - [x] ERP integration (delivery requests + callbacks)
-- [x] Driver app endpoints (13 routes)
+- [x] Driver app endpoints (17 routes)
 - [x] Route optimization with Google Maps
 - [x] Pricing calculation with tiers
 - [x] Double-entry ledger system
 - [x] Flutter app with real API integration
+- [x] **Shop management (persistent locations)**
+- [x] **Waste tracking (driver logging, auto-calculation)**
+- [x] **External API for B2B integration (pull/push)**
 
 **Deployment Tasks:**
 - [ ] Set `APP_ENV=production`, `APP_DEBUG=false`
@@ -391,8 +508,12 @@ make k8s-production  # Requires confirmation
 - [ ] Configure database credentials
 - [ ] Set up Redis AUTH
 - [ ] Enable HTTPS via Ingress
-- [ ] Deploy queue workers (Horizon)
+- [ ] Deploy queue workers (Horizon) for waste callbacks
 - [ ] Deploy Flutter app to stores
+- [ ] **Exchange API keys with Melo ERP**
+- [ ] **Set up Melo ERP webhook receiver endpoint**
+- [ ] **Configure webhook signature secret (HMAC-SHA256)**
+- [ ] **Schedule daily shop sync cron job (2 AM)**
 
 ## Troubleshooting
 
@@ -413,10 +534,27 @@ make tinker
 2. Check `callback_api_key` is valid
 3. Check ERP is reachable from Transport server
 
+### Waste callbacks not sent to Melo ERP
+1. Verify queue workers are running: `php artisan queue:work --queue=callbacks`
+2. Check Melo ERP webhook URL is configured in business settings
+3. Check webhook signature secret is configured (for HMAC-SHA256 verification)
+4. Check Melo ERP webhook receiver endpoint is responding with 200+ status
+5. Verify X-Webhook-Signature header is being sent correctly
+
+### Shop sync not creating shops
+1. Verify API key is valid and active
+2. Check X-API-Key header is included in POST request
+3. Verify coordinate ranges: latitude (-90 to 90), longitude (-180 to 180)
+4. Check all required fields are present: id, name, address, latitude, longitude
+
 ## Documentation
 
 - `CLAUDE.md` - AI assistant context (for Claude Code)
 - `flutter_app/README.md` - Flutter app documentation
+- **`docs/melo-erp-integration-guide.md`** - **Phase-by-phase Melo ERP integration**
+- **`docs/api-specifications.md`** - **Complete API reference (external API)**
+- **`docs/postman-collection-external-api.json`** - **Ready-to-import Postman collection**
+- **`docs/testing-guide.md`** - **Test scenarios, results, and CI/CD setup**
 - `docs/` - Additional documentation (added as needed)
 
 ## License

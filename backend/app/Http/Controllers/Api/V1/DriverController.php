@@ -22,7 +22,12 @@ use App\Http\Resources\Api\V1\TripResource;
 use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Trip;
+use App\Http\Requests\Api\V1\Driver\LogWasteCollectionRequest;
+use App\Models\Shop;
+use App\Models\WasteCollection;
+use App\Models\WasteCollectionItem;
 use App\Services\Callback\DeliveryCallbackService;
+use App\Services\Callback\WasteCallbackService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -37,6 +42,7 @@ class DriverController extends Controller
 {
     public function __construct(
         private readonly DeliveryCallbackService $callbackService,
+        private readonly WasteCallbackService $wasteCallbackService,
     ) {}
 
     /**
@@ -530,5 +536,144 @@ class DriverController extends Controller
         $trips = $query->paginate(15);
 
         return TripHistoryResource::collection($trips)->response();
+    }
+
+    // ========== WASTE COLLECTION ENDPOINTS ==========
+
+    /**
+     * Get expected waste items for a shop.
+     *
+     * GET /api/v1/driver/shops/{shop}/waste-expected
+     *
+     * Returns list of waste items expected to be collected from this shop.
+     */
+    public function getExpectedWaste(Shop $shop): JsonResponse
+    {
+        $driver = $this->getAuthenticatedDriver();
+
+        // Verify shop belongs to driver's business (via delivery request)
+        // For MVP, we allow access to any shop - can be restricted later
+
+        $wasteCollections = $shop->wasteCollections()
+            ->where('collected_at', null)
+            ->with('items')
+            ->get();
+
+        $wasteItems = $wasteCollections
+            ->pluck('items')
+            ->flatten();
+
+        return response()->json([
+            'data' => [
+                'shop' => [
+                    'id' => $shop->id,
+                    'external_id' => $shop->external_shop_id,
+                    'name' => $shop->name,
+                    'address' => $shop->address,
+                    'contact_phone' => $shop->contact_phone,
+                ],
+                'waste_items' => $wasteItems->map(fn ($item) => [
+                    'id' => $item->id,
+                    'order_item_id' => $item->order_item_id,
+                    'product_name' => $item->product_name,
+                    'quantity_delivered' => $item->quantity_delivered,
+                    'delivered_at' => $item->delivered_at?->toDateString(),
+                    'expires_at' => $item->expires_at?->toDateString(),
+                    'is_expired' => $item->isExpired(),
+                    'days_expired' => $item->getDaysExpired(),
+                ])->toArray(),
+                'total_expected_items' => $wasteItems->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Log waste collection for a shop during a trip.
+     *
+     * POST /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected
+     *
+     * Request body:
+     * {
+     *   "waste_items": [
+     *     {
+     *       "waste_item_id": "uuid",
+     *       "pieces_waste": 3,
+     *       "notes": "Optional notes"
+     *     }
+     *   ],
+     *   "driver_notes": "Optional overall notes"
+     * }
+     */
+    public function logWasteCollection(
+        Trip $trip,
+        Shop $shop,
+        LogWasteCollectionRequest $request
+    ): JsonResponse {
+        $driver = $this->getAuthenticatedDriver();
+
+        $this->authorizeTrip($trip);
+
+        // Verify this is a waste collection trip
+        if (! $trip->isWasteCollection()) {
+            return $this->error('This trip is not a waste collection trip', 422);
+        }
+
+        // Get or create waste collection record
+        $wasteCollection = WasteCollection::firstOrCreate(
+            [
+                'shop_id' => $shop->id,
+                'trip_id' => $trip->id,
+                'collection_date' => today(),
+            ],
+            [
+                'business_id' => $trip->deliveryRequest->business_id,
+                'driver_id' => $driver->id,
+            ]
+        );
+
+        $collectedCount = 0;
+
+        // Update waste items with collected data
+        foreach ($request->getWasteItems() as $wasteData) {
+            $wasteItem = WasteCollectionItem::find($wasteData['waste_item_id']);
+
+            if ($wasteItem) {
+                // Validate waste quantity doesn't exceed delivered
+                if ($wasteData['pieces_waste'] > $wasteItem->quantity_delivered) {
+                    return $this->error(
+                        "Waste quantity cannot exceed delivered quantity for item {$wasteItem->order_item_id}",
+                        422
+                    );
+                }
+
+                $wasteItem->update([
+                    'pieces_waste' => $wasteData['pieces_waste'],
+                    'notes' => $wasteData['notes'] ?? $wasteItem->notes,
+                    'waste_collection_id' => $wasteCollection->id,
+                ]);
+
+                $collectedCount++;
+            }
+        }
+
+        // Mark collection as complete
+        $wasteCollection->update([
+            'collected_at' => now(),
+            'driver_notes' => $request->getDriverNotes(),
+            'total_items_count' => $collectedCount,
+        ]);
+
+        // Send callback to business system
+        $this->wasteCallbackService->sendWasteCallback($wasteCollection);
+
+        return response()->json([
+            'data' => [
+                'waste_collection_id' => $wasteCollection->id,
+                'shop_id' => $shop->id,
+                'collected_items_count' => $collectedCount,
+                'collected_at' => $wasteCollection->collected_at?->toIso8601String(),
+            ],
+            'message' => "Waste collection logged successfully for {$shop->name}",
+        ]);
     }
 }
