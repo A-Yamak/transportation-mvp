@@ -15,11 +15,17 @@ class BusinessResource extends Resource
 {
     protected static ?string $model = Business::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
-
-    protected static ?string $navigationGroup = 'Configuration';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-building-office';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Configuration';
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

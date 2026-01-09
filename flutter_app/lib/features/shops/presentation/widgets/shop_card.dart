@@ -136,7 +136,7 @@ class ShopCard extends ConsumerWidget {
                                       ),
                                 ),
                                 Text(
-                                  '${shop.expectedWaste?.itemsCount ?? 0} items',
+                                  '${shop.wasteSummaryItemsCount ?? shop.expectedWaste?.itemsCount ?? 0} items',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall
@@ -147,7 +147,7 @@ class ShopCard extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          if (shop.expectedWaste?.isCollected ?? false)
+                          if (shop.isWasteCollected ?? shop.expectedWaste?.isCollected ?? false)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -177,26 +177,26 @@ class ShopCard extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Delivered: ${shop.expectedWaste?.totalDeliveredPieces ?? 0}',
+                            'Delivered: ${shop.wasteSummaryTotalDelivered ?? shop.expectedWaste?.totalDeliveredPieces ?? 0}',
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                           Text(
-                            'Waste: ${shop.expectedWaste?.totalWastePieces ?? 0}',
+                            'Waste: ${shop.wasteSummaryTotalWaste ?? shop.expectedWaste?.totalWastePieces ?? 0}',
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                           Text(
-                            'Sold: ${shop.expectedWaste?.totalSoldPieces ?? 0}',
+                            'Sold: ${shop.wasteSummaryTotalSold ?? shop.expectedWaste?.totalSoldPieces ?? 0}',
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ],
                       ),
 
                       // Expired items warning
-                      if ((shop.expectedWaste?.expiredItemsCount ?? 0) > 0)
+                      if ((shop.wasteSummaryExpiredCount ?? shop.expectedWaste?.expiredItemsCount ?? 0) > 0)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            '⚠️ ${shop.expectedWaste?.expiredItemsCount} expired item(s)',
+                            '⚠️ ${shop.wasteSummaryExpiredCount ?? shop.expectedWaste?.expiredItemsCount ?? 0} expired item(s)',
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: Colors.red[700],
                                   fontWeight: FontWeight.bold,
@@ -222,7 +222,7 @@ class ShopCard extends ConsumerWidget {
                         color: Colors.blue,
                       ),
                     ),
-                  if (shop.hasWaste && !(shop.expectedWaste?.isCollected ?? false))
+                  if (shop.hasWaste && !(shop.isWasteCollected ?? shop.expectedWaste?.isCollected ?? false))
                     Expanded(
                       child: _ActionButton(
                         icon: Icons.inventory_2,

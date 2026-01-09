@@ -11,6 +11,33 @@ class ShopsRepository {
 
   ShopsRepository(this._apiClient);
 
+  /// Get all shops with waste tracking.
+  /// Returns list of shops with their waste status.
+  Future<List<ShopModel>> listShops() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.shops);
+
+      final data = response.data;
+      final List<dynamic> shopsJson;
+
+      if (data is Map && data.containsKey('data')) {
+        shopsJson = data['data'] as List<dynamic>;
+      } else if (data is List) {
+        shopsJson = data;
+      } else {
+        throw ShopsException('Invalid shops list response format');
+      }
+
+      return shopsJson
+          .map((json) => ShopModel.fromListJson(json as Map<String, dynamic>))
+          .toList();
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ShopsException('Failed to fetch shops: $e');
+    }
+  }
+
   /// Get expected waste items for a specific shop.
   /// Returns waste collection with items that need to be logged.
   Future<WasteCollectionModel> getExpectedWaste(String shopId) async {

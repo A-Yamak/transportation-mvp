@@ -11,6 +11,12 @@ final shopsRepositoryProvider = Provider<ShopsRepository>((ref) {
   return ShopsRepository(apiClient);
 });
 
+/// Provider for fetching all shops with waste tracking
+final shopsListProvider = FutureProvider<List<ShopModel>>((ref) async {
+  final repository = ref.watch(shopsRepositoryProvider);
+  return repository.listShops();
+});
+
 /// Provider for fetching expected waste for a specific shop
 /// Takes shopId as a family parameter
 final expectedWasteProvider =

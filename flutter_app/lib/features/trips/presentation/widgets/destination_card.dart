@@ -67,8 +67,138 @@ class DestinationCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                // Amount to collect badge
+                if (destination.amountToCollect != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${destination.amountToCollect!.toStringAsFixed(2)} JOD',
+                      style: TextStyle(
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
               ],
             ),
+
+            // Contact info
+            if (destination.contactName != null || destination.contactPhone != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.person, size: 16, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (destination.contactName != null)
+                            Text(
+                              destination.contactName!,
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          if (destination.contactPhone != null)
+                            GestureDetector(
+                              onTap: () => launchUrl(Uri.parse('tel:${destination.contactPhone}')),
+                              child: Text(
+                                destination.contactPhone!,
+                                style: const TextStyle(color: Colors.blue),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (destination.contactPhone != null)
+                      IconButton(
+                        icon: const Icon(Icons.phone, color: Colors.green),
+                        onPressed: () => launchUrl(Uri.parse('tel:${destination.contactPhone}')),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Notes
+            if (destination.notes != null && destination.notes!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.note, size: 14, color: Colors.orange),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      destination.notes!,
+                      style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            // Items list
+            if (destination.items.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.inventory_2, size: 16, color: Colors.blue),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Items (${destination.items.length})',
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 12),
+                    ...destination.items.map((item) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.name ?? 'Unknown Item',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          Text(
+                            'x${item.quantityOrdered}',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                          if (item.unitPrice != null) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              '${(item.unitPrice! * item.quantityOrdered).toStringAsFixed(2)} JOD',
+                              style: TextStyle(fontSize: 12, color: Colors.green.shade700),
+                            ),
+                          ],
+                        ],
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ],
+
             const SizedBox(height: 12),
             _buildActions(context, ref),
           ],

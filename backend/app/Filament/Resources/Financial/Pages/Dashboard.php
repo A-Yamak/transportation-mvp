@@ -12,7 +12,7 @@ class Dashboard extends Page
 {
     protected static string $resource = FinancialResource::class;
 
-    protected static string $view = 'filament.resources.financial.pages.dashboard';
+    protected string $view = 'filament.resources.financial.pages.dashboard';
 
     protected ?string $heading = 'Financial Dashboard';
 

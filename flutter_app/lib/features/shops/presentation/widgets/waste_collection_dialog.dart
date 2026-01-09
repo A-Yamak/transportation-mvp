@@ -78,28 +78,33 @@ class _WasteCollectionDialogState extends ConsumerState<WasteCollectionDialog> {
     // Check result and handle
     if (mounted) {
       final state = ref.read(wasteCollectionProvider);
-      state.whenData((collection) {
-        if (collection != null) {
-          // Success
+      state.when(
+        data: (collection) {
+          if (collection != null) {
+            // Success
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Waste logged for ${widget.shop.name}'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            widget.onSuccess?.call();
+            Navigator.of(context).pop(true);
+          }
+        },
+        loading: () {
+          // Still loading, do nothing
+        },
+        error: (error, stack) {
+          // Error
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('Waste logged for ${widget.shop.name}'),
-              backgroundColor: Colors.green,
+              content: Text('Error: $error'),
+              backgroundColor: Colors.red,
             ),
           );
-          widget.onSuccess?.call();
-          Navigator.of(context).pop(true);
-        }
-      }).whenError((error, stack) {
-        // Error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
+        },
+      );
     }
   }
 

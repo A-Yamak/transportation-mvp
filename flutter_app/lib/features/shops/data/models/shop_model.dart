@@ -20,6 +20,15 @@ class ShopModel {
   final WasteCollectionModel? expectedWaste;
   final int? sequenceInTrip;
 
+  // Summary data (from list endpoint - used when expectedWaste.items is empty)
+  final int? wasteSummaryItemsCount;
+  final int? wasteSummaryTotalDelivered;
+  final int? wasteSummaryTotalWaste;
+  final int? wasteSummaryTotalSold;
+  final int? wasteSummaryExpiredCount;
+  final bool? hasPendingWaste;
+  final bool? isWasteCollected;
+
   ShopModel({
     required this.id,
     required this.externalShopId,
@@ -36,10 +45,19 @@ class ShopModel {
     required this.updatedAt,
     this.expectedWaste,
     this.sequenceInTrip,
+    this.wasteSummaryItemsCount,
+    this.wasteSummaryTotalDelivered,
+    this.wasteSummaryTotalWaste,
+    this.wasteSummaryTotalSold,
+    this.wasteSummaryExpiredCount,
+    this.hasPendingWaste,
+    this.isWasteCollected,
   });
 
   /// Check if shop has waste to collect
-  bool get hasWaste => expectedWaste != null && expectedWaste!.items.isNotEmpty;
+  bool get hasWaste =>
+      hasPendingWaste == true ||
+      (expectedWaste != null && expectedWaste!.items.isNotEmpty);
 
   /// Check if waste has been collected
   bool get wasteCollected => expectedWaste?.isCollected ?? false;
@@ -67,7 +85,7 @@ class ShopModel {
 
     return ShopModel(
       id: json['id']?.toString() ?? '',
-      externalShopId: json['external_shop_id']?.toString() ?? '',
+      externalShopId: json['external_shop_id']?.toString() ?? json['external_id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown Shop',
       address: json['address']?.toString() ?? '',
       lat: (json['lat'] ?? json['latitude'] ?? 0.0).toDouble(),
@@ -89,6 +107,55 @@ class ShopModel {
       sequenceInTrip: json['sequence_in_trip'] != null
           ? int.tryParse(json['sequence_in_trip'].toString())
           : null,
+    );
+  }
+
+  /// Factory to create from list API response (simplified format)
+  factory ShopModel.fromListJson(Map<String, dynamic> json) {
+    // Parse waste_summary into a mock WasteCollectionModel for UI display
+    final wasteSummary = json['waste_summary'] as Map<String, dynamic>?;
+    final hasPendingWaste = json['has_pending_waste'] == true;
+    final isCollected = json['is_collected'] == true;
+
+    WasteCollectionModel? waste;
+    if (wasteSummary != null && hasPendingWaste) {
+      // Create items list with summary data for display
+      final itemsCount = wasteSummary['items_count'] as int? ?? 0;
+      final totalDelivered = wasteSummary['total_delivered'] as int? ?? 0;
+      final totalWaste = wasteSummary['total_waste'] as int? ?? 0;
+
+      waste = WasteCollectionModel(
+        id: '',
+        shopId: json['id']?.toString() ?? '',
+        shopName: json['name']?.toString() ?? '',
+        collectionDate: DateTime.now(),
+        collectedAt: isCollected ? DateTime.now() : null,
+        items: [], // Items loaded on demand via getExpectedWaste
+      );
+      // Note: Summary data available via waste_summary, items fetched separately
+    }
+
+    return ShopModel(
+      id: json['id']?.toString() ?? '',
+      externalShopId: json['external_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Unknown Shop',
+      address: json['address']?.toString() ?? '',
+      lat: (json['lat'] ?? 0.0).toDouble(),
+      lng: (json['lng'] ?? 0.0).toDouble(),
+      contactName: json['contact_name']?.toString(),
+      contactPhone: json['contact_phone']?.toString(),
+      trackWaste: true, // Only tracked shops are returned
+      isActive: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      expectedWaste: waste,
+      wasteSummaryItemsCount: wasteSummary?['items_count'] as int?,
+      wasteSummaryTotalDelivered: wasteSummary?['total_delivered'] as int?,
+      wasteSummaryTotalWaste: wasteSummary?['total_waste'] as int?,
+      wasteSummaryTotalSold: wasteSummary?['total_sold'] as int?,
+      wasteSummaryExpiredCount: wasteSummary?['expired_items_count'] as int?,
+      hasPendingWaste: hasPendingWaste,
+      isWasteCollected: isCollected,
     );
   }
 
@@ -127,6 +194,13 @@ class ShopModel {
     DateTime? updatedAt,
     WasteCollectionModel? expectedWaste,
     int? sequenceInTrip,
+    int? wasteSummaryItemsCount,
+    int? wasteSummaryTotalDelivered,
+    int? wasteSummaryTotalWaste,
+    int? wasteSummaryTotalSold,
+    int? wasteSummaryExpiredCount,
+    bool? hasPendingWaste,
+    bool? isWasteCollected,
   }) {
     return ShopModel(
       id: id ?? this.id,
@@ -144,6 +218,13 @@ class ShopModel {
       updatedAt: updatedAt ?? this.updatedAt,
       expectedWaste: expectedWaste ?? this.expectedWaste,
       sequenceInTrip: sequenceInTrip ?? this.sequenceInTrip,
+      wasteSummaryItemsCount: wasteSummaryItemsCount ?? this.wasteSummaryItemsCount,
+      wasteSummaryTotalDelivered: wasteSummaryTotalDelivered ?? this.wasteSummaryTotalDelivered,
+      wasteSummaryTotalWaste: wasteSummaryTotalWaste ?? this.wasteSummaryTotalWaste,
+      wasteSummaryTotalSold: wasteSummaryTotalSold ?? this.wasteSummaryTotalSold,
+      wasteSummaryExpiredCount: wasteSummaryExpiredCount ?? this.wasteSummaryExpiredCount,
+      hasPendingWaste: hasPendingWaste ?? this.hasPendingWaste,
+      isWasteCollected: isWasteCollected ?? this.isWasteCollected,
     );
   }
 

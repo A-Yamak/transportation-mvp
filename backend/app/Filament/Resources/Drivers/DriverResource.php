@@ -15,11 +15,17 @@ class DriverResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
-
-    protected static ?string $navigationGroup = 'Operations';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-user-circle';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

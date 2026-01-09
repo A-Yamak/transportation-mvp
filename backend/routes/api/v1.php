@@ -88,6 +88,11 @@ Route::middleware('auth:api')->group(function () {
         Route::post('trips/{trip}/destinations/{destination}/fail', [DriverController::class, 'failDestination']);
         Route::get('trips/{trip}/destinations/{destination}/navigate', [DriverController::class, 'getNavigationUrl']);
 
+        // Shops and waste collection
+        Route::get('shops', [DriverController::class, 'listShops']);
+        Route::get('shops/{shop}/waste-expected', [DriverController::class, 'getExpectedWaste']);
+        Route::post('trips/{trip}/shops/{shop}/waste-collected', [DriverController::class, 'logWasteCollection']);
+
         // Notification management
         Route::prefix('notifications')->group(function () {
             Route::post('register-token', [NotificationController::class, 'registerFcmToken']);

@@ -14,11 +14,17 @@ class TripResource extends Resource
 {
     protected static ?string $model = Trip::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-truck';
-
-    protected static ?string $navigationGroup = 'Operations';
-
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-truck';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
 
     protected static ?string $recordTitleAttribute = 'id';
 

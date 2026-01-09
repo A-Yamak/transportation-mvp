@@ -5,7 +5,7 @@ class ApiConfig {
   /// Can be overridden with: --dart-define=API_BASE_URL=http://10.0.2.2:8000
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://transportation-app.alsabiqoon.com',
+    defaultValue: 'http://192.168.1.114:8001',  // LOCAL DEV - change back to production before release
   );
 
   /// API version prefix
@@ -57,6 +57,7 @@ class ApiEndpoints {
       '${ApiConfig.apiPrefix}/driver/trips/$tripId/destinations/$destId/navigate';
 
   // Driver - Shop and waste collection endpoints
+  static const String shops = '${ApiConfig.apiPrefix}/driver/shops';
   static String getExpectedWaste(String shopId) =>
       '${ApiConfig.apiPrefix}/driver/shops/$shopId/waste-expected';
   static String logWasteCollection(String tripId, String shopId) =>

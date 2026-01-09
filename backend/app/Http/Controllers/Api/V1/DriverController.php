@@ -56,7 +56,7 @@ class DriverController extends Controller
 
         $trips = Trip::where('driver_id', $driver->id)
             ->today()
-            ->with(['deliveryRequest.destinations', 'vehicle'])
+            ->with(['deliveryRequest.destinations.items', 'deliveryRequest.business', 'vehicle'])
             ->orderBy('created_at')
             ->get();
 
@@ -538,7 +538,69 @@ class DriverController extends Controller
         return TripHistoryResource::collection($trips)->response();
     }
 
-    // ========== WASTE COLLECTION ENDPOINTS ==========
+    // ========== SHOPS & WASTE COLLECTION ENDPOINTS ==========
+
+    /**
+     * List shops with expected waste for the driver.
+     *
+     * GET /api/v1/driver/shops
+     *
+     * Returns shops that have pending waste collections, along with
+     * their waste status and item counts.
+     */
+    public function listShops(): JsonResponse
+    {
+        $driver = $this->getAuthenticatedDriver();
+
+        // Get all active shops with pending waste (not yet collected)
+        $shops = Shop::where('is_active', true)
+            ->where('track_waste', true)
+            ->with(['wasteCollections' => function ($query) {
+                $query->whereNull('collected_at')
+                    ->with('items');
+            }])
+            ->get();
+
+        $shopsData = $shops->map(function ($shop) {
+            $pendingCollections = $shop->wasteCollections;
+            $wasteItems = $pendingCollections->pluck('items')->flatten();
+
+            $totalDelivered = $wasteItems->sum('quantity_delivered');
+            $totalWaste = $wasteItems->sum('pieces_waste');
+            $expiredCount = $wasteItems->filter(fn ($item) => $item->isExpired())->count();
+
+            return [
+                'id' => $shop->id,
+                'external_id' => $shop->external_shop_id,
+                'name' => $shop->name,
+                'address' => $shop->address,
+                'lat' => $shop->lat ? (float) $shop->lat : null,
+                'lng' => $shop->lng ? (float) $shop->lng : null,
+                'contact_name' => $shop->contact_name,
+                'contact_phone' => $shop->contact_phone,
+                'has_pending_waste' => $wasteItems->isNotEmpty(),
+                'waste_summary' => [
+                    'items_count' => $wasteItems->count(),
+                    'total_delivered' => $totalDelivered,
+                    'total_waste' => $totalWaste,
+                    'total_sold' => $totalDelivered - $totalWaste,
+                    'expired_items_count' => $expiredCount,
+                ],
+                'is_collected' => $pendingCollections->isEmpty() || $pendingCollections->every(fn ($c) => $c->collected_at !== null),
+            ];
+        });
+
+        // Sort: shops with pending waste first
+        $sorted = $shopsData->sortByDesc('has_pending_waste')->values();
+
+        return response()->json([
+            'data' => $sorted,
+            'meta' => [
+                'total' => $shops->count(),
+                'with_pending_waste' => $shopsData->where('has_pending_waste', true)->count(),
+            ],
+        ]);
+    }
 
     /**
      * Get expected waste items for a shop.

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/auth/auth_provider.dart';
 import '../features/auth/presentation/login_screen.dart';
-import '../features/trips/presentation/trips_list_screen.dart';
+import '../features/home/presentation/home_shell.dart';
 import '../features/trips/presentation/trip_details_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/trip_history_screen.dart';
@@ -66,10 +66,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
 
-      // Home (trips list)
+      // Home (tabs: Trips, Shops)
       GoRoute(
         path: Routes.home,
-        builder: (context, state) => const TripsListScreen(),
+        builder: (context, state) => const HomeShell(),
       ),
 
       // Trip details

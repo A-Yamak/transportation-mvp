@@ -15,11 +15,17 @@ class ShopResource extends Resource
 {
     protected static ?string $model = Shop::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map-pin';
-
-    protected static ?string $navigationGroup = 'Operations';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-map-pin';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

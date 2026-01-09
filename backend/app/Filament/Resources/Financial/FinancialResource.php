@@ -7,11 +7,17 @@ use Filament\Resources\Resource;
 
 class FinancialResource extends Resource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-
-    protected static ?string $navigationGroup = 'Reporting';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-currency-dollar';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Reporting';
+    }
 
     protected static ?string $label = 'Financial Dashboard';
 
