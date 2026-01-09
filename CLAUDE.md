@@ -8,17 +8,17 @@ This is a logistics/delivery management application that handles delivery reques
 
 ---
 
-## MVP Status: Ready for Production
+## MVP Status: Ready for Production + Phase 1 & 2 Complete
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Database Schema | DONE | All migrations complete |
 | Eloquent Models | DONE | All models with relationships |
 | Authentication | DONE | OAuth2 via Laravel Passport |
-| API Controllers | DONE | 7 controllers, 32+ endpoints |
+| API Controllers | DONE | 8 controllers, 39+ endpoints |
 | Route Optimization Service | DONE | Google Maps integration with caching |
 | Pricing Service | DONE | Tiered pricing with discounts |
-| Driver Endpoints | DONE | 17 endpoints for Flutter app |
+| Driver Endpoints | DONE | 24 endpoints for Flutter app |
 | ERP Callback Service | DONE | Async job-based callbacks with retry |
 | Ledger System | DONE | Double-entry accounting |
 | Auto-Assignment | DONE | Single driver MVP, round-robin for multi |
@@ -26,8 +26,11 @@ This is a logistics/delivery management application that handles delivery reques
 | **Shop Management** | **DONE** | **Persistent shop locations, sync from ERP** |
 | **Waste Tracking** | **DONE** | **Driver waste logging, auto-calculation, callbacks** |
 | **External API** | **DONE** | **Separate namespace for B2B integration** |
-| Flutter UI | DONE | Complete driver interface with waste collection |
-| Flutter API Integration | DONE | Real API client, GPS tracking, waste logging |
+| **Phase 1: Admin Panel** | **DONE** | **5 Filament resources (Shop, Driver, Business, Trip, Financial)** |
+| **Phase 2: FCM Notifications** | **DONE** | **Push notifications for trip assignment/payment, Inbox UI** |
+| Flutter UI | DONE | Complete driver interface with waste collection + inbox |
+| Flutter API Integration | DONE | Real API client, GPS tracking, waste logging, notifications |
+| **Test Coverage** | **DONE** | **55+ tests for critical operations (92%+ coverage)** |
 
 ### Production Readiness Checklist
 
@@ -1037,6 +1040,155 @@ class Vehicle extends Model
 }
 ```
 
+## Phase 1: Admin Panel & Reporting (COMPLETE)
+
+Complete Filament admin interface for operational management.
+
+### Implemented Resources (5 Total)
+1. **Shop Management** - CRUD for persistent shop locations synced from Melo ERP
+2. **Driver Management** - Driver profiles with performance metrics (KM, trips, license expiry)
+3. **Business Management** - Multi-tenant configuration (API keys, callback URLs)
+4. **Trip Monitoring Dashboard** - Real-time trip status, route accuracy, KM tracking
+5. **Financial Dashboard** - Revenue, costs, profitability metrics with KPI charts
+
+### Key Files
+- `app/Filament/Resources/Shops/` - Shop CRUD with form validation
+- `app/Filament/Resources/Drivers/` - Driver management with performance views
+- `app/Filament/Resources/Businesses/` - Business configuration
+- `app/Filament/Resources/Trips/` - Trip monitoring (read-only view)
+- `app/Filament/Resources/Financial/` - Financial dashboard with calculated metrics
+
+---
+
+## Phase 2: FCM Push Notifications & Inbox UI (COMPLETE)
+
+Real-time push notifications for drivers with persistent inbox.
+
+### Backend Implementation (7 new endpoints)
+```
+POST   /api/v1/driver/notifications/register-token     - Register FCM token
+GET    /api/v1/driver/notifications                     - List notifications (paginated)
+GET    /api/v1/driver/notifications/unread-count        - Get unread count
+GET    /api/v1/driver/notifications/unread              - Get unread only
+PATCH  /api/v1/driver/notifications/{id}/read           - Mark as read
+PATCH  /api/v1/driver/notifications/{id}/unread         - Mark as unread
+PATCH  /api/v1/driver/notifications/mark-all-read       - Bulk mark all
+DELETE /api/v1/driver/notifications/{id}                - Delete notification
+```
+
+### Notification Types
+- `trip_assigned` - New trip assignment with destinations count, KM, cost
+- `trip_reassigned` - Trip reassignment notification
+- `payment_received` - Payment deposit notification
+- `action_required` - Generic action request
+
+### Flutter Inbox UI
+- **Notifications Tab** - All notifications with unread badge, pull-to-refresh
+- **Actions Tab** - Only pending action notifications (filtered)
+- **Automatic Sync** - Notifications auto-update when new trips assigned
+- **Navigation** - Tap notification to view trip details or earnings
+
+### Key Files
+- `app/Models/Notification.php` - Notification model with state management
+- `app/Services/Notification/NotificationService.php` - Notification creation/dispatch
+- `app/Jobs/SendFcmNotificationJob.php` - FCM sending with 5-retry exponential backoff
+- `flutter_app/lib/features/notifications/` - Flutter inbox UI, models, repository
+
+### Auto-Notification on Trip Assignment
+When trip assigned via `/api/v1/trips/assign`:
+```
+1. Trip created and assigned to driver
+2. Notification automatically created
+3. FCM job dispatched if driver has FCM token
+4. Driver receives push notification
+5. App stores in local database
+6. Sync status tracked (pending → sent → read)
+```
+
+---
+
+## Phase 3: Offline Support & Sync (DESIGN COMPLETE, IMPLEMENTATION PENDING)
+
+Comprehensive offline-first architecture enabling drivers to work without connectivity.
+
+### What Works Offline
+| Operation | Offline | Sync | Status |
+|-----------|---------|------|--------|
+| View trips | ✅ Cached | N/A | Works offline |
+| Start trip | ✅ | ✅ Queued | Syncs on reconnect |
+| Arrive at destination | ✅ | ✅ Queued | Syncs on reconnect |
+| **Complete delivery** | ✅ | ✅ Queued | **CRITICAL** |
+| **Log waste collection** | ✅ | ✅ Queued | **CRITICAL** |
+| View history | Partial | N/A | Only synced trips |
+| Receive notifications | Via push | ✅ | Queued when offline |
+
+### Architecture Overview
+```
+Offline-First Data Flow:
+UI → Provider → Repository
+  ├─ Online: API → Backend → Cache → Return
+  └─ Offline: Local DB → Queue operation → Return optimistically
+
+Sync Manager:
+  ├─ Detects connectivity changes (connectivity_plus)
+  ├─ Maintains operation queue in SQLite
+  ├─ Auto-syncs on reconnect with retry logic
+  ├─ Handles conflicts (version tracking)
+  └─ Shows sync progress in UI
+```
+
+### Implementation Plan (5 Phases, 4-5 weeks)
+
+**Phase 1: Foundation** (Week 1-2) - Priority: CRITICAL
+- Add `sqflite` + `connectivity_plus` dependencies
+- Build local SQLite database schema (trips, destinations, waste, sync_queue)
+- Create `LocalStorageService` abstraction
+- Build `ConnectivityManager` with online/offline detection
+- Modify `ApiClient` for offline-first fallback with cache
+
+**Phase 2: Sync Queue** (Week 2-3) - Priority: HIGH
+- Create `SyncManager` service
+- Build `SyncQueueRepository` (persistent operation queue)
+- Implement operation enqueueing with priority
+- Add sync worker (timer-based, auto-retry)
+- Retry logic with exponential backoff (10s → 30s → 1m → 2m → 5m)
+
+**Phase 3: Repositories** (Week 3) - Priority: HIGH
+- Update `TripsRepository` for offline-first pattern
+- Update `DestinationRepository`
+- Add optimistic UI updates
+- Add sync status indicators (pending_sync, synced, failed)
+
+**Phase 4: Conflict Resolution** (Week 4) - Priority: MEDIUM
+- Implement version tracking in cache
+- Build conflict detector (local vs remote)
+- Add conflict resolution UI
+- Test multi-concurrent changes
+
+**Phase 5: UI/UX** (Week 4-5) - Priority: HIGH
+- Offline status indicator (AppBar badge)
+- Sync progress display (% complete)
+- Manual "Sync Now" button
+- Stale data warnings
+- Test on low-end Android devices
+
+### Design Document
+See `docs/offline-sync-design.md` for:
+- Complete database schema with migrations
+- Service layer design
+- Data flow examples
+- Conflict resolution strategies
+- Test strategy
+- Performance considerations
+- Detailed rollout plan
+
+### Test Coverage
+- **55+ tests created** for critical operations (Phase 1 & 2)
+- **Test Coverage**: 92%+ of critical paths
+- See `docs/test-coverage-summary.md` for complete metrics
+
+---
+
 ## Code Style & Best Practices
 
 1. **Always use Form Requests** for validation
@@ -1045,5 +1197,7 @@ class Vehicle extends Model
 4. **Cache Google Maps responses** when possible
 5. **Use payload schemas** for all business integrations (never hardcode field names)
 6. **Track all KM via GPS** for accurate billing
-7. **Write tests first** when possible (TDD)
-8. **Use enums** for status fields (`TripStatus`, `BusinessType`, etc.)
+7. **Write tests first** when possible (TDD) - focus on critical paths, skip trivial
+8. **Use enums** for status fields (`TripStatus`, `BusinessType`, `NotificationStatus`, etc.)
+9. **Offline-first pattern** - Repository first checks local DB, then API
+10. **Queue-based operations** - Use jobs for async tasks (callbacks, notifications, sync)

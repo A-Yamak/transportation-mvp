@@ -6,6 +6,7 @@ namespace App\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +26,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'fcm_token',
+        'fcm_token_updated_at',
     ];
 
     /**
@@ -46,6 +49,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'fcm_token_updated_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -66,5 +70,33 @@ class User extends Authenticatable implements FilamentUser
     public function driver(): HasOne
     {
         return $this->hasOne(Driver::class);
+    }
+
+    /**
+     * Get notifications for this user.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Update FCM token
+     */
+    public function updateFcmToken(string $token): self
+    {
+        $this->update([
+            'fcm_token' => $token,
+            'fcm_token_updated_at' => now(),
+        ]);
+        return $this;
+    }
+
+    /**
+     * Check if user has valid FCM token
+     */
+    public function hasFcmToken(): bool
+    {
+        return !empty($this->fcm_token);
     }
 }

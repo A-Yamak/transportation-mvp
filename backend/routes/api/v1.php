@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DeliveryRequestController;
 use App\Http\Controllers\Api\V1\DriverController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\TripAssignmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -86,6 +87,18 @@ Route::middleware('auth:api')->group(function () {
         Route::post('trips/{trip}/destinations/{destination}/complete', [DriverController::class, 'completeDestination']);
         Route::post('trips/{trip}/destinations/{destination}/fail', [DriverController::class, 'failDestination']);
         Route::get('trips/{trip}/destinations/{destination}/navigate', [DriverController::class, 'getNavigationUrl']);
+
+        // Notification management
+        Route::prefix('notifications')->group(function () {
+            Route::post('register-token', [NotificationController::class, 'registerFcmToken']);
+            Route::get('/', [NotificationController::class, 'index']);
+            Route::get('unread-count', [NotificationController::class, 'unreadCount']);
+            Route::get('unread', [NotificationController::class, 'unread']);
+            Route::patch('{notification}/read', [NotificationController::class, 'markAsRead']);
+            Route::patch('{notification}/unread', [NotificationController::class, 'markAsUnread']);
+            Route::patch('mark-all-read', [NotificationController::class, 'markAllAsRead']);
+            Route::delete('{notification}', [NotificationController::class, 'destroy']);
+        });
     });
 
     // -----------------------------------------------------------------------------

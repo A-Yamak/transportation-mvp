@@ -12,6 +12,7 @@ use App\Models\DeliveryRequest;
 use App\Models\Driver;
 use App\Models\Trip;
 use App\Models\Vehicle;
+use App\Services\Notification\NotificationService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -27,7 +28,7 @@ class TripAssignmentController extends Controller
      *
      * POST /api/v1/trips/assign
      */
-    public function assign(AssignTripRequest $request): TripResource|JsonResponse
+    public function assign(AssignTripRequest $request, NotificationService $notificationService): TripResource|JsonResponse
     {
         $deliveryRequest = DeliveryRequest::findOrFail($request->getDeliveryRequestId());
         $driver = Driver::findOrFail($request->getDriverId());
@@ -69,6 +70,15 @@ class TripAssignmentController extends Controller
         $deliveryRequest->update([
             'status' => DeliveryRequestStatus::Accepted,
         ]);
+
+        // Notify driver of trip assignment
+        $tripData = [
+            'trip_id' => $trip->id,
+            'destinations_count' => $deliveryRequest->destinations()->count(),
+            'total_km' => $trip->total_km ?? 0,
+            'estimated_cost' => $trip->estimated_cost ?? 0,
+        ];
+        $notificationService->notifyTripAssigned($driver->user, $tripData);
 
         return (new TripResource(
             $trip->load(['deliveryRequest.destinations', 'vehicle', 'driver'])
