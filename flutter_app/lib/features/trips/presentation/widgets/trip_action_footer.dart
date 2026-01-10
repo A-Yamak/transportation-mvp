@@ -68,7 +68,7 @@ class TripActionFooter extends ConsumerWidget {
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                           Text(
-                            '${trip.totalKm?.toStringAsFixed(1) ?? '0.0'} km',
+                            '${(trip.actualKmDriven ?? trip.estimatedKm)?.toStringAsFixed(1) ?? '0.0'} km',
                             style:
                                 Theme.of(context).textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
@@ -192,7 +192,7 @@ class TripActionFooterCompact extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'KM: ${trip.totalKm?.toStringAsFixed(1) ?? '0.0'}',
+                  'KM: ${(trip.actualKmDriven ?? trip.estimatedKm)?.toStringAsFixed(1) ?? '0.0'}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

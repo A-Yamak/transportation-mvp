@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:transportation_app/core/services/location_service.dart';
+import 'package:driver_app/core/services/location_service.dart';
 
 void main() {
   group('LatLng Tests', () {

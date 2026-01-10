@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:transportation_app/features/trips/data/trips_repository.dart';
-import 'package:transportation_app/features/trips/data/models/payment_collection_model.dart';
-import 'package:transportation_app/features/trips/data/models/payment_method_enum.dart';
-import 'package:transportation_app/features/trips/providers/payment_collection_provider.dart';
+import 'package:driver_app/features/trips/data/trips_repository.dart';
+import 'package:driver_app/features/trips/data/models/payment_collection_model.dart';
+import 'package:driver_app/features/trips/data/models/payment_method_enum.dart';
+import 'package:driver_app/features/trips/providers/payment_collection_provider.dart';
 
 import 'payment_collection_provider_test.mocks.dart';
 

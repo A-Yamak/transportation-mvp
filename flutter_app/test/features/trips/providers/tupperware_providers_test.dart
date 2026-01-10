@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:transportation_app/features/trips/data/tupperware_repository.dart';
-import 'package:transportation_app/features/trips/data/models/tupperware_balance_model.dart';
-import 'package:transportation_app/features/trips/data/models/tupperware_movement_model.dart';
-import 'package:transportation_app/features/trips/providers/tupperware_providers.dart';
+import 'package:driver_app/features/trips/data/tupperware_repository.dart';
+import 'package:driver_app/features/trips/data/models/tupperware_balance_model.dart';
+import 'package:driver_app/features/trips/data/models/tupperware_movement_model.dart';
+import 'package:driver_app/features/trips/providers/tupperware_providers.dart';
 
 import 'tupperware_providers_test.mocks.dart';
 

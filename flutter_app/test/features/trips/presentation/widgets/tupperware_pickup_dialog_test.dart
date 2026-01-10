@@ -54,7 +54,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -92,7 +92,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -120,7 +120,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -151,7 +151,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -187,7 +187,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -220,7 +220,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -252,7 +252,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -279,7 +279,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -311,7 +311,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -339,7 +339,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act
@@ -371,7 +371,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getShopBalance('shop-1'))
+      when(() => mockRepository.getShopBalance('shop-1'))
           .thenAnswer((_) async => balances);
 
       // Act

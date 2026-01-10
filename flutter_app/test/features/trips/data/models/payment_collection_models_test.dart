@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:transportation_app/features/trips/data/models/daily_reconciliation_model.dart';
-import 'package:transportation_app/features/trips/data/models/payment_collection_model.dart';
-import 'package:transportation_app/features/trips/data/models/payment_method_enum.dart';
-import 'package:transportation_app/features/trips/data/models/payment_status_enum.dart';
-import 'package:transportation_app/features/trips/data/models/shop_breakdown_model.dart';
-import 'package:transportation_app/features/trips/data/models/shortage_reason_enum.dart';
-import 'package:transportation_app/features/trips/data/models/tupperware_balance_model.dart';
-import 'package:transportation_app/features/trips/data/models/tupperware_movement_model.dart';
+import 'package:driver_app/features/trips/data/models/daily_reconciliation_model.dart';
+import 'package:driver_app/features/trips/data/models/payment_collection_model.dart';
+import 'package:driver_app/features/trips/data/models/payment_method_enum.dart';
+import 'package:driver_app/features/trips/data/models/payment_status_enum.dart';
+import 'package:driver_app/features/trips/data/models/shop_breakdown_model.dart';
+import 'package:driver_app/features/trips/data/models/shortage_reason_enum.dart';
+import 'package:driver_app/features/trips/data/models/tupperware_balance_model.dart';
+import 'package:driver_app/features/trips/data/models/tupperware_movement_model.dart';
 
 void main() {
   group('PaymentMethodEnum Tests', () {

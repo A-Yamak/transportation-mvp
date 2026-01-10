@@ -2,11 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:dio/dio.dart';
-import 'package:transportation_app/core/api/api_client.dart';
-import 'package:transportation_app/core/api/api_exceptions.dart';
-import 'package:transportation_app/features/trips/data/trips_repository.dart';
-import 'package:transportation_app/features/trips/data/models/payment_method_enum.dart';
-import 'package:transportation_app/features/trips/data/models/payment_status_enum.dart';
+import 'package:driver_app/core/api/api_client.dart';
+import 'package:driver_app/core/api/api_exceptions.dart';
+import 'package:driver_app/features/trips/data/trips_repository.dart';
+import 'package:driver_app/features/trips/data/models/payment_method_enum.dart';
+import 'package:driver_app/features/trips/data/models/payment_status_enum.dart';
 
 import 'trips_repository_payment_test.mocks.dart';
 

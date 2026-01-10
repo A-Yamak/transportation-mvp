@@ -18,6 +18,14 @@ class LocationService {
   Position? _lastPosition;
   double _totalDistanceMeters = 0;
   bool _isTracking = false;
+  DateTime? _lastPositionTime;
+  double _lastSpeed = 0; // m/s
+
+  /// Maximum reasonable speed for vehicle (200 km/h = 55.6 m/s)
+  static const double maxReasonableSpeed = 55.6;
+
+  /// Minimum accuracy threshold (in meters)
+  static const double accuracyThreshold = 100;
 
   /// Total distance traveled in kilometers
   double get totalDistanceKm => _totalDistanceMeters / 1000;
@@ -30,6 +38,9 @@ class LocationService {
 
   /// Current/last known position
   Position? get lastPosition => _lastPosition;
+
+  /// Current GPS accuracy in meters
+  double? get currentAccuracy => _lastPosition?.accuracy;
 
   /// Check and request location permissions
   /// For background tracking, also requests background location permission
@@ -137,9 +148,9 @@ class LocationService {
     );
   }
 
-  /// Handle position updates
+  /// Handle position updates with smart GPS error validation
   void _onPositionUpdate(Position position) {
-    if (_lastPosition != null) {
+    if (_lastPosition != null && _lastPositionTime != null) {
       final distance = Geolocator.distanceBetween(
         _lastPosition!.latitude,
         _lastPosition!.longitude,
@@ -147,13 +158,93 @@ class LocationService {
         position.longitude,
       );
 
-      // Only add distance if it's reasonable (filter GPS jumps)
-      // Ignore movements > 500m in a single update (likely GPS error)
-      if (distance < 500) {
-        _totalDistanceMeters += distance;
+      // Calculate time elapsed in seconds
+      final timeDiff = position.timestamp!.difference(_lastPositionTime!).inMilliseconds / 1000.0;
+
+      // Only process if we have a reasonable time difference
+      if (timeDiff > 0) {
+        // Calculate speed in m/s
+        final speed = distance / timeDiff;
+
+        // Validate GPS position using multiple criteria
+        final isValid = _isValidPosition(
+          distance: distance,
+          speed: speed,
+          accuracy: position.accuracy,
+          timeDiff: timeDiff,
+        );
+
+        if (isValid) {
+          _totalDistanceMeters += distance;
+          _lastSpeed = speed;
+          debugPrint(
+            'GPS Update: Distance=${distance.toStringAsFixed(1)}m, '
+            'Speed=${speed.toStringAsFixed(1)}m/s, '
+            'Accuracy=${position.accuracy.toStringAsFixed(1)}m',
+          );
+        } else {
+          debugPrint(
+            'GPS Error detected - rejected: Distance=${distance.toStringAsFixed(1)}m, '
+            'Speed=${speed.toStringAsFixed(1)}m/s, '
+            'Accuracy=${position.accuracy.toStringAsFixed(1)}m',
+          );
+        }
       }
+    } else {
+      // First position, always accept
+      debugPrint(
+        'GPS Initial position: '
+        'Accuracy=${position.accuracy.toStringAsFixed(1)}m',
+      );
     }
+
     _lastPosition = position;
+    _lastPositionTime = position.timestamp;
+  }
+
+  /// Validate if a GPS position is realistic
+  bool _isValidPosition({
+    required double distance,
+    required double speed,
+    required double accuracy,
+    required double timeDiff,
+  }) {
+    // Rule 1: Distance sanity check (typically max 500m, but allow up to 2km for highway)
+    // At 200 km/h, in 5 seconds we can travel ~277m
+    final maxDistance = maxReasonableSpeed * timeDiff * 1.5; // 1.5x buffer
+    if (distance > maxDistance) {
+      debugPrint('  → Failed: Distance too large ($distance > $maxDistance)');
+      return false;
+    }
+
+    // Rule 2: Speed sanity check (can't exceed 200 km/h = 55.6 m/s)
+    if (speed > maxReasonableSpeed) {
+      debugPrint('  → Failed: Speed too high ($speed > $maxReasonableSpeed m/s)');
+      return false;
+    }
+
+    // Rule 3: Acceleration sanity check
+    // Can't accelerate more than ~0.5g (5 m/s²) in a vehicle
+    const maxAcceleration = 5.0; // m/s²
+    final acceleration = (speed - _lastSpeed).abs() / timeDiff;
+    if (acceleration > maxAcceleration) {
+      debugPrint('  → Failed: Acceleration too high ($acceleration > $maxAcceleration m/s²)');
+      return false;
+    }
+
+    // Rule 4: Accuracy check - if accuracy > 100m, be more conservative
+    if (accuracy > accuracyThreshold && distance > 200) {
+      debugPrint('  → Failed: Poor accuracy with large distance ($accuracy > $accuracyThreshold, distance=$distance)');
+      return false;
+    }
+
+    // Rule 5: Very small distances are usually noise when accuracy is poor
+    if (distance < 5 && accuracy > 50) {
+      debugPrint('  → Failed: Tiny distance with poor accuracy (distance=$distance, accuracy=$accuracy)');
+      return false;
+    }
+
+    return true; // Position is valid
   }
 
   /// Handle location errors
