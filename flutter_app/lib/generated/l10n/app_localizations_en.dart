@@ -276,4 +276,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pricePerKm => 'Price/km';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get passwordResetEmailSent =>
+      'If an account exists with this email, you will receive a password reset link.';
 }

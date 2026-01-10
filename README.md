@@ -340,6 +340,13 @@ POST /api/v1/auth/login
   "password": "password"
 }
 
+# Forgot password (request reset link)
+POST /api/v1/auth/forgot-password
+{
+  "email": "user@example.com"
+}
+# Always returns success (prevents email enumeration)
+
 # Use token in subsequent requests
 Authorization: Bearer {access_token}
 ```

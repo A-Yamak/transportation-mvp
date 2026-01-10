@@ -276,4 +276,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pricePerKm => 'سعر/كم';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get send => 'إرسال';
+
+  @override
+  String get passwordResetEmailSent =>
+      'إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، ستتلقى رابط إعادة تعيين كلمة المرور.';
 }

@@ -631,6 +631,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سعر/كم'**
   String get pricePerKm;
+
+  /// No description provided for @cancel.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلغاء'**
+  String get cancel;
+
+  /// No description provided for @send.
+  ///
+  /// In ar, this message translates to:
+  /// **'إرسال'**
+  String get send;
+
+  /// No description provided for @passwordResetEmailSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، ستتلقى رابط إعادة تعيين كلمة المرور.'**
+  String get passwordResetEmailSent;
 }
 
 class _AppLocalizationsDelegate

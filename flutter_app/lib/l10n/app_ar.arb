@@ -108,5 +108,9 @@
   "tankCapacity": "الخزان",
   "fullTankRange": "المدى",
   "kmPerLiter": "كم/لتر",
-  "pricePerKm": "سعر/كم"
+  "pricePerKm": "سعر/كم",
+
+  "cancel": "إلغاء",
+  "send": "إرسال",
+  "passwordResetEmailSent": "إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، ستتلقى رابط إعادة تعيين كلمة المرور."
 }

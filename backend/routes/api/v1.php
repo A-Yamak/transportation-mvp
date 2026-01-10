@@ -47,6 +47,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
     // Protected auth routes
     Route::middleware('auth:api')->group(function () {

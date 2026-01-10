@@ -196,6 +196,30 @@ class AuthController extends Controller
     }
 
     /**
+     * Request a password reset link.
+     *
+     * SECURITY: Always returns success to prevent email enumeration attacks.
+     * In production, this would send an email with a reset link.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        // TODO: In production, implement actual email sending:
+        // Password::sendResetLink($request->only('email'));
+
+        // Always return success to prevent email enumeration
+        return response()->json([
+            'message' => 'If an account exists with this email, you will receive a password reset link.',
+        ]);
+    }
+
+    /**
      * Get the password grant client credentials.
      *
      * Tries config first (for production with env vars), falls back to

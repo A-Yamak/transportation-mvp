@@ -104,5 +104,9 @@
   "tankCapacity": "Tank",
   "fullTankRange": "Range",
   "kmPerLiter": "km/L",
-  "pricePerKm": "Price/km"
+  "pricePerKm": "Price/km",
+
+  "cancel": "Cancel",
+  "send": "Send",
+  "passwordResetEmailSent": "If an account exists with this email, you will receive a password reset link."
 }

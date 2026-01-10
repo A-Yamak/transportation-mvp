@@ -18,7 +18,7 @@
 #   - https://laravel.com/docs/12.x/octane
 # ==============================================================================
 
-.PHONY: help up down build rebuild logs shell-backend shell-frontend test test-coverage lint format migrate fresh seed horizon check-docker \
+.PHONY: help up down build rebuild logs shell-backend shell-frontend test test-coverage test-coverage-html test-coverage-open lint format migrate fresh seed horizon check-docker \
         artisan tinker pail routes cache-clear cache-all restart ps logs-backend logs-frontend logs-horizon \
         model controller request resource migration seeder factory middleware policy event listener job mail notification rule command test-make \
         v1-controller v1-request v1-resource v1-crud \
@@ -312,11 +312,21 @@ test-feature: ## Run feature tests only
 	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
 	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --testsuite=Feature
 
-test-coverage: ## Run tests with coverage report
+test-coverage: ## Run tests with coverage report (text)
 	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
 	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
 	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --coverage-text
 	@echo "$(GREEN)Coverage report generated$(NC)"
+
+test-coverage-html: ## Run tests with HTML coverage report (open backend/storage/coverage/html/index.html)
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache storage/coverage/html' 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --coverage-html=storage/coverage/html
+	@echo "$(GREEN)HTML coverage report generated at backend/storage/coverage/html/index.html$(NC)"
+	@echo "$(YELLOW)Run 'make test-coverage-open' to view in browser$(NC)"
+
+test-coverage-open: ## Open HTML coverage report in browser
+	@open backend/storage/coverage/html/index.html 2>/dev/null || xdg-open backend/storage/coverage/html/index.html 2>/dev/null || echo "$(RED)No coverage report found. Run 'make test-coverage-html' first$(NC)"
 
 test-filter: ## Run specific test (usage: make test-filter name="UserTest")
 	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true

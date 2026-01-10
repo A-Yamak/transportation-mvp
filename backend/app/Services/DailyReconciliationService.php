@@ -9,6 +9,7 @@ use App\Models\DailyReconciliation;
 use App\Models\Driver;
 use App\Models\PaymentCollection;
 use App\Models\Trip;
+use App\Services\Callback\ReconciliationCallbackService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -20,6 +21,9 @@ use Illuminate\Support\Collection;
  */
 class DailyReconciliationService
 {
+    public function __construct(
+        protected ReconciliationCallbackService $callbackService,
+    ) {}
     /**
      * Generate daily reconciliation for a driver on a specific date.
      *
@@ -166,9 +170,8 @@ class DailyReconciliationService
         // Mark as submitted
         $reconciliation->markAsSubmitted();
 
-        // TODO: Send callback to Melo ERP
-        // $callbackService->sendReconciliationCallback($reconciliation)
-        // This will be implemented in Phase 4 (Integration)
+        // Send callback to Melo ERP (async via queue)
+        $this->callbackService->sendReconciliationCallback($reconciliation);
 
         return true;
     }

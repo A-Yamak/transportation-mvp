@@ -388,6 +388,11 @@ POST   /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected - Log waste
 - `sendWasteCallbackSync(WasteCollection)` - Synchronous (testing)
 - `buildCallbackPayload(WasteCollection)` - Payload construction
 
+**ReconciliationCallbackService** (`app/Services/Callback/ReconciliationCallbackService.php`)
+- `sendReconciliationCallback(DailyReconciliation)` - Async via queue
+- `sendReconciliationCallbackSync(DailyReconciliation)` - Synchronous (testing)
+- `buildCallbackPayload(DailyReconciliation)` - Payload with driver, summary, metrics, shop breakdown
+
 ### Callback Format
 
 ```json
@@ -446,7 +451,9 @@ app/Models/
 app/Services/Shop/ShopSyncService.php
 app/Services/Waste/WasteCollectionService.php
 app/Services/Callback/WasteCallbackService.php
+app/Services/Callback/ReconciliationCallbackService.php
 app/Jobs/SendWasteCallbackJob.php
+app/Jobs/SendReconciliationCallbackJob.php
 app/Http/Controllers/Api/External/V1/ShopController.php
 app/Http/Controllers/Api/External/V1/WasteCollectionController.php
 
@@ -630,7 +637,7 @@ Independent from ERP. Tracks:
 - `app/Http/Controllers/Api/V1/DeliveryRequestController.php` - ERP order intake (5 endpoints)
 - `app/Http/Controllers/Api/V1/DriverController.php` - Driver app endpoints (31 endpoints)
 - `app/Http/Controllers/Api/V1/TripAssignmentController.php` - Trip dispatch (3 endpoints)
-- `app/Http/Controllers/Api/V1/AuthController.php` - OAuth2 authentication (5 endpoints)
+- `app/Http/Controllers/Api/V1/AuthController.php` - OAuth2 authentication (6 endpoints: login, register, refresh, logout, user, forgot-password)
 - `app/Services/GoogleMaps/RouteOptimizer.php` - Google Directions API with caching
 - `app/Services/GoogleMaps/DistanceCalculator.php` - Distance Matrix API
 - `app/Services/Pricing/CostCalculator.php` - KM × price calculation with tiers

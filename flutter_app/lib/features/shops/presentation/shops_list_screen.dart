@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../trips/providers/trips_provider.dart';
 import '../providers/shops_provider.dart';
 import 'widgets/shop_card.dart';
 import 'widgets/waste_collection_dialog.dart';
@@ -179,17 +180,61 @@ class ShopsListScreen extends ConsumerWidget {
   }
 
   void _showWasteDialog(BuildContext context, WidgetRef ref, shop) {
-    // For now, show a snackbar - waste dialog needs trip context
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Waste collection for ${shop.name}'),
-        action: SnackBarAction(
-          label: 'View',
-          onPressed: () {
-            // TODO: Navigate to waste collection detail
-          },
-        ),
-      ),
+    // Check for an active trip
+    final tripsAsync = ref.read(tripsProvider);
+
+    tripsAsync.when(
+      data: (trips) {
+        // Find an active trip (in_progress status)
+        final activeTrip = trips.where((t) => t.status == 'in_progress').firstOrNull;
+
+        if (activeTrip != null) {
+          // Show the waste collection dialog with the active trip ID
+          showDialog(
+            context: context,
+            builder: (context) => WasteCollectionDialog(
+              shop: shop,
+              tripId: activeTrip.id,
+              onSuccess: () {
+                // Refresh shops list after successful waste collection
+                ref.invalidate(shopsListProvider);
+              },
+            ),
+          );
+        } else {
+          // No active trip - show message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Please start a trip first to log waste collection'),
+              backgroundColor: Colors.orange,
+              action: SnackBarAction(
+                label: 'View Trips',
+                textColor: Colors.white,
+                onPressed: () {
+                  // Navigate to trips (index 0 of bottom nav)
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+            ),
+          );
+        }
+      },
+      loading: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Loading trips...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      },
+      error: (error, stack) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading trips: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
     );
   }
 }

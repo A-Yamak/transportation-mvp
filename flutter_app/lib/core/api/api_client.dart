@@ -146,9 +146,10 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    // Skip auth for login/register endpoints
+    // Skip auth for login/register/forgot-password endpoints
     if (options.path.contains('/auth/login') ||
-        options.path.contains('/auth/register')) {
+        options.path.contains('/auth/register') ||
+        options.path.contains('/auth/forgot-password')) {
       return handler.next(options);
     }
 
