@@ -7,15 +7,18 @@ use App\Filament\Resources\Drivers\Pages\EditDriver;
 use App\Filament\Resources\Drivers\Pages\ListDrivers;
 use App\Filament\Resources\Drivers\Schemas\DriverForm;
 use App\Filament\Resources\Drivers\Tables\DriversTable;
-use App\Models\User;
+use App\Models\Driver;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class DriverResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Driver::class;
 
     protected static ?int $navigationSort = 2;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationIcon(): ?string
     {
@@ -27,16 +30,19 @@ class DriverResource extends Resource
         return 'Operations';
     }
 
-    protected static ?string $recordTitleAttribute = 'name';
-
-    public static function getLabel(): ?string
+    public static function getModelLabel(): string
     {
         return 'Driver';
     }
 
-    public static function getPluralLabel(): ?string
+    public static function getPluralModelLabel(): string
     {
         return 'Drivers';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return DriverForm::configure($schema);
     }
 
     public static function table(Table $table): Table

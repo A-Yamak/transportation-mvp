@@ -9,6 +9,7 @@ use App\Filament\Resources\Shops\Schemas\ShopForm;
 use App\Filament\Resources\Shops\Tables\ShopsTable;
 use App\Models\Shop;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class ShopResource extends Resource
@@ -16,6 +17,8 @@ class ShopResource extends Resource
     protected static ?string $model = Shop::class;
 
     protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationIcon(): ?string
     {
@@ -27,16 +30,19 @@ class ShopResource extends Resource
         return 'Operations';
     }
 
-    protected static ?string $recordTitleAttribute = 'name';
-
-    public static function getLabel(): ?string
+    public static function getModelLabel(): string
     {
         return 'Shop';
     }
 
-    public static function getPluralLabel(): ?string
+    public static function getPluralModelLabel(): string
     {
         return 'Shops';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return ShopForm::configure($schema);
     }
 
     public static function table(Table $table): Table

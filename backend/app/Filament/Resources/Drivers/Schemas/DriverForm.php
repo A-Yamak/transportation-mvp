@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Drivers\Schemas;
 
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class DriverForm
@@ -15,101 +15,59 @@ class DriverForm
     {
         return $schema
             ->schema([
-                Section::make('Personal Information')
-                    ->description('Driver contact and identification details')
+                Section::make('Driver Information')
+                    ->description('Basic driver details')
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextInput::make('name')
-                                    ->label('Full Name')
+                                Select::make('user_id')
+                                    ->label('User Account')
+                                    ->relationship('user', 'name')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText('User account for authentication'),
 
-                                TextInput::make('email')
-                                    ->label('Email')
-                                    ->email()
-                                    ->unique('users', 'email', ignoreRecord: true)
-                                    ->maxLength(255),
-                            ]),
-
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('phone_number')
+                                TextInput::make('phone')
                                     ->label('Phone Number')
                                     ->tel()
                                     ->required()
                                     ->maxLength(20),
-
-                                TextInput::make('identification_number')
-                                    ->label('ID Number')
-                                    ->maxLength(50)
-                                    ->helperText('License or Passport number'),
                             ]),
+
+                        TextInput::make('license_number')
+                            ->label('License Number')
+                            ->required()
+                            ->maxLength(50)
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Assignment')
-                    ->description('Vehicle and status assignment')
+                    ->description('Vehicle and rate configuration')
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Select::make('assigned_vehicle_id')
+                                Select::make('vehicle_id')
                                     ->label('Assigned Vehicle')
-                                    ->relationship('assignedVehicle', 'model')
-                                    ->required()
-                                    ->helperText('Select the vehicle this driver operates'),
+                                    ->relationship('vehicle', 'model')
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText('Vehicle this driver operates'),
 
-                                Select::make('status')
-                                    ->label('Status')
-                                    ->options([
-                                        'active' => 'Active',
-                                        'inactive' => 'Inactive',
-                                        'on_leave' => 'On Leave',
-                                    ])
-                                    ->required()
-                                    ->default('active'),
+                                TextInput::make('price_per_km')
+                                    ->label('Price per KM')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->helperText('Driver rate per kilometer'),
                             ]),
                     ]),
 
-                Section::make('Documentation')
-                    ->description('License and certification dates')
+                Section::make('Status')
+                    ->description('Active/inactive configuration')
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('license_expiry_date')
-                                    ->label('License Expiry')
-                                    ->type('date')
-                                    ->helperText('When driver license expires'),
-
-                                TextInput::make('notes')
-                                    ->label('Notes')
-                                    ->placeholder('Any additional notes about driver')
-                                    ->columnSpanFull(),
-                            ]),
-                    ]),
-
-                Section::make('Performance Metrics')
-                    ->description('Driver performance tracking (read-only)')
-                    ->schema([
-                        Grid::make(3)
-                            ->schema([
-                                TextInput::make('total_km_driven')
-                                    ->label('Total KM Driven')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->numeric(),
-
-                                TextInput::make('monthly_km_app')
-                                    ->label('Monthly KM (App)')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->numeric(),
-
-                                TextInput::make('completed_trips')
-                                    ->label('Completed Trips')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->numeric(),
-                            ]),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->helperText('Inactive drivers cannot be assigned trips'),
                     ]),
             ]);
     }

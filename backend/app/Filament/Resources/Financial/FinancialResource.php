@@ -19,9 +19,15 @@ class FinancialResource extends Resource
         return 'Reporting';
     }
 
-    protected static ?string $label = 'Financial Dashboard';
+    public static function getModelLabel(): string
+    {
+        return 'Financial Dashboard';
+    }
 
-    protected static ?string $pluralLabel = 'Financial Dashboard';
+    public static function getPluralModelLabel(): string
+    {
+        return 'Financial Dashboard';
+    }
 
     public static function getPages(): array
     {

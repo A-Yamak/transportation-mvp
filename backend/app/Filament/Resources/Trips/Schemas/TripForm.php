@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Trips\Schemas;
 
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class TripForm
@@ -54,19 +54,19 @@ class TripForm
                             ->schema([
                                 TextInput::make('total_km')
                                     ->label('Planned KM')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->disabled()
                                     ->dehydrated(false),
 
                                 TextInput::make('actual_km')
                                     ->label('Actual KM')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->disabled()
                                     ->dehydrated(false),
 
                                 TextInput::make('estimated_cost')
                                     ->label('Estimated Cost')
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->prefix('$'),
@@ -80,7 +80,6 @@ class TripForm
                             ->schema([
                                 TextInput::make('destinations_count')
                                     ->label('Total Stops')
-                                    ->counts('destinations')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->numeric(),

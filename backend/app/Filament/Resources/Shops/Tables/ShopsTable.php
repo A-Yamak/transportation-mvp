@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Shops\Tables;
 
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -81,7 +80,7 @@ class ShopsTable
             ])
             ->actions([
                 // Actions defined in resource pages
-            ], position: ActionsPosition::BeforeColumns)
+            ])
             ->bulkActions([
                 // Bulk actions can be added here if needed
             ])

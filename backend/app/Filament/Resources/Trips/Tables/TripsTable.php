@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Trips\Tables;
 
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -18,9 +16,10 @@ class TripsTable
                 TextColumn::make('id')
                     ->label('Trip ID')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(8),
 
-                TextColumn::make('driver.name')
+                TextColumn::make('driver.user.name')
                     ->label('Driver')
                     ->searchable()
                     ->sortable(),
@@ -29,43 +28,34 @@ class TripsTable
                     ->label('Vehicle')
                     ->searchable(),
 
-                BadgeColumn::make('status')
-                    ->label('Status')
-                    ->colors([
-                        'info' => 'pending',
-                        'warning' => 'in_progress',
-                        'success' => 'completed',
-                        'danger' => 'failed',
-                    ])
-                    ->formatStateUsing(fn($state) => str($state)->replace('_', ' ')->title())
+                TextColumn::make('trip_type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state?->value ?? $state) {
+                        'delivery' => 'info',
+                        'waste_collection' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => str($state?->value ?? $state)->replace('_', ' ')->title())
                     ->sortable(),
 
-                TextColumn::make('total_km')
-                    ->label('Planned KM')
-                    ->numeric(decimalPlaces: 1)
-                    ->suffix(' km')
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state?->value ?? $state) {
+                        'pending' => 'info',
+                        'in_progress' => 'warning',
+                        'completed' => 'success',
+                        'cancelled' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => str($state?->value ?? $state)->replace('_', ' ')->title())
                     ->sortable(),
 
                 TextColumn::make('actual_km')
                     ->label('Actual KM')
                     ->numeric(decimalPlaces: 1)
                     ->suffix(' km')
-                    ->sortable(),
-
-                TextColumn::make('estimated_cost')
-                    ->label('Cost')
-                    ->numeric(decimalPlaces: 2)
-                    ->prefix('$')
-                    ->sortable(),
-
-                TextColumn::make('destinations_count')
-                    ->label('Stops')
-                    ->counts('destinations')
-                    ->sortable(),
-
-                TextColumn::make('completed_destinations_count')
-                    ->label('Completed')
-                    ->numeric()
                     ->sortable(),
 
                 TextColumn::make('started_at')
@@ -77,6 +67,11 @@ class TripsTable
                     ->label('Completed')
                     ->dateTime('M d, H:i')
                     ->sortable(),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('M d, Y')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -85,12 +80,15 @@ class TripsTable
                         'pending' => 'Pending',
                         'in_progress' => 'In Progress',
                         'completed' => 'Completed',
-                        'failed' => 'Failed',
+                        'cancelled' => 'Cancelled',
                     ]),
 
-                SelectFilter::make('driver_id')
-                    ->label('Driver')
-                    ->relationship('driver', 'name'),
+                SelectFilter::make('trip_type')
+                    ->label('Type')
+                    ->options([
+                        'delivery' => 'Delivery',
+                        'waste_collection' => 'Waste Collection',
+                    ]),
 
                 TernaryFilter::make('has_completed')
                     ->label('Completed')
@@ -108,10 +106,10 @@ class TripsTable
             ])
             ->actions([
                 // Actions defined in resource pages
-            ], position: ActionsPosition::BeforeColumns)
+            ])
             ->bulkActions([
                 // Bulk actions can be added here if needed
             ])
-            ->defaultSort('assigned_at', 'desc');
+            ->defaultSort('created_at', 'desc');
     }
 }

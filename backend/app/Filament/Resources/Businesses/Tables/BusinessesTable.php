@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\Businesses\Tables;
 
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -21,13 +19,15 @@ class BusinessesTable
                     ->searchable()
                     ->sortable(),
 
-                BadgeColumn::make('business_type')
+                TextColumn::make('business_type')
                     ->label('Type')
-                    ->colors([
-                        'info' => 'bulk_order',
-                        'warning' => 'pickup',
-                    ])
-                    ->formatStateUsing(fn($state) => match($state) {
+                    ->badge()
+                    ->color(fn ($state): string => match ($state?->value ?? $state) {
+                        'bulk_order' => 'info',
+                        'pickup' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => match($state?->value ?? $state) {
                         'bulk_order' => 'ERP Bulk',
                         'pickup' => 'Pickup',
                         default => $state
@@ -52,11 +52,6 @@ class BusinessesTable
                 TextColumn::make('deliveryRequests_count')
                     ->label('Delivery Requests')
                     ->counts('deliveryRequests')
-                    ->sortable(),
-
-                TextColumn::make('drivers_count')
-                    ->label('Drivers')
-                    ->counts('drivers')
                     ->sortable(),
 
                 TextColumn::make('created_at')
@@ -88,7 +83,7 @@ class BusinessesTable
             ])
             ->actions([
                 // Actions defined in resource pages
-            ], position: ActionsPosition::BeforeColumns)
+            ])
             ->bulkActions([
                 // Bulk actions can be added here if needed
             ])

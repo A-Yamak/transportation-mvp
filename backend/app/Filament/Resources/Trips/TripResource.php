@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Trips;
 
 use App\Filament\Resources\Trips\Pages\ListTrips;
 use App\Filament\Resources\Trips\Pages\ViewTrip;
-use App\Filament\Resources\Trips\Schemas\TripForm;
 use App\Filament\Resources\Trips\Tables\TripsTable;
 use App\Models\Trip;
 use Filament\Resources\Resource;
@@ -16,6 +15,8 @@ class TripResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $recordTitleAttribute = 'id';
+
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-truck';
@@ -26,14 +27,12 @@ class TripResource extends Resource
         return 'Operations';
     }
 
-    protected static ?string $recordTitleAttribute = 'id';
-
-    public static function getLabel(): ?string
+    public static function getModelLabel(): string
     {
         return 'Trip';
     }
 
-    public static function getPluralLabel(): ?string
+    public static function getPluralModelLabel(): string
     {
         return 'Trips';
     }

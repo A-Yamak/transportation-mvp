@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Financial\Schemas;
 
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class FinancialDashboardForm
@@ -22,7 +22,7 @@ class FinancialDashboardForm
                                     ->label('Total Revenue')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
 
                                 TextInput::make('completed_trips_count')
@@ -35,7 +35,7 @@ class FinancialDashboardForm
                                     ->label('Avg Revenue/Trip')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
                             ]),
                     ]),
@@ -49,21 +49,21 @@ class FinancialDashboardForm
                                     ->label('Fuel Expenses')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
 
                                 TextInput::make('driver_payments')
                                     ->label('Driver Payments')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
 
                                 TextInput::make('maintenance_costs')
                                     ->label('Maintenance')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
                             ]),
 
@@ -71,7 +71,7 @@ class FinancialDashboardForm
                             ->label('Total Operating Costs')
                             ->disabled()
                             ->dehydrated(false)
-                            ->numeric(decimalPlaces: 2)
+                            ->numeric()
                             ->prefix('$'),
                     ]),
 
@@ -84,21 +84,21 @@ class FinancialDashboardForm
                                     ->label('Net Profit')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
 
                                 TextInput::make('profit_margin_percentage')
                                     ->label('Profit Margin %')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 1)
+                                    ->numeric()
                                     ->suffix('%'),
 
                                 TextInput::make('cost_ratio_percentage')
                                     ->label('Cost Ratio %')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 1)
+                                    ->numeric()
                                     ->suffix('%'),
                             ]),
                     ]),
@@ -112,21 +112,21 @@ class FinancialDashboardForm
                                     ->label('Total KM Driven')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 1)
+                                    ->numeric()
                                     ->suffix(' km'),
 
                                 TextInput::make('average_km_per_trip')
                                     ->label('Avg KM/Trip')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 1)
+                                    ->numeric()
                                     ->suffix(' km'),
 
                                 TextInput::make('revenue_per_km')
                                     ->label('Revenue/KM')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->numeric(decimalPlaces: 2)
+                                    ->numeric()
                                     ->prefix('$'),
                             ]),
                     ]),

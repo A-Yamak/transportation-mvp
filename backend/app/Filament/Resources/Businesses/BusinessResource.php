@@ -9,6 +9,7 @@ use App\Filament\Resources\Businesses\Schemas\BusinessForm;
 use App\Filament\Resources\Businesses\Tables\BusinessesTable;
 use App\Models\Business;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class BusinessResource extends Resource
@@ -16,6 +17,8 @@ class BusinessResource extends Resource
     protected static ?string $model = Business::class;
 
     protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationIcon(): ?string
     {
@@ -27,16 +30,19 @@ class BusinessResource extends Resource
         return 'Configuration';
     }
 
-    protected static ?string $recordTitleAttribute = 'name';
-
-    public static function getLabel(): ?string
+    public static function getModelLabel(): string
     {
         return 'Business';
     }
 
-    public static function getPluralLabel(): ?string
+    public static function getPluralModelLabel(): string
     {
         return 'Businesses';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return BusinessForm::configure($schema);
     }
 
     public static function table(Table $table): Table
