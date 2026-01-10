@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:driver_app/generated/l10n/app_localizations.dart';
 import '../../../core/auth/auth_provider.dart';
+import '../../../core/auth/biometric_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../app.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -19,6 +20,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController(text: 'driver123');
   bool _obscurePassword = true;
   bool _isSendingResetEmail = false;
+  bool _isBiometricLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Try biometric login on screen load if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tryBiometricLogin();
+    });
+  }
 
   @override
   void dispose() {
@@ -27,21 +38,140 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _tryBiometricLogin() async {
+    final biometricService = ref.read(biometricServiceProvider);
+
+    // Check if biometric login is enabled
+    final isEnabled = await biometricService.isBiometricLoginEnabled();
+    if (!isEnabled) return;
+
+    // Check if biometrics are available
+    final isAvailable = await biometricService.isBiometricAvailable();
+    if (!isAvailable) return;
+
+    // Attempt biometric authentication
+    await _loginWithBiometric();
+  }
+
+  Future<void> _loginWithBiometric() async {
+    setState(() {
+      _isBiometricLoading = true;
+    });
+
+    try {
+      final biometricService = ref.read(biometricServiceProvider);
+      final credentials = await biometricService.getStoredCredentials();
+
+      if (credentials == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Biometric authentication cancelled'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Login with stored credentials
+      final success = await ref.read(authProvider.notifier).login(
+        credentials.email,
+        credentials.password,
+      );
+
+      if (!success && mounted) {
+        final error = ref.read(authProvider).error;
+        if (error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBiometricLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await ref.read(authProvider.notifier).login(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
-    if (!success && mounted) {
+    final success = await ref.read(authProvider.notifier).login(email, password);
+
+    if (success && mounted) {
+      // Offer to enable biometric after successful login
+      await _offerBiometricSetup(email, password);
+    } else if (!success && mounted) {
       final error = ref.read(authProvider).error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error),
             backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _offerBiometricSetup(String email, String password) async {
+    final biometricService = ref.read(biometricServiceProvider);
+
+    // Check if biometrics are available
+    final isAvailable = await biometricService.isBiometricAvailable();
+    if (!isAvailable) return;
+
+    // Check if already enabled
+    final isEnabled = await biometricService.isBiometricLoginEnabled();
+    if (isEnabled) return;
+
+    // Get biometric type for display
+    final biometricType = await biometricService.getBiometricTypeLabel();
+
+    if (!mounted) return;
+
+    // Show dialog to offer biometric setup
+    final shouldEnable = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Enable $biometricType Login?'),
+        content: Text(
+          'Would you like to use $biometricType for faster login next time?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not Now'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Enable'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldEnable == true) {
+      final enabled = await biometricService.enableBiometricLogin(
+        email: email,
+        password: password,
+      );
+
+      if (enabled && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$biometricType login enabled!'),
+            backgroundColor: AppTheme.successColor,
           ),
         );
       }
@@ -267,7 +397,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         )
                       : Text(l10n.loginButton),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 16),
+
+                // Biometric login button
+                Consumer(
+                  builder: (context, ref, child) {
+                    final biometricAvailable = ref.watch(biometricAvailableProvider);
+                    final biometricEnabled = ref.watch(biometricEnabledProvider);
+
+                    // Only show if biometrics are available AND enabled
+                    final showBiometric = biometricAvailable.maybeWhen(
+                      data: (available) => available && biometricEnabled.maybeWhen(
+                        data: (enabled) => enabled,
+                        orElse: () => false,
+                      ),
+                      orElse: () => false,
+                    );
+
+                    if (!showBiometric) return const SizedBox.shrink();
+
+                    return Column(
+                      children: [
+                        const Row(
+                          children: [
+                            Expanded(child: Divider()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: Text('OR', style: TextStyle(color: Colors.grey)),
+                            ),
+                            Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: _isBiometricLoading ? null : _loginWithBiometric,
+                          icon: _isBiometricLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.fingerprint),
+                          label: FutureBuilder<String>(
+                            future: ref.read(biometricServiceProvider).getBiometricTypeLabel(),
+                            builder: (context, snapshot) {
+                              final label = snapshot.data ?? 'Biometric';
+                              return Text('Login with $label');
+                            },
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 32),
 
                 // Language switcher
                 const Divider(),

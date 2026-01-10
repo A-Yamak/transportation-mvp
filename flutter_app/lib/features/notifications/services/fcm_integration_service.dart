@@ -10,12 +10,12 @@ import '../data/models/notification_model.dart';
 class FcmIntegrationService {
   final NotificationsRepository _repository;
   final PushNotificationService _pushService;
-  final WidgetRef _ref;
+  final Ref _ref;
 
   FcmIntegrationService({
     required NotificationsRepository repository,
     required PushNotificationService pushService,
-    required WidgetRef ref,
+    required Ref ref,
   })  : _repository = repository,
         _pushService = pushService,
         _ref = ref;

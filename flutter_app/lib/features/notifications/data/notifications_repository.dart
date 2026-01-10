@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_config.dart';
 import 'models/notification_model.dart';
 
 final notificationsRepositoryProvider = Provider<NotificationsRepository>((ref) {
@@ -14,6 +15,8 @@ class NotificationsRepository {
 
   final ApiClient _apiClient;
 
+  static const String _basePath = '${ApiConfig.apiPrefix}/driver/notifications';
+
   /// Get paginated notifications
   Future<List<NotificationModel>> getNotifications({
     int page = 1,
@@ -21,7 +24,7 @@ class NotificationsRepository {
   }) async {
     try {
       final response = await _apiClient.get(
-        '/driver/notifications',
+        _basePath,
         queryParameters: {
           'page': page,
           'per_page': perPage,
@@ -40,7 +43,7 @@ class NotificationsRepository {
   /// Get unread notification count
   Future<int> getUnreadCount() async {
     try {
-      final response = await _apiClient.get('/driver/notifications/unread-count');
+      final response = await _apiClient.get('$_basePath/unread-count');
       return response.data['data']['unread_count'] as int;
     } on DioException catch (e) {
       throw _handleError(e);
@@ -50,7 +53,7 @@ class NotificationsRepository {
   /// Get all unread notifications
   Future<List<NotificationModel>> getUnreadNotifications() async {
     try {
-      final response = await _apiClient.get('/driver/notifications/unread');
+      final response = await _apiClient.get('$_basePath/unread');
 
       final data = response.data['data'] as List;
       return data
@@ -65,7 +68,7 @@ class NotificationsRepository {
   Future<NotificationModel> markAsRead(String notificationId) async {
     try {
       final response = await _apiClient.patch(
-        '/driver/notifications/$notificationId/read',
+        '$_basePath/$notificationId/read',
       );
 
       return NotificationModel.fromJson(
@@ -80,7 +83,7 @@ class NotificationsRepository {
   Future<NotificationModel> markAsUnread(String notificationId) async {
     try {
       final response = await _apiClient.patch(
-        '/driver/notifications/$notificationId/unread',
+        '$_basePath/$notificationId/unread',
       );
 
       return NotificationModel.fromJson(
@@ -94,7 +97,7 @@ class NotificationsRepository {
   /// Mark all notifications as read
   Future<void> markAllAsRead() async {
     try {
-      await _apiClient.patch('/driver/notifications/mark-all-read');
+      await _apiClient.patch('$_basePath/mark-all-read');
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -103,7 +106,7 @@ class NotificationsRepository {
   /// Delete notification
   Future<void> deleteNotification(String notificationId) async {
     try {
-      await _apiClient.delete('/driver/notifications/$notificationId');
+      await _apiClient.delete('$_basePath/$notificationId');
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -113,7 +116,7 @@ class NotificationsRepository {
   Future<void> registerFcmToken(String token) async {
     try {
       await _apiClient.post(
-        '/driver/notifications/register-token',
+        '$_basePath/register-token',
         data: {'fcm_token': token},
       );
     } on DioException catch (e) {
