@@ -8,7 +8,7 @@ use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+// Using Passport auth via TestCase::actingAs($user, 'api')
 use Tests\TestCase;
 
 class TupperwareCollectionTest extends TestCase
@@ -21,7 +21,7 @@ class TupperwareCollectionTest extends TestCase
         $this->driver = Driver::factory()
             ->has(User::factory())
             ->create();
-        Sanctum::actingAs($this->driver->user);
+        $this->actingAs($this->driver->user, 'api');
     }
 
     /**
@@ -33,7 +33,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -101,7 +101,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -127,7 +127,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -158,7 +158,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -189,7 +189,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -219,7 +219,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -249,13 +249,13 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
         $other_trip = Trip::factory()->create();
         $other_destination = Destination::factory()
-            ->for($other_trip)
+            ->forTrip($other_trip)
             ->for($shop)
             ->create();
 
@@ -285,7 +285,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -316,7 +316,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 
@@ -343,14 +343,16 @@ class TupperwareCollectionTest extends TestCase
      */
     public function test_unauthenticated_request_fails(): void
     {
-        // Setup
-        Sanctum::useActualEncryption();
+        // Setup - test without authentication
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
+
+        // Clear authentication from setUp
+        $this->app['auth']->forgetGuards();
 
         // Act - Without authentication
         $response = $this->postJson(
@@ -362,7 +364,7 @@ class TupperwareCollectionTest extends TestCase
             ]
         );
 
-        // Assert
+        // Assert - Passport returns 401 for unauthenticated requests
         $response->assertStatus(401);
     }
 
@@ -375,7 +377,7 @@ class TupperwareCollectionTest extends TestCase
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create();
 

@@ -46,7 +46,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act: Record 3 deliveries
         $this->service->recordDelivery(
@@ -86,7 +86,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Record deliveries first
         $this->service->recordDelivery(
@@ -125,7 +125,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $movement = $this->service->recordDelivery(
@@ -154,7 +154,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // First deliver
         $this->service->recordDelivery(
@@ -189,7 +189,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Deliver 10 boxes
         $this->service->recordDelivery(
@@ -220,7 +220,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Initial delivery
         $this->service->recordDelivery(
@@ -252,7 +252,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Record deliveries of multiple types
         $this->service->recordDelivery($shop, $destination, 'boxes', 10);
@@ -279,7 +279,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Record multiple movements
         $this->service->recordDelivery($shop, $destination, 'boxes', 10);
@@ -304,7 +304,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Create various movements
         $this->service->recordDelivery($shop, $destination, 'boxes', 10);
@@ -328,7 +328,7 @@ class TupperwareServiceTest extends TestCase
     {
         // Setup
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         $shop1 = Shop::factory()->create(); // Will have 60 boxes
         $shop2 = Shop::factory()->create(); // Will have 30 boxes
@@ -352,7 +352,7 @@ class TupperwareServiceTest extends TestCase
     {
         // Setup
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         $shop1 = Shop::factory()->create(); // Will have 3 boxes
         $shop2 = Shop::factory()->create(); // Will have 10 boxes
@@ -377,7 +377,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act: Complex movements
         $this->service->recordDelivery($shop, $destination, 'boxes', 20);
@@ -403,7 +403,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $movement = $this->service->recordDelivery(
@@ -428,7 +428,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act: Record zero quantity (edge case)
         $movement = $this->service->recordDelivery(
@@ -451,7 +451,7 @@ class TupperwareServiceTest extends TestCase
         // Setup
         $shop = Shop::factory()->create();
         $trip = Trip::factory()->create();
-        $destination = Destination::factory()->for($trip)->create();
+        $destination = Destination::factory()->forTrip($trip)->create();
 
         // Act: Try extreme pickup
         $this->service->recordPickup(

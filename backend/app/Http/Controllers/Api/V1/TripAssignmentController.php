@@ -75,8 +75,8 @@ class TripAssignmentController extends Controller
         $tripData = [
             'trip_id' => $trip->id,
             'destinations_count' => $deliveryRequest->destinations()->count(),
-            'total_km' => $trip->total_km ?? 0,
-            'estimated_cost' => $trip->estimated_cost ?? 0,
+            'total_km' => $deliveryRequest->total_km ?? 0,
+            'estimated_cost' => $deliveryRequest->estimated_cost ?? 0,
         ];
         $notificationService->notifyTripAssigned($driver->user, $tripData);
 

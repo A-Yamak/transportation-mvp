@@ -2,23 +2,24 @@
 
 A logistics and delivery management application with route optimization, cost calculation, and multi-client API integration.
 
-## MVP Status: Ready for Production + Phase 1 & 2 Complete
+## MVP Status: Ready for Production + Phase 1, 2, & 3 Complete
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Database/Models | 100% | All 14 tables, migrations complete |
+| Database/Models | 100% | All 24 tables, migrations complete |
 | Authentication | 100% | OAuth2 + API Key auth |
-| API Controllers | 100% | 8 controllers, 39+ endpoints |
+| API Controllers | 100% | 8 controllers, 46+ endpoints |
 | ERP Integration | 100% | Submit orders + async callbacks |
 | **Shop Management** | **100%** | **Persistent locations, ERP sync, CRUD** |
 | **Waste Tracking** | **100%** | **Driver logging, auto-calculation, callbacks** |
-| Driver Endpoints | 100% | 24 endpoints for Flutter app (+ notifications) |
+| Driver Endpoints | 100% | 31 endpoints for Flutter app (+ notifications + payment) |
 | Route Optimization | 100% | Google Maps with caching |
 | Pricing Service | 100% | Tiered pricing with discounts |
 | Ledger System | 100% | Double-entry accounting |
 | **Phase 1: Admin Panel** | **100%** | **5 Filament resources (Shop, Driver, Business, Trip, Financial)** |
 | **Phase 2: FCM Notifications** | **100%** | **Push notifications + Inbox UI with 2 tabs** |
-| **Test Coverage** | **100%** | **55+ tests, 92%+ coverage of critical paths** |
+| **Phase 3: Payment & Reconciliation** | **100%** | **Payment collection, tupperware tracking, daily reconciliation** |
+| **Test Coverage** | **100%** | **389 tests passing (Unit + Feature + Integration)** |
 | Flutter App | 100% | Real API integration + GPS + waste + notifications + inbox |
 | **Offline Support** | Design | SQLite caching + sync queue (implementation ready) |
 
@@ -29,10 +30,9 @@ A logistics and delivery management application with route optimization, cost ca
 4. Deploy queue workers (Horizon) for async callbacks + FCM jobs
 5. **Exchange API keys with Melo ERP**
 6. **Configure webhook signature secret (HMAC-SHA256)**
-7. **Set up Melo ERP webhook receiver for waste callbacks**
+7. **Set up Melo ERP webhook receiver for waste/payment callbacks**
 8. **Set up Firebase Cloud Messaging for FCM**
-9. **Test end-to-end flow with Melo ERP + notifications**
-10. **Run all tests and achieve >95% pass rate**
+9. **Test end-to-end flow with Melo ERP + notifications + payments**
 
 ## Overview
 
@@ -84,6 +84,14 @@ Manual Orders ─────┘    └────────┬────�
 - **Driver Inbox**: Two-tab interface (All Notifications + Pending Actions)
 - **Auto-Notification**: Automatic notification on trip assignment with KM/cost details
 - **Notification Management**: Mark as read, bulk actions, swipe-to-delete
+
+**Payment Collection & Reconciliation (Phase 3)**
+- **Multi-Payment Methods**: Cash, CliQ Now, CliQ Later support
+- **Shortage Tracking**: Automatic shortage detection with reason codes
+- **Tupperware/Container Tracking**: Per-shop balance tracking for delivery containers
+- **Daily Reconciliation**: End-of-day driver reconciliation with shop breakdown
+- **Route Reordering**: Drag-drop destination reordering within trips
+- **KM Tracking**: Trip-level start/end KM for accurate mileage
 
 **Offline Support (Upcoming)**
 - **Offline Work**: Complete deliveries and waste logs without connectivity
@@ -201,13 +209,29 @@ Financial System (Independent Ledger)
     ├── JournalEntry (Transaction headers)
     └── JournalEntryItem (Debit/Credit lines)
 
-Shops (NEW)
+Shops
     ├── Persistent locations (synced from Melo ERP)
     ├── track_waste flag
     └── WasteCollections
           ├── WasteCollectionItems (delivered vs waste)
           ├── pieces_sold (auto-calculated)
           └── Callbacks to ERP
+
+Payment & Reconciliation (Phase 3)
+    ├── PaymentCollections (per destination)
+    │     ├── amount_expected, amount_collected
+    │     ├── payment_method (Cash, CliQ Now, CliQ Later)
+    │     ├── shortage_amount, shortage_reason
+    │     └── collected_at timestamp
+    ├── TupperwareMovements (container tracking)
+    │     ├── shop_id, product_type
+    │     ├── quantity, movement_type (delivery/pickup/adjustment)
+    │     └── running balance per shop
+    └── DailyReconciliations (end-of-day)
+          ├── total_expected, total_collected
+          ├── total_cash, total_cliq
+          ├── shop_breakdown (JSON)
+          └── status (pending/submitted/approved)
 ```
 
 ## Shop Management & Waste Tracking
@@ -297,8 +321,8 @@ POST   /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected           # Log 
 - `docs/postman-collection-external-api.json` - Ready-to-import Postman collection
 
 **Testing & Quality**
-- `docs/testing-guide.md` - Test scenarios and results (22+ unit tests)
-- `docs/test-coverage-summary.md` - Complete test coverage metrics (55+ tests, 92%+ coverage)
+- `docs/testing-guide.md` - Test scenarios and results
+- `docs/test-coverage-summary.md` - Complete test coverage metrics (389 tests passing)
 
 **Offline Support (Upcoming)**
 - `docs/offline-sync-design.md` - Complete architecture design (5-phase implementation plan)
@@ -359,9 +383,22 @@ POST /api/v1/driver/trips/{id}/destinations/{dest}/complete  # Complete (→ ERP
 POST /api/v1/driver/trips/{id}/destinations/{dest}/fail      # Mark failed
 GET  /api/v1/driver/trips/{id}/destinations/{dest}/navigate  # Google Maps URL
 
-# Waste Collection Operations (NEW)
+# Waste Collection Operations
 GET  /api/v1/driver/shops/{shop}/waste-expected                         # Get uncollected waste
 POST /api/v1/driver/trips/{trip}/shops/{shop}/waste-collected           # Log waste
+
+# Payment Collection (Phase 3)
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/collect-payment    # Collect cash/CliQ
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/collect-tupperware # Pickup containers
+GET  /api/v1/driver/shops/{shop}/tupperware-balance                     # Get container balance
+
+# Route Reordering (Phase 3)
+POST /api/v1/driver/trips/{trip}/reorder-destinations                   # Drag-drop reorder
+
+# Daily Reconciliation (Phase 3)
+POST /api/v1/driver/day/end                                             # Generate reconciliation
+GET  /api/v1/driver/day/reconciliation                                  # Get today's reconciliation
+POST /api/v1/driver/reconciliation/submit                               # Submit to Melo ERP
 ```
 
 **Trip Assignment (Admin/Dispatch):**
@@ -524,9 +561,9 @@ make k8s-production  # Requires confirmation
 ### Production Checklist
 
 **Development Complete:**
-- [x] All API endpoints implemented (32+ routes)
+- [x] All API endpoints implemented (46+ routes)
 - [x] ERP integration (delivery requests + callbacks)
-- [x] Driver app endpoints (17 routes)
+- [x] Driver app endpoints (31 routes)
 - [x] Route optimization with Google Maps
 - [x] Pricing calculation with tiers
 - [x] Double-entry ledger system
@@ -534,6 +571,10 @@ make k8s-production  # Requires confirmation
 - [x] **Shop management (persistent locations)**
 - [x] **Waste tracking (driver logging, auto-calculation)**
 - [x] **External API for B2B integration (pull/push)**
+- [x] **Phase 3: Payment collection (Cash, CliQ Now, CliQ Later)**
+- [x] **Phase 3: Tupperware/container tracking**
+- [x] **Phase 3: Daily reconciliation with shop breakdown**
+- [x] **389 tests passing (Unit + Feature + Integration)**
 
 **Deployment Tasks:**
 - [ ] Set `APP_ENV=production`, `APP_DEBUG=false`
@@ -594,7 +635,7 @@ make tinker
 
 **Testing & Quality Assurance**
 - **`docs/testing-guide.md`** - **Test scenarios, results, and CI/CD setup**
-- **`docs/test-coverage-summary.md`** - **55+ tests, 92%+ coverage, detailed metrics**
+- **`docs/test-coverage-summary.md`** - **389 tests passing, full Phase 3 coverage**
 
 **Upcoming Features**
 - **`docs/offline-sync-design.md`** - **Offline support architecture (5-phase plan)**

@@ -208,6 +208,8 @@ services:
       MYSQL_PASSWORD: secret
     volumes:
       - mysql-data:/var/lib/mysql
+      # Init script to create test database (runs on first container creation)
+      - ./infrastructure/docker/mysql/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
     networks:
       - transportationapp
     healthcheck:

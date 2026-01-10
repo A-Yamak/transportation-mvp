@@ -115,6 +115,16 @@ class Destination extends Model
     }
 
     /**
+     * Get the trip through the delivery request.
+     * Note: This is NOT an Eloquent relationship to avoid factory issues with HasOneThrough.
+     * Use $destination->getTrip() instead of $destination->trip.
+     */
+    public function getTrip(): ?Trip
+    {
+        return Trip::where('delivery_request_id', $this->delivery_request_id)->first();
+    }
+
+    /**
      * Shop this destination is linked to (if any).
      */
     public function shop(): BelongsTo

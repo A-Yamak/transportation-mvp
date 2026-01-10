@@ -20,7 +20,7 @@ class CollectPaymentRequest extends ApiRequest
 {
     public function rules(): array
     {
-        return [
+        $rules = [
             'amount_collected' => [
                 'required',
                 'numeric',
@@ -41,7 +41,6 @@ class CollectPaymentRequest extends ApiRequest
                 'nullable',
                 'string',
                 Rule::enum(ShortageReason::class),
-                $this->getShortageReasonRule(),
             ],
             'notes' => [
                 'nullable',
@@ -49,6 +48,29 @@ class CollectPaymentRequest extends ApiRequest
                 'max:500',
             ],
         ];
+
+        // Require cliq_reference for CliQ payment methods
+        $paymentMethod = $this->input('payment_method');
+        if (in_array($paymentMethod, [PaymentMethod::CliqNow->value, PaymentMethod::CliqLater->value])) {
+            $rules['cliq_reference'] = ['required', 'string', 'max:100'];
+        }
+
+        // Check destination for amount-based validation
+        $destination = $this->route('destination');
+        if ($destination) {
+            $amountCollected = (float) $this->input('amount_collected');
+            $amountExpected = (float) $destination->amount_to_collect;
+
+            // Require shortage_reason when amount collected is less than expected
+            if ($amountCollected < $amountExpected) {
+                $rules['shortage_reason'] = ['required', 'string', Rule::enum(ShortageReason::class)];
+            }
+
+            // Cannot collect more than expected
+            $rules['amount_collected'][] = 'max:' . $amountExpected;
+        }
+
+        return $rules;
     }
 
     public function messages(): array
@@ -63,18 +85,6 @@ class CollectPaymentRequest extends ApiRequest
             'shortage_reason.enum' => 'Invalid shortage reason.',
             'notes.max' => 'Notes cannot exceed 500 characters.',
         ];
-    }
-
-    /**
-     * Shortage reason is required if amount collected is less than expected.
-     * This is validated in the controller with access to the destination.
-     */
-    private function getShortageReasonRule()
-    {
-        return function ($attribute, $value, $fail) {
-            // This will be validated in controller after checking destination amount
-            return true;
-        };
     }
 
     public function getAmountCollected(): float

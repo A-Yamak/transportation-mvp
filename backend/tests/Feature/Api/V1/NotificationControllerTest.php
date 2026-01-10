@@ -217,7 +217,8 @@ class NotificationControllerTest extends TestCase
      */
     public function test_unauthenticated_user_cannot_access_notifications(): void
     {
-        Passport::actingAs(null);
+        // Clear authentication from setUp
+        $this->app['auth']->forgetGuards();
 
         $response = $this->getJson('/api/v1/driver/notifications');
 

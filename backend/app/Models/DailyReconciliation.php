@@ -74,7 +74,7 @@ class DailyReconciliation extends Model
 
     public function driver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'driver_id');
+        return $this->belongsTo(Driver::class);
     }
 
     public function business(): BelongsTo

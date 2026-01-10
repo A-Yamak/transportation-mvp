@@ -31,7 +31,7 @@ This is a logistics/delivery management application that handles delivery reques
 | **Phase 3: Payment Collection & Reconciliation** | ✅ **DONE** | **7 new endpoints, 3 services, full TDD coverage** |
 | Flutter UI | ✅ DONE | Complete driver interface with waste collection + inbox |
 | Flutter API Integration | ✅ DONE | Real API client, GPS tracking, waste logging, notifications |
-| **Test Coverage** | ✅ **DONE** | **163 comprehensive tests (43 unit + 64 feature + 56 integration)** |
+| **Test Coverage** | ✅ **DONE** | **389 tests passing (Unit + Feature + Integration)** |
 
 ### Production Readiness Checklist
 
@@ -51,6 +51,11 @@ This is a logistics/delivery management application that handles delivery reques
 - [x] **Automatic pieces_sold calculation (delivered - waste)**
 - [x] **Waste callbacks sent to Melo ERP with exponential backoff retry**
 - [x] **Expected waste date management**
+- [x] **Payment collection (Cash, CliQ Now, CliQ Later)**
+- [x] **Tupperware/container tracking per shop**
+- [x] **Daily reconciliation with shop breakdown**
+- [x] **Route reordering for drivers**
+- [x] **389 tests passing**
 
 **Flutter App (Ready)**
 - [x] Real API integration (not mock data)
@@ -64,19 +69,20 @@ This is a logistics/delivery management application that handles delivery reques
 - [x] **Driver notes for waste items**
 
 **Pre-Deployment Tasks**
-1. Configure production `.env` (database, Redis, Google Maps API key)
+1. Configure production `.env` (database, Redis, Google Maps API key, Firebase FCM key)
 2. Set up Cloudflare R2 bucket for file storage
 3. Configure business callback URLs in admin panel
-4. Deploy queue workers (Horizon) for async callbacks
+4. Deploy queue workers (Horizon) for async callbacks + FCM jobs
 5. **Exchange API keys with Melo ERP team**
-6. **Set up Melo ERP webhook receiver for waste callbacks**
+6. **Set up Melo ERP webhook receiver for waste/payment callbacks**
 7. **Configure webhook signature secret (HMAC-SHA256)**
 8. **Schedule daily shop sync cron job (2 AM)**
-9. **Test end-to-end flow with Melo ERP**
+9. **Set up Firebase Cloud Messaging for FCM**
+10. **Test end-to-end flow with Melo ERP + notifications + payments**
 
 ---
 
-## Phase 3: Payment Collection & Daily Reconciliation (NEW - January 2026)
+## Phase 3: Payment Collection & Daily Reconciliation (COMPLETE - January 2026)
 
 ### ✅ IMPLEMENTATION COMPLETE
 
@@ -100,30 +106,26 @@ POST   /api/v1/driver/reconciliation/submit                                     
 GET    /api/v1/driver/shops/{shop}/tupperware-balance                               - Get container balance
 ```
 
-**Test Coverage: 163 Comprehensive Tests**
+**Test Coverage: 389 Tests Passing**
 
-| Category | Count | Details |
-|----------|-------|---------|
-| **Unit Tests** | 43 | Service business logic, calculations, validations |
-| **Feature Tests** | 64 | API endpoints, request validation, error handling |
-| **Callback Tests** | 56 | Melo ERP webhook receivers, idempotency |
-| **Total** | **163** | **All sensitive financial operations covered** |
+All Phase 3 tests are fully passing along with existing tests:
 
-**Unit Tests (43):**
-- PaymentCollectionServiceTest: 11 tests (payment methods, shortages, daily totals)
-- TupperwareServiceTest: 16 tests (deliveries, pickups, balance tracking, edge cases)
-- DailyReconciliationServiceTest: 16 tests (aggregation, status workflow, shop breakdown)
+| Category | Details |
+|----------|---------|
+| **Unit Tests** | Service business logic, calculations, validations |
+| **Feature Tests** | API endpoints, request validation, error handling |
+| **Integration Tests** | End-to-end flows, notification dispatch, callbacks |
+| **Total** | **389 tests** |
 
-**Feature Tests (64):**
-- PaymentCollectionTest: 15 tests (full/partial payment, all methods, validation)
-- TupperwareCollectionTest: 15 tests (pickup, balance, quantities, validation)
-- DailyReconciliationTest: 18 tests (generation, submission, calculation, timestamps)
-- RouteReorderingTest: 16 tests (reorder validation, sequence order, authorization)
-
-**Callback Tests (56):**
-- Melo ERP PaymentCallbackTest: 16 tests (receive, update, idempotency)
-- Melo ERP TupperwareCallbackTest: 18 tests (inventory update, movement types)
-- Melo ERP ReconciliationCallbackTest: 17 tests (receive, shop breakdown, status)
+**Phase 3 Specific Tests:**
+- PaymentCollectionServiceTest: Payment methods, shortages, daily totals
+- TupperwareServiceTest: Deliveries, pickups, balance tracking, edge cases
+- DailyReconciliationServiceTest: Aggregation, status workflow, shop breakdown
+- PaymentCollectionTest: Full/partial payment, all methods, validation
+- TupperwareCollectionTest: Pickup, balance, quantities, validation
+- DailyReconciliationTest: Generation, submission, calculation, timestamps
+- RouteReorderingTest: Reorder validation, sequence order, authorization
+- TripAssignmentNotificationTest: FCM dispatch, notification creation
 
 **Key Features Implemented:**
 - ✅ Multi-payment method support (Cash, CliQ Now, CliQ Later, Mixed)
@@ -138,22 +140,16 @@ GET    /api/v1/driver/shops/{shop}/tupperware-balance                           
 
 **Test Execution:**
 ```bash
-# Run all Phase 3 tests
-php artisan test tests/Unit/Services/PaymentCollectionServiceTest.php
-php artisan test tests/Unit/Services/TupperwareServiceTest.php
-php artisan test tests/Unit/Services/DailyReconciliationServiceTest.php
-php artisan test tests/Feature/Api/V1/PaymentCollectionTest.php
-php artisan test tests/Feature/Api/V1/TupperwareCollectionTest.php
-php artisan test tests/Feature/Api/V1/DailyReconciliationTest.php
-php artisan test tests/Feature/Api/V1/RouteReorderingTest.php
-
-# Run Melo ERP callbacks
-php artisan test tests/Feature/Api/V1/PaymentCallbackTest.php
-php artisan test tests/Feature/Api/V1/TupperwareCallbackTest.php
-php artisan test tests/Feature/Api/V1/ReconciliationCallbackTest.php
-
-# Run all tests
+# Run all tests (389 tests passing)
 php artisan test
+
+# Or via make command
+make test
+
+# Run specific test files
+php artisan test tests/Unit/Services/PaymentCollectionServiceTest.php
+php artisan test tests/Feature/Api/V1/PaymentCollectionTest.php
+php artisan test tests/Feature/Integration/TripAssignmentNotificationTest.php
 ```
 
 ---
@@ -632,7 +628,7 @@ Independent from ERP. Tracks:
 
 ### Backend Core
 - `app/Http/Controllers/Api/V1/DeliveryRequestController.php` - ERP order intake (5 endpoints)
-- `app/Http/Controllers/Api/V1/DriverController.php` - Driver app endpoints (13 endpoints)
+- `app/Http/Controllers/Api/V1/DriverController.php` - Driver app endpoints (31 endpoints)
 - `app/Http/Controllers/Api/V1/TripAssignmentController.php` - Trip dispatch (3 endpoints)
 - `app/Http/Controllers/Api/V1/AuthController.php` - OAuth2 authentication (5 endpoints)
 - `app/Services/GoogleMaps/RouteOptimizer.php` - Google Directions API with caching
@@ -642,11 +638,17 @@ Independent from ERP. Tracks:
 - `app/Services/Ledger/LedgerService.php` - Double-entry accounting
 - `app/Services/Callback/DeliveryCallbackService.php` - Async callback dispatcher
 - `app/Services/Callback/CallbackService.php` - HTTP callback sender
+- `app/Services/PaymentCollectionService.php` - Payment collection logic (Phase 3)
+- `app/Services/TupperwareService.php` - Container tracking logic (Phase 3)
+- `app/Services/DailyReconciliationService.php` - Daily reconciliation logic (Phase 3)
 - `app/Models/DeliveryRequest.php` - Core delivery model
 - `app/Models/Destination.php` - Individual stops
+- `app/Models/PaymentCollection.php` - Payment collection model (Phase 3)
+- `app/Models/TupperwareMovement.php` - Container movement model (Phase 3)
+- `app/Models/DailyReconciliation.php` - Reconciliation model (Phase 3)
 
 ### Routes
-- `routes/api/v1.php` - All API endpoints (26+ routes)
+- `routes/api/v1.php` - All API endpoints (46+ routes)
 
 ### Config
 - `config/google-maps.php` - Google API credentials
@@ -934,6 +936,17 @@ POST /api/v1/driver/trips/{trip}/destinations/{dest}/arrive    - Mark arrival
 POST /api/v1/driver/trips/{trip}/destinations/{dest}/complete  - Complete delivery (triggers ERP callback)
 POST /api/v1/driver/trips/{trip}/destinations/{dest}/fail      - Mark as failed
 GET  /api/v1/driver/trips/{trip}/destinations/{dest}/navigate  - Get Google Maps URL
+
+# Payment Collection (Phase 3)
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/collect-payment    - Collect cash/CliQ
+POST /api/v1/driver/trips/{trip}/destinations/{dest}/collect-tupperware - Pickup containers
+POST /api/v1/driver/trips/{trip}/reorder-destinations                   - Drag-drop reorder
+GET  /api/v1/driver/shops/{shop}/tupperware-balance                     - Get container balance
+
+# Daily Reconciliation (Phase 3)
+POST /api/v1/driver/day/end                                             - Generate reconciliation
+GET  /api/v1/driver/day/reconciliation                                  - Get today's reconciliation
+POST /api/v1/driver/reconciliation/submit                               - Submit to Melo ERP
 ```
 
 ### Trip Flow
@@ -1190,7 +1203,7 @@ When trip assigned via `/api/v1/trips/assign`:
 
 ---
 
-## Phase 3: Offline Support & Sync (DESIGN COMPLETE, IMPLEMENTATION PENDING)
+## Phase 4: Offline Support & Sync (DESIGN COMPLETE, IMPLEMENTATION PENDING)
 
 Comprehensive offline-first architecture enabling drivers to work without connectivity.
 
@@ -1266,8 +1279,8 @@ See `docs/offline-sync-design.md` for:
 - Detailed rollout plan
 
 ### Test Coverage
-- **55+ tests created** for critical operations (Phase 1 & 2)
-- **Test Coverage**: 92%+ of critical paths
+- **389 tests passing** across all phases
+- Full coverage of Phase 3 payment, tupperware, and reconciliation operations
 - See `docs/test-coverage-summary.md` for complete metrics
 
 ---

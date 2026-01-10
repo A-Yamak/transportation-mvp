@@ -25,8 +25,8 @@ class WasteCollectionItemTest extends TestCase
     public function pieces_sold_handles_zero_waste()
     {
         $item = WasteCollectionItem::factory()
-            ->noWaste()
             ->state(['quantity_delivered' => 20])
+            ->noWaste()
             ->create();
 
         $this->assertEquals(20, $item->pieces_sold);
@@ -36,8 +36,8 @@ class WasteCollectionItemTest extends TestCase
     public function pieces_sold_handles_full_waste()
     {
         $item = WasteCollectionItem::factory()
-            ->fullWaste()
             ->state(['quantity_delivered' => 15])
+            ->fullWaste()
             ->create();
 
         $this->assertEquals(0, $item->pieces_sold);
@@ -110,8 +110,8 @@ class WasteCollectionItemTest extends TestCase
     public function get_waste_percentage_handles_full_waste()
     {
         $item = WasteCollectionItem::factory()
-            ->fullWaste()
             ->state(['quantity_delivered' => 20])
+            ->fullWaste()
             ->create();
 
         $this->assertEquals(100.0, $item->getWastePercentage());
@@ -121,8 +121,8 @@ class WasteCollectionItemTest extends TestCase
     public function get_waste_percentage_returns_zero_when_no_waste()
     {
         $item = WasteCollectionItem::factory()
-            ->noWaste()
             ->state(['quantity_delivered' => 20])
+            ->noWaste()
             ->create();
 
         $this->assertEquals(0.0, $item->getWastePercentage());

@@ -8,10 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('daily_reconciliations')) {
+            return;
+        }
         Schema::create('daily_reconciliations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('driver_id');
-            $table->uuid('business_id');
+            $table->uuid('business_id')->nullable();
             $table->date('reconciliation_date');
 
             $table->decimal('total_expected', 10, 2);
@@ -30,8 +33,8 @@ return new class extends Migration
             $table->timestamp('acknowledged_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('driver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+            $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('businesses')->nullOnDelete();
 
             $table->unique(['driver_id', 'reconciliation_date']);
             $table->index('reconciliation_date');

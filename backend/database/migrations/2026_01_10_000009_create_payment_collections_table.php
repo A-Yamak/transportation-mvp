@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('payment_collections')) {
+            return;
+        }
         Schema::create('payment_collections', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('destination_id');
@@ -28,7 +31,7 @@ return new class extends Migration
 
             $table->foreign('destination_id')->references('id')->on('destinations')->onDelete('cascade');
             $table->foreign('trip_id')->references('id')->on('trips')->onDelete('cascade');
-            $table->foreign('driver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
 
             $table->index('trip_id');
             $table->index('payment_status');

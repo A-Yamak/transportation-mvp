@@ -22,7 +22,8 @@
         artisan tinker pail routes cache-clear cache-all restart ps logs-backend logs-frontend logs-horizon \
         model controller request resource migration seeder factory middleware policy event listener job mail notification rule command test-make \
         v1-controller v1-request v1-resource v1-crud \
-        shell-mysql shell-redis install setup k8s-staging k8s-production k8s-status build-backend build-frontend build-all clean prune reset
+        shell-mysql shell-redis install setup k8s-staging k8s-production k8s-status build-backend build-frontend build-all clean prune reset \
+        test-unit test-feature test-filter test-group test-verbose test-report test-report-verbose test-report-filter test-report-full test-db-create test-db-reset
 
 # Default target
 .DEFAULT_GOAL := help
@@ -292,23 +293,83 @@ v1-crud: ## Create V1 CRUD (controller + requests + resource) (usage: make v1-cr
 # ==============================================================================
 # Testing
 # ==============================================================================
+# Tests use separate MySQL testing database (alsabiqoon_testing) with RefreshDatabase.
+# Configuration is in phpunit.xml - sync driver for queues, array for cache/session.
+# ==============================================================================
 
 test: ## Run all tests
-	$(DOCKER_COMPOSE) exec backend php artisan test
+	@echo "$(YELLOW)Clearing caches for clean test environment...$(NC)"
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit
 	@echo "$(GREEN)All tests passed$(NC)"
 
 test-unit: ## Run unit tests only
-	$(DOCKER_COMPOSE) exec backend php artisan test --testsuite=Unit
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --testsuite=Unit
 
 test-feature: ## Run feature tests only
-	$(DOCKER_COMPOSE) exec backend php artisan test --testsuite=Feature
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --testsuite=Feature
 
 test-coverage: ## Run tests with coverage report
-	$(DOCKER_COMPOSE) exec backend php artisan test --coverage
-	@echo "$(GREEN)Coverage report generated in storage/coverage/$(NC)"
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --coverage-text
+	@echo "$(GREEN)Coverage report generated$(NC)"
 
 test-filter: ## Run specific test (usage: make test-filter name="UserTest")
-	$(DOCKER_COMPOSE) exec backend php artisan test --filter=$(name)
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --filter=$(name)
+
+test-group: ## Run tests by group (usage: make test-group name="auth")
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --group=$(name)
+
+test-verbose: ## Run all tests with full error details
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	$(DOCKER_COMPOSE) exec backend ./vendor/bin/phpunit --testdox
+
+test-report: ## Run all tests and export results to backend/storage/test-report.txt
+	@echo "$(YELLOW)Clearing caches for clean test environment...$(NC)"
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	@echo "Running tests and exporting to backend/storage/test-report.txt..."
+	$(DOCKER_COMPOSE) exec backend sh -c './vendor/bin/phpunit 2>&1 | tee storage/test-report.txt'
+	@echo "$(GREEN)Test report saved to backend/storage/test-report.txt$(NC)"
+
+test-report-verbose: ## Run all tests (verbose) and export to backend/storage/test-report.txt
+	@echo "$(YELLOW)Clearing caches for clean test environment...$(NC)"
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	@echo "Running tests (verbose) and exporting to backend/storage/test-report.txt..."
+	$(DOCKER_COMPOSE) exec backend sh -c './vendor/bin/phpunit --testdox 2>&1 | tee storage/test-report.txt'
+	@echo "$(GREEN)Test report saved to backend/storage/test-report.txt$(NC)"
+
+test-report-filter: ## Run filtered tests and export results (usage: make test-report-filter name="UserTest")
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@echo "Running filtered tests and exporting to backend/storage/test-report.txt..."
+	$(DOCKER_COMPOSE) exec backend sh -c './vendor/bin/phpunit --testdox --filter=$(name) 2>&1 | tee storage/test-report.txt'
+	@echo "$(GREEN)Test report saved to backend/storage/test-report.txt$(NC)"
+
+test-report-full: ## Run all tests with FULL error details and stack traces, export to file
+	@echo "$(YELLOW)Clearing caches for clean test environment...$(NC)"
+	@$(DOCKER_COMPOSE) exec backend php artisan config:clear 2>/dev/null || true
+	@$(DOCKER_COMPOSE) exec backend sh -c 'rm -rf .phpunit.cache' 2>/dev/null || true
+	@echo "Running tests with full error details..."
+	$(DOCKER_COMPOSE) exec backend sh -c './vendor/bin/phpunit 2>&1 | tee storage/test-report.txt'
+	@echo "$(GREEN)Full test report saved to backend/storage/test-report.txt$(NC)"
+
+test-db-create: ## Create the testing database if it doesn't exist
+	@echo "$(YELLOW)Creating test database if it doesn't exist...$(NC)"
+	$(DOCKER_COMPOSE) exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS alsabiqoon_testing; GRANT ALL PRIVILEGES ON alsabiqoon_testing.* TO 'transportationapp'@'%';"
+	@echo "$(GREEN)Test database ready$(NC)"
+
+test-db-reset: ## Reset the testing database
+	@echo "$(YELLOW)Resetting test database...$(NC)"
+	$(DOCKER_COMPOSE) exec mysql mysql -uroot -proot -e "DROP DATABASE IF EXISTS alsabiqoon_testing; CREATE DATABASE alsabiqoon_testing; GRANT ALL PRIVILEGES ON alsabiqoon_testing.* TO 'transportationapp'@'%';"
+	@echo "$(GREEN)Test database reset$(NC)"
 
 # ==============================================================================
 # Code Quality

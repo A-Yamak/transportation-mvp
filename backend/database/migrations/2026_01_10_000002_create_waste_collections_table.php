@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('shop_id')->constrained('shops')->cascadeOnDelete();
             $table->foreignUuid('trip_id')->nullable()->constrained('trips')->nullOnDelete();
-            $table->foreignUuid('driver_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('driver_id')->nullable()->constrained('drivers')->nullOnDelete();
             $table->foreignUuid('business_id')->constrained('businesses')->cascadeOnDelete();
             $table->date('collection_date');
             $table->integer('total_items_count')->default(0);

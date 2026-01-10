@@ -11,7 +11,7 @@ use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+// Using Passport auth via TestCase::actingAs($user, 'api')
 use Tests\TestCase;
 
 class PaymentCollectionTest extends TestCase
@@ -25,7 +25,7 @@ class PaymentCollectionTest extends TestCase
         $this->driver = Driver::factory()
             ->has(User::factory())
             ->create();
-        Sanctum::actingAs($this->driver->user);
+        $this->actingAs($this->driver->user, 'api');
     }
 
     /**
@@ -36,7 +36,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -89,7 +89,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -125,7 +125,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act - Try to collect partial without reason
@@ -151,7 +151,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act - Try CliQ without reference
@@ -177,7 +177,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act - Try to collect more
@@ -201,7 +201,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -234,7 +234,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -264,7 +264,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -297,12 +297,12 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         $other_trip = Trip::factory()->create(); // Different driver's trip
         $other_destination = Destination::factory()
-            ->for($other_trip)
+            ->forTrip($other_trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act - Try to collect for destination in wrong trip
@@ -326,7 +326,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -340,7 +340,7 @@ class PaymentCollectionTest extends TestCase
 
         // Assert
         $response->assertStatus(201)
-            ->assertJsonPath('data.payment_collected_at', fn($date) => !empty($date));
+            ->assertJsonPath('data.collected_at', fn($date) => !empty($date));
 
         $destination->refresh();
         $this->assertNotNull($destination->payment_collected_at);
@@ -354,7 +354,7 @@ class PaymentCollectionTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1234.56]);
 
         // Act
@@ -390,7 +390,7 @@ class PaymentCollectionTest extends TestCase
         foreach ($reasons as $reason) {
             // Setup
             $destination = Destination::factory()
-                ->for($trip)
+                ->forTrip($trip)
                 ->create(['amount_to_collect' => 1000.00]);
 
             // Act
@@ -413,12 +413,14 @@ class PaymentCollectionTest extends TestCase
      */
     public function test_unauthenticated_request_fails(): void
     {
-        // Setup
-        Sanctum::useActualEncryption();
+        // Setup - test without authentication
         $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
+
+        // Clear authentication from setUp
+        $this->app['auth']->forgetGuards();
 
         // Act - Without authentication
         $response = $this->postJson(
@@ -429,7 +431,7 @@ class PaymentCollectionTest extends TestCase
             ]
         );
 
-        // Assert
+        // Assert - Passport returns 401 for unauthenticated requests
         $response->assertStatus(401);
     }
 }

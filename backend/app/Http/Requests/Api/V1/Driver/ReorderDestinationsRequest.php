@@ -26,6 +26,7 @@ class ReorderDestinationsRequest extends ApiRequest
                 'required',
                 'string',
                 'uuid',
+                'distinct', // No duplicate IDs allowed
             ],
         ];
     }

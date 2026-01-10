@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('tupperware_movements')) {
+            return;
+        }
         Schema::create('tupperware_movements', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('shop_id');
@@ -30,7 +33,7 @@ return new class extends Migration
             $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
             $table->foreign('destination_id')->references('id')->on('destinations')->onDelete('set null');
             $table->foreign('trip_id')->references('id')->on('trips')->onDelete('cascade');
-            $table->foreign('driver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
             $table->index(['shop_id', 'movement_at']);

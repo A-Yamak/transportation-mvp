@@ -110,6 +110,7 @@ class NotificationService
             [
                 'trip_id' => $tripData['trip_id'],
                 'action' => 'open_trip',
+                'destinations_count' => $tripData['destinations_count'],
                 'total_km' => $tripData['total_km'],
                 'estimated_cost' => $tripData['estimated_cost'],
             ]
@@ -168,12 +169,13 @@ class NotificationService
     /**
      * Bulk notify multiple drivers
      */
-    public function notifyMultiple(array $drivers, string $type, string $title, string $body, array $data = []): array
+    public function notifyMultiple(iterable $drivers, string $type, string $title, string $body, array $data = []): array
     {
-        return array_map(
-            fn($driver) => $this->notifyDriver($driver, $type, $title, $body, $data),
-            $drivers
-        );
+        $notifications = [];
+        foreach ($drivers as $driver) {
+            $notifications[] = $this->notifyDriver($driver, $type, $title, $body, $data);
+        }
+        return $notifications;
     }
 
     /**

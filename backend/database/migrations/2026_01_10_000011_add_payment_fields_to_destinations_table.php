@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('destinations', 'payment_method')) {
+            return;
+        }
         Schema::table('destinations', function (Blueprint $table) {
             $table->enum('payment_method', ['cash', 'cliq_now', 'cliq_later', 'mixed', 'pending'])
                 ->default('pending')

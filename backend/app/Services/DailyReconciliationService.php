@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\PaymentMethod;
 use App\Models\DailyReconciliation;
+use App\Models\Driver;
 use App\Models\PaymentCollection;
 use App\Models\Trip;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -22,21 +23,20 @@ class DailyReconciliationService
     /**
      * Generate daily reconciliation for a driver on a specific date.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $date
      * @param string|null $businessId
      * @return DailyReconciliation
      */
-    public function generateReconciliation(User $driver, Carbon $date, ?string $businessId = null): DailyReconciliation
+    public function generateReconciliation(Driver $driver, Carbon $date, ?string $businessId = null): DailyReconciliation
     {
-        // Get all trips for driver on date
+        // Get all trips for driver on date (started or completed on this date)
         $trips = Trip::where('driver_id', $driver->id)
-            ->whereDate('started_at', $date)
-            ->orWhere(function ($query) use ($driver, $date) {
-                $query->where('driver_id', $driver->id)
-                    ->whereDate('completed_at', $date);
+            ->where(function ($query) use ($date) {
+                $query->whereDate('started_at', $date)
+                    ->orWhereDate('completed_at', $date);
             })
-            ->with(['destinations.paymentCollections'])
+            ->with(['deliveryRequest'])
             ->get();
 
         // Get all payment collections for the date
@@ -51,11 +51,11 @@ class DailyReconciliationService
 
         // Split by payment method
         $totalCash = $paymentCollections
-            ->where('payment_method', 'cash')
+            ->where('payment_method', PaymentMethod::Cash)
             ->sum('amount_collected');
 
         $totalCliq = $paymentCollections
-            ->filter(fn ($pc) => in_array($pc->payment_method, ['cliq_now', 'cliq_later']))
+            ->filter(fn ($pc) => in_array($pc->payment_method, [PaymentMethod::CliqNow, PaymentMethod::CliqLater]))
             ->sum('amount_collected');
 
         // Count trips and deliveries
@@ -70,10 +70,18 @@ class DailyReconciliationService
         // Build per-shop breakdown
         $shopBreakdown = $this->buildShopBreakdown($paymentCollections);
 
+        // Get business_id from the first trip (drivers can work for multiple businesses)
+        $derivedBusinessId = $businessId ?? $trips->first()?->deliveryRequest?->business_id;
+
+        // If no business_id can be derived, use a fallback from payment collections
+        if (!$derivedBusinessId && $paymentCollections->isNotEmpty()) {
+            $derivedBusinessId = $paymentCollections->first()?->destination?->deliveryRequest?->business_id;
+        }
+
         // Create reconciliation record
         $reconciliation = DailyReconciliation::create([
             'driver_id' => $driver->id,
-            'business_id' => $businessId ?? $driver->business_id,
+            'business_id' => $derivedBusinessId,
             'reconciliation_date' => $date,
             'total_expected' => round($totalExpected, 2),
             'total_collected' => round($totalCollected, 2),
@@ -104,9 +112,9 @@ class DailyReconciliationService
             $methods = $collections->pluck('payment_method')->unique()->values();
 
             // Determine primary method
-            $cashCollections = $collections->where('payment_method', 'cash')->count();
+            $cashCollections = $collections->where('payment_method', PaymentMethod::Cash)->count();
             $cliqCollections = $collections->filter(
-                fn ($c) => in_array($c->payment_method, ['cliq_now', 'cliq_later'])
+                fn ($c) => in_array($c->payment_method, [PaymentMethod::CliqNow, PaymentMethod::CliqLater])
             )->count();
 
             $primaryMethod = $cashCollections > $cliqCollections ? 'cash' : 'cliq';
@@ -116,7 +124,7 @@ class DailyReconciliationService
 
             return [
                 'shop_id' => $shopId,
-                'shop_name' => $collections->first()?->destination->shop->name,
+                'shop_name' => $collections->first()?->destination?->shop?->name ?? 'Unknown Shop',
                 'amount_collected' => round($totalCollected, 2),
                 'amount_expected' => round($collections->sum('amount_expected'), 2),
                 'payment_method' => $primaryMethod,
@@ -129,11 +137,11 @@ class DailyReconciliationService
     /**
      * Get or create reconciliation for a driver on a date.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $date
      * @return DailyReconciliation
      */
-    public function getOrCreateReconciliation(User $driver, Carbon $date): DailyReconciliation
+    public function getOrCreateReconciliation(Driver $driver, Carbon $date): DailyReconciliation
     {
         $existing = DailyReconciliation::where('driver_id', $driver->id)
             ->where('reconciliation_date', $date)
@@ -201,12 +209,12 @@ class DailyReconciliationService
     /**
      * Get all reconciliations for a driver in date range.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $startDate
      * @param Carbon $endDate
      * @return Collection
      */
-    public function getReconciliationHistory(User $driver, Carbon $startDate, Carbon $endDate): Collection
+    public function getReconciliationHistory(Driver $driver, Carbon $startDate, Carbon $endDate): Collection
     {
         return DailyReconciliation::where('driver_id', $driver->id)
             ->whereBetween('reconciliation_date', [$startDate, $endDate])
@@ -217,12 +225,12 @@ class DailyReconciliationService
     /**
      * Calculate cumulative statistics for a date range.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $startDate
      * @param Carbon $endDate
      * @return array
      */
-    public function getCumulativeStats(User $driver, Carbon $startDate, Carbon $endDate): array
+    public function getCumulativeStats(Driver $driver, Carbon $startDate, Carbon $endDate): array
     {
         $reconciliations = $this->getReconciliationHistory($driver, $startDate, $endDate);
 

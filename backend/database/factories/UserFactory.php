@@ -41,4 +41,26 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+        ]);
+    }
+
+    /**
+     * User with FCM token for push notifications.
+     */
+    public function withFcmToken(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'fcm_token' => fake()->sha256(),
+            'fcm_token_updated_at' => now(),
+        ]);
+    }
 }

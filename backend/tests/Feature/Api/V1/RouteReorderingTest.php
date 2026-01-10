@@ -7,7 +7,7 @@ use App\Models\Driver;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+// Using Passport auth via TestCase::actingAs($user, 'api')
 use Tests\TestCase;
 
 class RouteReorderingTest extends TestCase
@@ -20,7 +20,7 @@ class RouteReorderingTest extends TestCase
         $this->driver = Driver::factory()
             ->has(User::factory())
             ->create();
-        Sanctum::actingAs($this->driver->user);
+        $this->actingAs($this->driver->user, 'api');
     }
 
     /**
@@ -31,9 +31,9 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['sequence_order' => 0]);
-        $dest2 = Destination::factory()->for($trip)->create(['sequence_order' => 1]);
-        $dest3 = Destination::factory()->for($trip)->create(['sequence_order' => 2]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['sequence_order' => 0]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['sequence_order' => 1]);
+        $dest3 = Destination::factory()->forTrip($trip)->create(['sequence_order' => 2]);
 
         // Act: Reorder to [dest3, dest1, dest2]
         $response = $this->postJson(
@@ -77,9 +77,9 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
-        $dest3 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
+        $dest3 = Destination::factory()->forTrip($trip)->create();
 
         // Act: Try to reorder with missing IDs
         $response = $this->postJson(
@@ -105,8 +105,8 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create(['started_at' => now()]);
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $response = $this->postJson(
@@ -131,8 +131,8 @@ class RouteReorderingTest extends TestCase
             'completed_at' => now()
         ]);
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $response = $this->postJson(
@@ -153,7 +153,7 @@ class RouteReorderingTest extends TestCase
     {
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
-        $dest1 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $response = $this->postJson(
@@ -189,7 +189,7 @@ class RouteReorderingTest extends TestCase
 
         // Assert
         $response->assertStatus(422)
-            ->assertJsonValidationErrors('destination_ids.0', 'destination_ids.1');
+            ->assertJsonValidationErrors(['destination_ids.0', 'destination_ids.1']);
     }
 
     /**
@@ -200,7 +200,7 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
         $fakeId = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'; // Valid UUID, wrong destination
 
         // Act
@@ -224,8 +224,8 @@ class RouteReorderingTest extends TestCase
         $trip1 = Trip::factory()->for($this->driver)->create();
         $trip2 = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip1)->create();
-        $dest2 = Destination::factory()->for($trip2)->create();
+        $dest1 = Destination::factory()->forTrip($trip1)->create();
+        $dest2 = Destination::factory()->forTrip($trip2)->create();
 
         // Act: Try to reorder trip1 with destination from trip2
         $response = $this->postJson(
@@ -247,7 +247,7 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $destinations = Destination::factory(10)->for($trip)->create();
+        $destinations = Destination::factory(10)->forTrip($trip)->create();
         $destinationIds = $destinations->pluck('id')->shuffle()->toArray();
 
         // Act
@@ -279,9 +279,9 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
-        $dest3 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
+        $dest3 = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $response = $this->postJson(
@@ -306,7 +306,7 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $destinations = Destination::factory(5)->for($trip)->create([
+        $destinations = Destination::factory(5)->forTrip($trip)->create([
             'sequence_order' => 0 // Will be updated
         ]);
 
@@ -337,14 +337,16 @@ class RouteReorderingTest extends TestCase
      */
     public function test_unauthenticated_request_fails(): void
     {
-        // Setup
-        Sanctum::useActualEncryption();
+        // Clear authentication from setUp
+        $this->app['auth']->forgetGuards();
+
+        // Setup - test without authentication
         $trip = Trip::factory()->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
 
-        // Act
+        // Act - make request without authentication
         $response = $this->postJson(
             "/api/v1/driver/trips/{$trip->id}/reorder-destinations",
             [
@@ -368,8 +370,8 @@ class RouteReorderingTest extends TestCase
 
         $trip = Trip::factory()->for($otherDriver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
 
         // Act
         $response = $this->postJson(
@@ -391,8 +393,8 @@ class RouteReorderingTest extends TestCase
         // Setup
         $trip = Trip::factory()->for($this->driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create();
-        $dest2 = Destination::factory()->for($trip)->create();
+        $dest1 = Destination::factory()->forTrip($trip)->create();
+        $dest2 = Destination::factory()->forTrip($trip)->create();
 
         // Act - Same destination twice
         $response = $this->postJson(

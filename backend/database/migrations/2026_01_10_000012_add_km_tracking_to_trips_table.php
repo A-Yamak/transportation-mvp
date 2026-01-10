@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('trips', 'start_odometer_km')) {
+            return;
+        }
         Schema::table('trips', function (Blueprint $table) {
             $table->decimal('start_odometer_km', 10, 2)->nullable()
                 ->after('started_at');

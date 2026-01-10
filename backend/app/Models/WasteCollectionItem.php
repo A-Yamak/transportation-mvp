@@ -101,12 +101,12 @@ class WasteCollectionItem extends Model
             return 0;
         }
 
-        return today()->diffInDays($this->expires_at);
+        return $this->expires_at->diffInDays(today());
     }
 
     /**
      * Get percentage of items that were wasted.
-     * Returns: (pieces_waste / quantity_delivered) * 100
+     * Returns: (pieces_waste / quantity_delivered) * 100, capped at 100%
      */
     public function getWastePercentage(): float
     {
@@ -114,7 +114,7 @@ class WasteCollectionItem extends Model
             return 0;
         }
 
-        return ($this->pieces_waste / $this->quantity_delivered) * 100;
+        return min(100.0, ($this->pieces_waste / $this->quantity_delivered) * 100);
     }
 
     /**

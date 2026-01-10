@@ -33,12 +33,11 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_full_payment_cash(): void
     {
         // Setup
-        $destination = Destination::factory()
-            ->has(Trip::factory())
-            ->create(['amount_to_collect' => 1000.00]);
-
         $driver = Driver::factory()->create();
-        $trip = $destination->trip;
+        $trip = Trip::factory()->for($driver)->create();
+        $destination = Destination::factory()
+            ->forTrip($trip)
+            ->create(['amount_to_collect' => 1000.00]);
 
         // Act
         $collection = $this->service->collectPayment(
@@ -55,7 +54,7 @@ class PaymentCollectionServiceTest extends TestCase
         $this->assertEquals(1000.00, $collection->amount_collected);
         $this->assertEquals(PaymentMethod::Cash, $collection->payment_method);
         $this->assertEquals(PaymentStatus::Collected, $collection->payment_status);
-        $this->assertEquals(0.00, $collection->shortageAmount());
+        $this->assertEquals(0.00, $collection->shortage_amount);
         $this->assertTrue($collection->isFullyCollected());
         $this->assertFalse($collection->hasShortage());
 
@@ -72,8 +71,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_partial_payment_with_reason(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -89,10 +89,10 @@ class PaymentCollectionServiceTest extends TestCase
         // Assert
         $this->assertEquals(750.00, $collection->amount_collected);
         $this->assertEquals(PaymentStatus::Partial, $collection->payment_status);
-        $this->assertEquals(250.00, $collection->shortageAmount());
+        $this->assertEquals(250.00, $collection->shortage_amount);
         $this->assertTrue($collection->hasShortage());
         $this->assertFalse($collection->isFullyCollected());
-        $this->assertEquals(ShortageReason::CustomerAbsent->value, $collection->shortage_reason);
+        $this->assertEquals(ShortageReason::CustomerAbsent, $collection->shortage_reason);
     }
 
     /**
@@ -101,8 +101,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_payment_cliq_now(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -128,8 +129,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_payment_cliq_later(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -153,8 +155,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_zero_payment(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
         // Act
@@ -170,7 +173,7 @@ class PaymentCollectionServiceTest extends TestCase
         // Assert
         $this->assertEquals(0.00, $collection->amount_collected);
         $this->assertEquals(PaymentStatus::Failed, $collection->payment_status);
-        $this->assertEquals(1000.00, $collection->shortageAmount());
+        $this->assertEquals(1000.00, $collection->shortage_amount);
     }
 
     /**
@@ -178,13 +181,17 @@ class PaymentCollectionServiceTest extends TestCase
      */
     public function test_calculate_daily_totals(): void
     {
-        // Setup: Create trip with multiple collections
+        // Setup: Create trip with multiple collections at different shops
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 500.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 700.00]);
-        $dest3 = Destination::factory()->for($trip)->create(['amount_to_collect' => 300.00]);
+        $shop1 = Shop::factory()->create();
+        $shop2 = Shop::factory()->create();
+        $shop3 = Shop::factory()->create();
+
+        $dest1 = Destination::factory()->forTrip($trip)->for($shop1)->create(['amount_to_collect' => 500.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->for($shop2)->create(['amount_to_collect' => 700.00]);
+        $dest3 = Destination::factory()->forTrip($trip)->for($shop3)->create(['amount_to_collect' => 300.00]);
 
         // Create payments
         $this->service->collectPayment(
@@ -215,14 +222,14 @@ class PaymentCollectionServiceTest extends TestCase
 
         // Assert
         $this->assertEquals(1450.00, $totals['total_collected']);
-        $this->assertEquals(1200.00, $totals['total_cash']);
+        $this->assertEquals(750.00, $totals['total_cash']); // 500 + 250
         $this->assertEquals(700.00, $totals['total_cliq']);
-        $this->assertEquals(50.00, $totals['total_shortage']);
+        $this->assertEquals(50.00, $totals['shortage_amount']);
         $this->assertCount(3, $totals['shop_breakdown']);
 
         // Check collection rate
         $expectedTotal = 500 + 700 + 300;
-        $expectedRate = ($totals['total_collected'] / $expectedTotal) * 100;
+        $expectedRate = round(($totals['total_collected'] / $expectedTotal) * 100, 2);
         $this->assertEquals($expectedRate, $totals['collection_rate']);
     }
 
@@ -231,11 +238,14 @@ class PaymentCollectionServiceTest extends TestCase
      */
     public function test_get_payments_for_trip(): void
     {
-        // Setup
-        $trip = Trip::factory()->has(Destination::factory(3))->create();
+        // Setup - create trip first, then destinations
+        $trip = Trip::factory()->create();
+        $destinations = Destination::factory(3)
+            ->forTrip($trip)
+            ->create(['amount_to_collect' => 1000.00]);
 
         // Create payments for all destinations
-        foreach ($trip->destinations as $destination) {
+        foreach ($destinations as $destination) {
             $this->service->collectPayment(
                 destination: $destination,
                 amountCollected: $destination->amount_to_collect * 0.9,
@@ -261,8 +271,8 @@ class PaymentCollectionServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 1000.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 500.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 1000.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 500.00]);
 
         // Full payment (no shortage)
         $this->service->collectPayment(
@@ -287,7 +297,7 @@ class PaymentCollectionServiceTest extends TestCase
 
         // Assert
         $this->assertCount(1, $shortages);
-        $this->assertEquals(200.00, $shortages->first()->shortageAmount());
+        $this->assertEquals(200.00, $shortages->first()->shortage_amount);
     }
 
     /**
@@ -299,7 +309,7 @@ class PaymentCollectionServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $destinations = Destination::factory(5)->for($trip)->create([
+        $destinations = Destination::factory(5)->forTrip($trip)->create([
             'amount_to_collect' => 1000.00
         ]);
 
@@ -332,11 +342,11 @@ class PaymentCollectionServiceTest extends TestCase
         );
 
         // Assert
-        $this->assertEquals(2700.00, $stats['total_collected']);
+        $this->assertEquals(2700.00, $stats['total_amount_collected']);
         $this->assertEquals(1900.00, $stats['total_cash']);
         $this->assertEquals(800.00, $stats['total_cliq']);
-        $this->assertEquals(300.00, $stats['total_shortage']);
-        $this->assertTrue($stats['collection_rate'] > 0);
+        $this->assertEquals(2, $stats['collections_with_shortage']); // dest2 and dest3 are partial
+        $this->assertTrue($stats['average_collection_rate'] > 0);
     }
 
     /**
@@ -345,11 +355,12 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collected_at_timestamp_is_set(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1000.00]);
 
-        $before = Carbon::now();
+        $before = Carbon::now()->subSecond();
 
         // Act
         $collection = $this->service->collectPayment(
@@ -358,11 +369,15 @@ class PaymentCollectionServiceTest extends TestCase
             paymentMethod: PaymentMethod::Cash
         );
 
-        $after = Carbon::now();
+        $after = Carbon::now()->addSecond();
 
         // Assert
         $this->assertNotNull($collection->collected_at);
-        $this->assertTrue($collection->collected_at->between($before, $after));
+        $this->assertTrue(
+            $collection->collected_at->greaterThanOrEqualTo($before) &&
+            $collection->collected_at->lessThanOrEqualTo($after),
+            "collected_at should be within reasonable time bounds"
+        );
     }
 
     /**
@@ -371,8 +386,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_decimal_precision_calculations(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 1234.56]);
 
         // Act
@@ -385,7 +401,7 @@ class PaymentCollectionServiceTest extends TestCase
 
         // Assert - Verify precision
         $this->assertEquals('987.33', number_format($collection->amount_collected, 2));
-        $this->assertEquals('247.23', number_format($collection->shortageAmount(), 2));
+        $this->assertEquals('247.23', number_format($collection->shortage_amount, 2));
         $this->assertEquals(987.33 + 247.23, 1234.56);
     }
 
@@ -395,8 +411,9 @@ class PaymentCollectionServiceTest extends TestCase
     public function test_collect_more_than_expected(): void
     {
         // Setup
+        $trip = Trip::factory()->create();
         $destination = Destination::factory()
-            ->has(Trip::factory())
+            ->forTrip($trip)
             ->create(['amount_to_collect' => 500.00]);
 
         // Act - Some drivers might collect more (tips, advance payment)

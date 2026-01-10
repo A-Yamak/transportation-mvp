@@ -90,6 +90,7 @@ Thumbs.db
 .eslintcache
 /coverage/
 /backend/coverage/
+/backend/storage/coverage/
 __screenshots__/
 
 # ------------------------------------------------------------------------------

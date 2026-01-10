@@ -765,31 +765,16 @@ class DriverController extends Controller
         Trip $trip,
         Destination $destination,
     ): JsonResponse {
-        // Validate destination belongs to trip
-        if ($destination->deliveryRequest->trip_id !== $trip->id) {
-            return $this->error('Destination does not belong to this trip', 422);
-        }
-
-        $amountCollected = $request->getAmountCollected();
-        $amountExpected = (float) $destination->amount_to_collect;
-
-        // Check if shortage reason is provided when needed
-        if ($amountCollected < $amountExpected && !$request->getShortageReason()) {
-            return $this->error('Shortage reason is required when amount collected is less than expected', 422);
-        }
-
-        // Validate CliQ reference if CliQ payment
-        if ($request->isCliQPayment() && !$request->getCliQReference()) {
-            return $this->error('CliQ reference is required for CliQ payments', 422);
-        }
+        $this->authorizeTrip($trip);
+        $this->validateDestinationBelongsToTrip($trip, $destination);
 
         // Record payment collection
         $payment = $this->paymentService->collectPayment(
             $destination,
-            $amountCollected,
-            $request->getPaymentMethod()->value,
+            $request->getAmountCollected(),
+            $request->getPaymentMethod(),
             $request->getCliQReference(),
-            $request->getShortageReason()?->value,
+            $request->getShortageReason(),
             $request->getNotes(),
         );
 
@@ -808,10 +793,8 @@ class DriverController extends Controller
         Trip $trip,
         Destination $destination,
     ): JsonResponse {
-        // Validate destination belongs to trip
-        if ($destination->deliveryRequest->trip_id !== $trip->id) {
-            return $this->error('Destination does not belong to this trip', 422);
-        }
+        $this->authorizeTrip($trip);
+        $this->validateDestinationBelongsToTrip($trip, $destination);
 
         $shop = $destination->shop;
         if (!$shop) {
@@ -822,14 +805,9 @@ class DriverController extends Controller
         foreach ($request->getTupperwareItems() as $item) {
             $movement = $this->tupperwareService->recordPickup(
                 $shop,
+                $destination,
                 $item['product_type'],
                 (int) $item['quantity'],
-                [
-                    'trip_id' => $trip->id,
-                    'destination_id' => $destination->id,
-                    'driver_id' => auth()->id(),
-                    'business_id' => $trip->deliveryRequest->business_id,
-                ],
                 $request->getNotes(),
             );
             $movements[] = $movement;
@@ -849,8 +827,12 @@ class DriverController extends Controller
         ReorderDestinationsRequest $request,
         Trip $trip,
     ): JsonResponse {
-        // Validate trip hasn't started
-        if ($trip->status === TripStatus::InProgress || $trip->status === TripStatus::Completed) {
+        $this->authorizeTrip($trip);
+
+        // Validate trip hasn't started (check status and timestamps)
+        if ($trip->status === TripStatus::InProgress ||
+            $trip->status === TripStatus::Completed ||
+            $trip->started_at !== null) {
             return $this->error('Cannot reorder destinations after trip has started', 422);
         }
 
@@ -858,25 +840,29 @@ class DriverController extends Controller
 
         // Validate all destinations belong to this trip
         $tripDestinations = $trip->deliveryRequest->destinations->pluck('id')->toArray();
+
+        // Check for destinations not in trip
         if (count(array_diff($destinationIds, $tripDestinations)) > 0) {
             return $this->error('Some destinations do not belong to this trip', 422);
         }
 
-        // Update sequence order
-        foreach ($request->getDestinationsWithSequence() as $item) {
-            Destination::where('id', $item['id'])->update([
-                'sequence_order' => $item['sequence_order'],
+        // Check ALL trip destinations are included
+        if (count(array_diff($tripDestinations, $destinationIds)) > 0) {
+            return $this->error('All trip destinations must be included in the reorder', 422);
+        }
+
+        // Update sequence order (0-indexed)
+        foreach ($destinationIds as $index => $destinationId) {
+            Destination::where('id', $destinationId)->update([
+                'sequence_order' => $index,
             ]);
         }
 
+        // Return flat array of destinations
         return response()->json([
-            'data' => [
-                'trip_id' => $trip->id,
-                'destinations_reordered' => count($destinationIds),
-                'destinations' => DestinationResource::collection(
-                    $trip->deliveryRequest->destinations()->orderBy('sequence_order')->get()
-                ),
-            ],
+            'data' => DestinationResource::collection(
+                $trip->deliveryRequest->destinations()->orderBy('sequence_order')->get()
+            ),
             'message' => 'Destinations reordered successfully',
         ]);
     }
@@ -887,7 +873,7 @@ class DriverController extends Controller
      */
     public function endDay(EndDayRequest $request): JsonResponse
     {
-        $driver = auth()->user();
+        $driver = $this->getAuthenticatedDriver();
         $date = $request->getReconciliationDate();
 
         // Generate or get reconciliation for today
@@ -896,7 +882,7 @@ class DriverController extends Controller
         return response()->json([
             'data' => new DailyReconciliationResource($reconciliation),
             'message' => 'Day ended successfully',
-        ]);
+        ], 201);
     }
 
     /**
@@ -905,7 +891,7 @@ class DriverController extends Controller
      */
     public function getDayReconciliation(): JsonResponse
     {
-        $driver = auth()->user();
+        $driver = $this->getAuthenticatedDriver();
         $date = now();
 
         $reconciliation = DailyReconciliation::where('driver_id', $driver->id)
@@ -927,13 +913,14 @@ class DriverController extends Controller
      */
     public function submitReconciliation(SubmitReconciliationRequest $request): JsonResponse
     {
+        $driver = $this->getAuthenticatedDriver();
         $reconciliation = DailyReconciliation::find($request->getReconciliationId());
 
         if (!$reconciliation) {
             return $this->error('Reconciliation not found', 404);
         }
 
-        if ($reconciliation->driver_id !== auth()->id()) {
+        if ($reconciliation->driver_id !== $driver->id) {
             return $this->error('Unauthorized', 403);
         }
 
@@ -941,7 +928,7 @@ class DriverController extends Controller
         $this->reconciliationService->submitReconciliation($reconciliation);
 
         return response()->json([
-            'data' => new DailyReconciliationResource($reconciliation),
+            'data' => new DailyReconciliationResource($reconciliation->fresh()),
             'message' => 'Reconciliation submitted successfully',
         ]);
     }

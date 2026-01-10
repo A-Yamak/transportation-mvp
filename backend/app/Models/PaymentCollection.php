@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\ShortageReason;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+// Note: driver() relationship references Driver model
 
 /**
  * PaymentCollection Model
@@ -55,6 +58,7 @@ class PaymentCollection extends Model
             'amount_collected' => 'decimal:2',
             'payment_method' => PaymentMethod::class,
             'payment_status' => PaymentStatus::class,
+            'shortage_reason' => ShortageReason::class,
             'collected_at' => 'datetime',
         ];
     }
@@ -73,7 +77,7 @@ class PaymentCollection extends Model
 
     public function driver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'driver_id');
+        return $this->belongsTo(Driver::class);
     }
 
     // ========== SCOPES ==========
@@ -159,7 +163,7 @@ class PaymentCollection extends Model
      */
     public function isCliQPayment(): bool
     {
-        return in_array($this->payment_method, ['cliq_now', 'cliq_later']);
+        return in_array($this->payment_method, [PaymentMethod::CliqNow, PaymentMethod::CliqLater]);
     }
 
     /**
@@ -167,6 +171,6 @@ class PaymentCollection extends Model
      */
     public function isCashPayment(): bool
     {
-        return $this->payment_method === 'cash';
+        return $this->payment_method === PaymentMethod::Cash;
     }
 }

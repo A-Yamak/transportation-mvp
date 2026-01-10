@@ -8,6 +8,7 @@ use App\Enums\DestinationStatus;
 use App\Enums\FailureReason;
 use App\Models\DeliveryRequest;
 use App\Models\Destination;
+use App\Models\Trip;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -41,6 +42,17 @@ class DestinationFactory extends Factory
             'arrived_at' => null,
             'completed_at' => null,
         ];
+    }
+
+    /**
+     * Associate destination with a Trip (uses Trip's DeliveryRequest).
+     * This allows: Destination::factory()->forTrip($trip)->create()
+     */
+    public function forTrip(Trip $trip): static
+    {
+        return $this->state(fn () => [
+            'delivery_request_id' => $trip->delivery_request_id,
+        ]);
     }
 
     /**

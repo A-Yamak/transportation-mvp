@@ -5,16 +5,20 @@ namespace Tests\Feature\Integration;
 use App\Jobs\SendFcmNotificationJob;
 use App\Models\DeliveryRequest;
 use App\Models\Destination;
+use App\Models\Driver;
 use App\Models\Notification;
 use App\Models\Trip;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class TripAssignmentNotificationTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test complete trip assignment flow triggers driver notification
      *
@@ -29,8 +33,10 @@ class TripAssignmentNotificationTest extends TestCase
     {
         Bus::fake();
 
-        // Setup
-        $driver = User::factory()->create(['fcm_token' => 'test-fcm-token']);
+        // Setup - Create driver with user that has FCM token
+        $driver = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => 'test-fcm-token']))
+            ->create();
         $vehicle = Vehicle::factory()->create(['is_active' => true]);
 
         $deliveryRequest = DeliveryRequest::factory()->create(['status' => 'pending']);
@@ -53,15 +59,15 @@ class TripAssignmentNotificationTest extends TestCase
         $response->assertStatus(201);
         $tripId = $response['data']['id'];
 
-        // Assert: Notification created for driver
+        // Assert: Notification created for driver's user
         $this->assertDatabaseHas('notifications', [
-            'user_id' => $driver->id,
+            'user_id' => $driver->user->id,
             'type' => 'trip_assigned',
             'status' => 'pending',
         ]);
 
         // Assert: Correct notification data
-        $notification = Notification::where('user_id', $driver->id)
+        $notification = Notification::where('user_id', $driver->user->id)
             ->where('type', 'trip_assigned')
             ->first();
 
@@ -80,7 +86,9 @@ class TripAssignmentNotificationTest extends TestCase
     {
         Bus::fake();
 
-        $driver = User::factory()->create(['fcm_token' => null]);
+        $driver = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => null]))
+            ->create();
         $vehicle = Vehicle::factory()->create(['is_active' => true]);
         $deliveryRequest = DeliveryRequest::factory()->create();
         Destination::factory()->count(3)->create(['delivery_request_id' => $deliveryRequest->id]);
@@ -95,7 +103,7 @@ class TripAssignmentNotificationTest extends TestCase
 
         // Notification still created (pending status)
         $this->assertDatabaseHas('notifications', [
-            'user_id' => $driver->id,
+            'user_id' => $driver->user->id,
             'status' => 'pending',
         ]);
 
@@ -110,7 +118,9 @@ class TripAssignmentNotificationTest extends TestCase
     {
         Bus::fake();
 
-        $driver = User::factory()->create(['fcm_token' => 'token']);
+        $driver = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => 'token']))
+            ->create();
         $vehicle = Vehicle::factory()->create();
 
         $deliveryRequest = DeliveryRequest::factory()->create([
@@ -128,7 +138,7 @@ class TripAssignmentNotificationTest extends TestCase
             'vehicle_id' => $vehicle->id,
         ]);
 
-        $notification = Notification::where('user_id', $driver->id)->first();
+        $notification = Notification::where('user_id', $driver->user->id)->first();
 
         $this->assertEquals(8, $notification->data['destinations_count']);
         $this->assertEquals(42.5, $notification->data['total_km']);
@@ -142,7 +152,9 @@ class TripAssignmentNotificationTest extends TestCase
     {
         Bus::fake();
 
-        $driver = User::factory()->create(['fcm_token' => 'token']);
+        $driver = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => 'token']))
+            ->create();
         $vehicle = Vehicle::factory()->create();
         $deliveryRequest = DeliveryRequest::factory()->create();
         Destination::factory()->count(3)->create(['delivery_request_id' => $deliveryRequest->id]);
@@ -155,7 +167,7 @@ class TripAssignmentNotificationTest extends TestCase
             'vehicle_id' => $vehicle->id,
         ]);
 
-        $notification = Notification::where('user_id', $driver->id)->first();
+        $notification = Notification::where('user_id', $driver->user->id)->first();
 
         $this->assertEquals('New Trip Assigned', $notification->title);
         $this->assertStringContainsString('3 deliveries', $notification->body);
@@ -168,8 +180,12 @@ class TripAssignmentNotificationTest extends TestCase
     {
         Bus::fake();
 
-        $driver1 = User::factory()->create(['fcm_token' => 'token1']);
-        $driver2 = User::factory()->create(['fcm_token' => 'token2']);
+        $driver1 = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => 'token1']))
+            ->create();
+        $driver2 = Driver::factory()
+            ->for(User::factory()->state(['fcm_token' => 'token2']))
+            ->create();
         $vehicle = Vehicle::factory()->create();
 
         $deliveryRequest1 = DeliveryRequest::factory()->create();
@@ -197,15 +213,15 @@ class TripAssignmentNotificationTest extends TestCase
         $this->assertEquals(201, $response2->status());
 
         // Each driver gets their notification
-        $driver1Notifications = Notification::where('user_id', $driver1->id)->count();
-        $driver2Notifications = Notification::where('user_id', $driver2->id)->count();
+        $driver1Notifications = Notification::where('user_id', $driver1->user->id)->count();
+        $driver2Notifications = Notification::where('user_id', $driver2->user->id)->count();
 
         $this->assertEquals(1, $driver1Notifications);
         $this->assertEquals(1, $driver2Notifications);
 
         // Notifications contain correct data
-        $notif1 = Notification::where('user_id', $driver1->id)->first();
-        $notif2 = Notification::where('user_id', $driver2->id)->first();
+        $notif1 = Notification::where('user_id', $driver1->user->id)->first();
+        $notif2 = Notification::where('user_id', $driver2->user->id)->first();
 
         $this->assertEquals(3, $notif1->data['destinations_count']);
         $this->assertEquals(4, $notif2->data['destinations_count']);

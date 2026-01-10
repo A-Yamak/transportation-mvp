@@ -35,11 +35,12 @@ class NotificationFactory extends Factory
     public function tripAssigned(User $driver = null, array $tripData = []): self
     {
         return $this->state(function (array $attributes) use ($driver, $tripData) {
+            $destinationsCount = $tripData['destinations_count'] ?? 3;
             return [
                 'user_id' => $driver?->id ?? User::factory(),
                 'type' => 'trip_assigned',
                 'title' => 'New Trip Assigned',
-                'body' => "Trip with {$tripData['destinations_count'] ?? 3} deliveries assigned",
+                'body' => "Trip with {$destinationsCount} deliveries assigned",
                 'data' => [
                     'trip_id' => $tripData['trip_id'] ?? fake()->uuid(),
                     'action' => 'open_trip',

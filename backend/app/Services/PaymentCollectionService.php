@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
+use App\Enums\ShortageReason;
 use App\Models\Destination;
+use App\Models\Driver;
 use App\Models\PaymentCollection;
 use App\Models\Trip;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -24,34 +27,39 @@ class PaymentCollectionService
      *
      * @param Destination $destination
      * @param float $amountCollected
-     * @param string $paymentMethod "cash", "cliq_now", "cliq_later", or "mixed"
+     * @param PaymentMethod $paymentMethod Payment method enum
      * @param string|null $cliqReference CliQ transaction ID (if CliQ payment)
-     * @param string|null $shortageReason Reason for shortage (if applicable)
+     * @param ShortageReason|null $shortageReason Reason for shortage (if applicable)
      * @param string|null $notes Optional notes
      * @return PaymentCollection
      */
     public function collectPayment(
         Destination $destination,
         float $amountCollected,
-        string $paymentMethod,
+        PaymentMethod $paymentMethod,
         ?string $cliqReference = null,
-        ?string $shortageReason = null,
+        ?ShortageReason $shortageReason = null,
         ?string $notes = null,
     ): PaymentCollection {
         $amountExpected = (float) $destination->amount_to_collect;
 
         // Determine payment status based on collected amount
         $paymentStatus = match (true) {
-            $amountCollected >= $amountExpected => 'collected',
-            $amountCollected > 0 => 'partial',
-            default => 'failed',
+            $amountCollected >= $amountExpected => PaymentStatus::Collected,
+            $amountCollected > 0 => PaymentStatus::Partial,
+            default => PaymentStatus::Failed,
         };
+
+        // Get trip through delivery request
+        $trip = $destination->deliveryRequest->trip;
+        $tripId = $trip?->id;
+        $driverId = $trip?->driver_id ?? auth()->user()?->driver?->id ?? auth()->id();
 
         // Create payment collection record
         $paymentCollection = PaymentCollection::create([
             'destination_id' => $destination->id,
-            'trip_id' => $destination->trip_id,
-            'driver_id' => auth()->id(),
+            'trip_id' => $tripId,
+            'driver_id' => $driverId,
             'amount_expected' => $amountExpected,
             'amount_collected' => $amountCollected,
             'payment_method' => $paymentMethod,
@@ -62,11 +70,14 @@ class PaymentCollectionService
             'collected_at' => now(),
         ]);
 
+        // Determine payment reference: CliQ reference for CliQ payments, shortage reason for partials
+        $reference = $cliqReference ?: ($shortageReason ? $shortageReason->value : null);
+
         // Update destination payment fields
         $destination->update([
             'payment_method' => $paymentMethod,
             'payment_status' => $paymentStatus,
-            'payment_reference' => $cliqReference,
+            'payment_reference' => $reference,
             'payment_collected_at' => now(),
             'amount_collected' => $amountCollected,
         ]);
@@ -90,15 +101,15 @@ class PaymentCollectionService
     /**
      * Get daily totals for a driver on a specific date.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $date
      * @return array
      */
-    public function calculateDailyTotals(User $driver, Carbon $date): array
+    public function calculateDailyTotals(Driver $driver, Carbon $date): array
     {
         $collections = PaymentCollection::where('driver_id', $driver->id)
             ->whereDate('collected_at', $date)
-            ->with(['destination.trip'])
+            ->with(['destination'])
             ->get();
 
         $totalExpected = 0;
@@ -152,32 +163,32 @@ class PaymentCollectionService
     /**
      * Get payment collections with shortages for a driver on a date.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $date
      * @return Collection
      */
-    public function getShortagesForDriver(User $driver, Carbon $date): Collection
+    public function getShortagesForDriver(Driver $driver, Carbon $date): Collection
     {
         return PaymentCollection::where('driver_id', $driver->id)
             ->whereDate('collected_at', $date)
             ->whereColumn('amount_collected', '<', 'amount_expected')
-            ->with(['destination.shop', 'destination.trip'])
-            ->orderByDesc('shortage_amount')
+            ->with(['destination.shop'])
+            ->orderByRaw('(amount_expected - amount_collected) DESC')
             ->get();
     }
 
     /**
      * Get collection statistics for a date range.
      *
-     * @param User $driver
+     * @param Driver $driver
      * @param Carbon $startDate
      * @param Carbon $endDate
      * @return array
      */
-    public function getCollectionStats(User $driver, Carbon $startDate, Carbon $endDate): array
+    public function getCollectionStats(Driver $driver, Carbon $startDate, Carbon $endDate): array
     {
         $collections = PaymentCollection::where('driver_id', $driver->id)
-            ->whereBetween('collected_at', [$startDate, $endDate])
+            ->whereBetween('collected_at', [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()])
             ->get();
 
         $stats = [

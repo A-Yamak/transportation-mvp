@@ -33,7 +33,7 @@ class PaymentCollectionResource extends ApiResource
             'payment_status' => $this->resource->payment_status->value,
             'payment_status_label' => $this->resource->payment_status->label(),
             'payment_status_color' => $this->resource->payment_status->color(),
-            'shortage_amount' => (float) $this->resource->shortage_amount,
+            'shortage_amount' => round((float) $this->resource->shortage_amount, 2),
             'shortage_percentage' => $this->resource->hasShortage()
                 ? round(($this->resource->shortage_amount / $this->resource->amount_expected) * 100, 2)
                 : 0,

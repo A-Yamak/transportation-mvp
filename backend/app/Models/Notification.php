@@ -115,4 +115,9 @@ class Notification extends Model
     {
         return $this->status === 'pending';
     }
+
+    public function isFailed(): bool
+    {
+        return $this->status === 'failed';
+    }
 }

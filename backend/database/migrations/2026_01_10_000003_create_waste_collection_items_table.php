@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('waste_collection_id');
-            $table->index('order_item_id');
+            // order_item_id already indexed via ->index() on line 19
             $table->index('expires_at');
         });
     }

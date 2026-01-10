@@ -14,7 +14,7 @@ return new class extends Migration
 
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('type'); // 'trip_assigned', 'trip_reassigned', 'payment_received', 'action_required'
             $table->string('title');
             $table->text('body');
@@ -24,7 +24,6 @@ return new class extends Migration
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->index('user_id');
             $table->index('status');
             $table->index('created_at');

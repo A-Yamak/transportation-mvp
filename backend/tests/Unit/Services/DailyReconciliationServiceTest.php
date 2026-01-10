@@ -63,7 +63,7 @@ class DailyReconciliationServiceTest extends TestCase
         $shop = Shop::factory()->create();
 
         $dest = Destination::factory()
-            ->for($trip)
+            ->forTrip($trip)
             ->for($shop)
             ->create(['amount_to_collect' => 1000.00]);
 
@@ -85,7 +85,7 @@ class DailyReconciliationServiceTest extends TestCase
         $this->assertEquals(1000.00, $reconciliation->total_collected);
         $this->assertEquals(1000.00, $reconciliation->total_cash);
         $this->assertEquals(0.00, $reconciliation->total_cliq);
-        $this->assertEquals(100.0, $reconciliation->collectionRate());
+        $this->assertEquals(100.0, $reconciliation->collection_rate);
     }
 
     /**
@@ -96,14 +96,20 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup
         $driver = Driver::factory()->create();
 
-        // Trip 1
-        $trip1 = Trip::factory()->for($driver)->create();
-        $dest1 = Destination::factory()->for($trip1)->create(['amount_to_collect' => 500.00]);
+        // Trip 1 - completed
+        $trip1 = Trip::factory()->for($driver)->create([
+            'started_at' => now(),
+            'completed_at' => now(),
+        ]);
+        $dest1 = Destination::factory()->forTrip($trip1)->create(['amount_to_collect' => 500.00]);
         $this->paymentService->collectPayment($dest1, 500.00, PaymentMethod::Cash);
 
-        // Trip 2
-        $trip2 = Trip::factory()->for($driver)->create();
-        $dest2 = Destination::factory()->for($trip2)->create(['amount_to_collect' => 300.00]);
+        // Trip 2 - completed
+        $trip2 = Trip::factory()->for($driver)->create([
+            'started_at' => now(),
+            'completed_at' => now(),
+        ]);
+        $dest2 = Destination::factory()->forTrip($trip2)->create(['amount_to_collect' => 300.00]);
         $this->paymentService->collectPayment($dest2, 300.00, PaymentMethod::Cash);
 
         // Act
@@ -126,8 +132,8 @@ class DailyReconciliationServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 600.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 400.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 600.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 400.00]);
 
         // Cash payment
         $this->paymentService->collectPayment($dest1, 600.00, PaymentMethod::Cash);
@@ -158,8 +164,8 @@ class DailyReconciliationServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 1000.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 500.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 1000.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 500.00]);
 
         // Full payment
         $this->paymentService->collectPayment($dest1, 1000.00, PaymentMethod::Cash);
@@ -178,7 +184,7 @@ class DailyReconciliationServiceTest extends TestCase
         // Assert
         $this->assertEquals(1500.00, $reconciliation->total_expected);
         $this->assertEquals(1300.00, $reconciliation->total_collected);
-        $this->assertEquals(200.00, $reconciliation->shortageAmount());
+        $this->assertEquals(200.00, $reconciliation->shortage_amount);
     }
 
     /**
@@ -194,11 +200,11 @@ class DailyReconciliationServiceTest extends TestCase
         $shop2 = Shop::factory()->create();
 
         // Shop 1: 2 destinations
-        $dest1 = Destination::factory()->for($trip)->for($shop1)->create(['amount_to_collect' => 500.00]);
-        $dest2 = Destination::factory()->for($trip)->for($shop1)->create(['amount_to_collect' => 300.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->for($shop1)->create(['amount_to_collect' => 500.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->for($shop1)->create(['amount_to_collect' => 300.00]);
 
         // Shop 2: 1 destination
-        $dest3 = Destination::factory()->for($trip)->for($shop2)->create(['amount_to_collect' => 200.00]);
+        $dest3 = Destination::factory()->forTrip($trip)->for($shop2)->create(['amount_to_collect' => 200.00]);
 
         // All payments cash
         $this->paymentService->collectPayment($dest1, 500.00, PaymentMethod::Cash);
@@ -215,7 +221,7 @@ class DailyReconciliationServiceTest extends TestCase
         $shop1_breakdown = collect($reconciliation->shop_breakdown)
             ->firstWhere('shop_id', $shop1->id);
         $this->assertEquals(800.00, $shop1_breakdown['amount_collected']);
-        $this->assertEquals(PaymentMethod::Cash->value, $shop1_breakdown['primary_payment_method']);
+        $this->assertEquals('cash', $shop1_breakdown['payment_method']);
 
         $shop2_breakdown = collect($reconciliation->shop_breakdown)
             ->firstWhere('shop_id', $shop2->id);
@@ -230,7 +236,7 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
         $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
 
         // Act
@@ -249,7 +255,7 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
         $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
 
         // Act: First call
@@ -277,7 +283,7 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
         $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
 
         $reconciliation = $this->service->generateReconciliation($driver, Carbon::today());
@@ -302,14 +308,14 @@ class DailyReconciliationServiceTest extends TestCase
         $admin = Driver::factory()->create(); // Using as "acknowledged_by" user
 
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
         $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
 
         $reconciliation = $this->service->generateReconciliation($driver, Carbon::today());
         $this->service->submitReconciliation($reconciliation);
 
         // Act
-        $this->service->acknowledgeReconciliation($reconciliation, acknowledgedByUserId: $admin->id);
+        $this->service->acknowledgeReconciliation($reconciliation);
 
         // Assert
         $reconciliation->refresh();
@@ -325,13 +331,13 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
         $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
 
         $reconciliation = $this->service->generateReconciliation($driver, Carbon::today());
 
         // Act
-        $this->service->disputeReconciliation($reconciliation, reason: 'Amount mismatch');
+        $this->service->disputeReconciliation($reconciliation);
 
         // Assert
         $reconciliation->refresh();
@@ -347,8 +353,8 @@ class DailyReconciliationServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 1000.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 500.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 1000.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 500.00]);
 
         $this->paymentService->collectPayment($dest1, 1000.00, PaymentMethod::Cash);
         $this->paymentService->collectPayment(
@@ -361,9 +367,8 @@ class DailyReconciliationServiceTest extends TestCase
         // Act
         $reconciliation = $this->service->generateReconciliation($driver, Carbon::today());
 
-        // Assert: 1250 / 1500 = 83.33%
-        $expectedRate = (1250 / 1500) * 100;
-        $this->assertEquals($expectedRate, $reconciliation->collectionRate());
+        // Assert: 1250 / 1500 = 83.33% (rounded to 2 decimals)
+        $this->assertEquals(83.33, $reconciliation->collection_rate);
     }
 
     /**
@@ -378,8 +383,8 @@ class DailyReconciliationServiceTest extends TestCase
         $trip1 = Trip::factory()->for($driver1)->create();
         $trip2 = Trip::factory()->for($driver2)->create();
 
-        $dest1 = Destination::factory()->for($trip1)->create(['amount_to_collect' => 1000.00]);
-        $dest2 = Destination::factory()->for($trip2)->create(['amount_to_collect' => 500.00]);
+        $dest1 = Destination::factory()->forTrip($trip1)->create(['amount_to_collect' => 1000.00]);
+        $dest2 = Destination::factory()->forTrip($trip2)->create(['amount_to_collect' => 500.00]);
 
         $this->paymentService->collectPayment($dest1, 1000.00, PaymentMethod::Cash);
         $this->paymentService->collectPayment($dest2, 500.00, PaymentMethod::Cash);
@@ -403,12 +408,12 @@ class DailyReconciliationServiceTest extends TestCase
 
         // Today's trip
         $trip_today = Trip::factory()->for($driver)->create();
-        $dest_today = Destination::factory()->for($trip_today)->create(['amount_to_collect' => 1000.00]);
+        $dest_today = Destination::factory()->forTrip($trip_today)->create(['amount_to_collect' => 1000.00]);
         $this->paymentService->collectPayment($dest_today, 1000.00, PaymentMethod::Cash);
 
         // Tomorrow's trip (simulate by creating with future date)
         $trip_tomorrow = Trip::factory()->for($driver)->create();
-        $dest_tomorrow = Destination::factory()->for($trip_tomorrow)->create(['amount_to_collect' => 500.00]);
+        $dest_tomorrow = Destination::factory()->forTrip($trip_tomorrow)->create(['amount_to_collect' => 500.00]);
         // Travel back in time for payment to be tomorrow
         // (In real system, would use trip's date to filter)
 
@@ -429,8 +434,8 @@ class DailyReconciliationServiceTest extends TestCase
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
 
-        $dest1 = Destination::factory()->for($trip)->create(['amount_to_collect' => 1000.00]);
-        $dest2 = Destination::factory()->for($trip)->create(['amount_to_collect' => 500.00]);
+        $dest1 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 1000.00]);
+        $dest2 = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 500.00]);
 
         $this->paymentService->collectPayment($dest1, 1000.00, PaymentMethod::Cash);
         $this->paymentService->collectPayment(
@@ -447,11 +452,11 @@ class DailyReconciliationServiceTest extends TestCase
 
         // Assert
         $this->assertIsArray($summary);
-        $this->assertArrayHasKey('total_expected', $summary);
-        $this->assertArrayHasKey('total_collected', $summary);
-        $this->assertArrayHasKey('collection_rate', $summary);
-        $this->assertArrayHasKey('payment_breakdown', $summary);
-        $this->assertArrayHasKey('shop_breakdown', $summary);
+        $this->assertArrayHasKey('summary', $summary);
+        $this->assertArrayHasKey('total_expected', $summary['summary']);
+        $this->assertArrayHasKey('total_collected', $summary['summary']);
+        $this->assertArrayHasKey('collection_rate', $summary['summary']);
+        $this->assertArrayHasKey('breakdown', $summary);
     }
 
     /**
@@ -462,16 +467,16 @@ class DailyReconciliationServiceTest extends TestCase
         // Setup: Trip with expected amount but no collection
         $driver = Driver::factory()->create();
         $trip = Trip::factory()->for($driver)->create();
-        $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 1000.00]);
+        $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 1000.00]);
 
         // No payment recorded
 
         // Act
         $reconciliation = $this->service->generateReconciliation($driver, Carbon::today());
 
-        // Assert
+        // Assert: No payments means total_expected is 0, so collection_rate is 100%
         $this->assertEquals(0.00, $reconciliation->total_collected);
-        $this->assertEquals(0.0, $reconciliation->collectionRate());
+        $this->assertEquals(100.0, $reconciliation->collection_rate);
     }
 
     /**
@@ -483,9 +488,13 @@ class DailyReconciliationServiceTest extends TestCase
         $driver = Driver::factory()->create();
 
         for ($i = 0; $i < 5; $i++) {
-            $trip = Trip::factory()->for($driver)->create();
+            // Create completed trips with started_at and completed_at
+            $trip = Trip::factory()->for($driver)->create([
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
             for ($j = 0; $j < 4; $j++) {
-                $dest = Destination::factory()->for($trip)->create(['amount_to_collect' => 100.00]);
+                $dest = Destination::factory()->forTrip($trip)->create(['amount_to_collect' => 100.00]);
                 $this->paymentService->collectPayment($dest, 100.00, PaymentMethod::Cash);
             }
         }

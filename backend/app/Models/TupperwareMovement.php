@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MovementType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,7 @@ class TupperwareMovement extends Model
     {
         return [
             'movement_at' => 'datetime',
+            'movement_type' => MovementType::class,
         ];
     }
 
@@ -76,7 +78,7 @@ class TupperwareMovement extends Model
 
     public function driver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'driver_id');
+        return $this->belongsTo(Driver::class);
     }
 
     public function business(): BelongsTo
@@ -121,7 +123,7 @@ class TupperwareMovement extends Model
      */
     public function isReturn(): bool
     {
-        return $this->movement_type === 'return';
+        return $this->movement_type === MovementType::Return;
     }
 
     /**
@@ -129,6 +131,6 @@ class TupperwareMovement extends Model
      */
     public function isDelivery(): bool
     {
-        return $this->movement_type === 'delivery';
+        return $this->movement_type === MovementType::Delivery;
     }
 }

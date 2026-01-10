@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Business;
+use App\Models\Driver;
 use App\Models\Shop;
 use App\Models\Trip;
-use App\Models\User;
 use App\Models\WasteCollection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -36,7 +36,7 @@ class WasteCollectionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'collected_at' => fake()->dateTimeBetween('-1 day'),
-            'driver_id' => User::factory(),
+            'driver_id' => Driver::factory(),
             'trip_id' => Trip::factory(),
         ]);
     }
@@ -44,7 +44,7 @@ class WasteCollectionFactory extends Factory
     public function withDriver(): self
     {
         return $this->state(fn (array $attributes) => [
-            'driver_id' => User::factory(),
+            'driver_id' => Driver::factory(),
         ]);
     }
 
