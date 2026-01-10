@@ -5,6 +5,7 @@ import '../core/auth/auth_provider.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/home/presentation/home_shell.dart';
 import '../features/trips/presentation/trip_details_screen.dart';
+import '../features/trips/presentation/screens/daily_reconciliation_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/trip_history_screen.dart';
 
@@ -16,6 +17,7 @@ class Routes {
   static const String tripDetails = '/trips/:id';
   static const String profile = '/profile';
   static const String tripHistory = '/trips/history';
+  static const String reconciliation = '/reconciliation';
 
   static String tripDetailsPath(String id) => '/trips/$id';
 }
@@ -91,6 +93,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.tripHistory,
         builder: (context, state) => const TripHistoryScreen(),
+      ),
+
+      // Daily Reconciliation
+      GoRoute(
+        path: Routes.reconciliation,
+        builder: (context, state) => const DailyReconciliationScreen(),
       ),
     ],
   );

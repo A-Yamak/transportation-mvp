@@ -4,6 +4,10 @@ import '../../../core/api/api_exceptions.dart';
 import 'models/delivery_item_model.dart';
 import 'models/trip_model.dart';
 import 'models/destination_model.dart';
+import 'models/payment_collection_model.dart';
+import 'models/tupperware_movement_model.dart';
+import 'models/daily_reconciliation_model.dart';
+import 'models/tupperware_balance_model.dart';
 
 /// Repository for trips data access via API
 class TripsRepository {
@@ -269,6 +273,73 @@ class TripsRepository {
       rethrow;
     } catch (e) {
       throw TripException('Failed to get navigation URL: $e');
+    }
+  }
+
+  /// Collect payment at a destination (Phase 3)
+  Future<PaymentCollectionModel> collectPayment(
+    String tripId,
+    String destinationId, {
+    required double amountCollected,
+    required String paymentMethod,
+    String? cliqReference,
+    String? shortageReason,
+    String? notes,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.collectPayment(tripId, destinationId),
+        data: {
+          'amount_collected': amountCollected,
+          'payment_method': paymentMethod,
+          if (cliqReference != null) 'cliq_reference': cliqReference,
+          if (shortageReason != null) 'shortage_reason': shortageReason,
+          if (notes != null && notes.isNotEmpty) 'notes': notes,
+        },
+      );
+
+      final data = response.data;
+      final Map<String, dynamic> paymentJson;
+      if (data is Map && data.containsKey('data')) {
+        paymentJson = data['data'] as Map<String, dynamic>;
+      } else {
+        paymentJson = data as Map<String, dynamic>;
+      }
+
+      return PaymentCollectionModel.fromJson(paymentJson);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw TripException('Failed to collect payment: $e');
+    }
+  }
+
+  /// Reorder destinations in a trip (Phase 3)
+  Future<TripModel> reorderDestinations(
+    String tripId,
+    List<String> destinationIds,
+  ) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.reorderDestinations(tripId),
+        data: {
+          'destination_order': destinationIds,
+        },
+      );
+
+      final data = response.data;
+      final Map<String, dynamic> tripJson;
+      if (data is Map && data.containsKey('data')) {
+        tripJson = data['data'] as Map<String, dynamic>;
+      } else {
+        tripJson = data as Map<String, dynamic>;
+      }
+
+      return TripModel.fromJson(tripJson);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw TripException('Failed to reorder destinations: $e');
     }
   }
 }

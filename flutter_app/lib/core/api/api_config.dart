@@ -62,4 +62,21 @@ class ApiEndpoints {
       '${ApiConfig.apiPrefix}/driver/shops/$shopId/waste-expected';
   static String logWasteCollection(String tripId, String shopId) =>
       '${ApiConfig.apiPrefix}/driver/trips/$tripId/shops/$shopId/waste-collected';
+
+  // Driver - Payment collection endpoints (Phase 3)
+  static String collectPayment(String tripId, String destinationId) =>
+      '${ApiConfig.apiPrefix}/driver/trips/$tripId/destinations/$destinationId/collect-payment';
+  static String collectTupperware(String tripId, String destinationId) =>
+      '${ApiConfig.apiPrefix}/driver/trips/$tripId/destinations/$destinationId/collect-tupperware';
+  static String tupperwareBalance(String shopId) =>
+      '${ApiConfig.apiPrefix}/driver/shops/$shopId/tupperware-balance';
+
+  // Driver - Daily reconciliation endpoints (Phase 3)
+  static const String endDay = '${ApiConfig.apiPrefix}/driver/day/end';
+  static const String getTodaysReconciliation =
+      '${ApiConfig.apiPrefix}/driver/day/reconciliation';
+  static const String submitReconciliation =
+      '${ApiConfig.apiPrefix}/driver/reconciliation/submit';
+  static String reorderDestinations(String tripId) =>
+      '${ApiConfig.apiPrefix}/driver/trips/$tripId/reorder-destinations';
 }

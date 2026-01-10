@@ -166,6 +166,7 @@ class DestinationModel {
     required double lat,
     required double lng,
     DestinationStatus status = DestinationStatus.pending,
+    double? amountToCollect,
   }) {
     return DestinationModel(
       id: 'DEST-$order',
@@ -175,6 +176,7 @@ class DestinationModel {
       sequenceOrder: order,
       status: status,
       externalId: 'ORDER-$order',
+      amountToCollect: amountToCollect,
     );
   }
 }
