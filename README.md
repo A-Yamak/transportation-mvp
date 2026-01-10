@@ -647,6 +647,77 @@ make tinker
 **Upcoming Features**
 - **`docs/offline-sync-design.md`** - **Offline support architecture (5-phase plan)**
 
+---
+
+## Future Roadmap
+
+### Phase 4: Offline Support + Proof of Delivery (Next)
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Offline Mode** | SQLite caching, sync queue, conflict resolution | Critical for low-connectivity areas |
+| **Proof of Delivery** | Photo capture, digital signature, GPS timestamp | Legal protection, dispute resolution |
+| **POD Storage** | Cloudflare R2 storage with Melo ERP callbacks | Audit trail, quality assurance |
+
+### Phase 5: Real-Time Tracking + Customer Portal
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Live Driver Tracking** | WebSocket updates, admin map view | Dispatcher visibility, ETAs |
+| **Geofencing** | Alerts when driver enters/exits zones | Automated arrival detection |
+| **Customer Tracking Portal** | Public order tracking (no login) | Reduce "where's my order?" calls |
+| **SMS/WhatsApp Notifications** | Delivery stage updates | Customer experience |
+
+### Phase 6: Analytics & Driver Incentives
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Analytics Dashboard** | Operational, financial, driver metrics | Data-driven decisions |
+| **Trend Analysis** | Week/month comparisons, PDF/Excel export | Management reporting |
+| **Driver Performance Scoring** | On-time %, waste rates, ratings | Identify top performers |
+| **Incentive System** | Bonus calculations, leaderboards, badges | Reduce turnover, improve performance |
+
+### Phase 7: Route Optimization V2
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Time Windows** | "Deliver between 9-11 AM" constraints | Customer preferences |
+| **Vehicle Capacity** | Weight/volume constraints | Prevent overloading |
+| **Real-Time Traffic** | Adjust routes based on current conditions | Fuel savings, faster delivery |
+| **Priority Stops** | VIP customers first | Customer satisfaction |
+| **Multi-Day Planning** | Optimize across the week | Resource efficiency |
+
+### Phase 8: Multi-Business & Integrations
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Multi-Warehouse** | Multiple pickup locations per trip | Scale operations |
+| **White-Label App** | Per-business branding | Serve multiple clients |
+| **Accounting Integration** | QuickBooks, Xero sync | Automated bookkeeping |
+| **WhatsApp Business API** | Direct messaging integration | Better communication |
+| **CliQ Direct Integration** | Native payment processing | Faster reconciliation |
+
+### Long-Term Vision
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| **Predictive Analytics** | Demand forecasting, waste prediction | Proactive planning |
+| **Mobile Admin App** | Supervisors manage from field | Real-time operations |
+| **Event-Driven Architecture** | Event sourcing, webhooks, pub/sub | Scalability |
+| **API Gateway** | Rate limiting, versioning, GraphQL | Enterprise-ready |
+
+### Recommended Timeline
+
+```
+2026 Q1: Phase 4 - Offline Support + POD
+2026 Q2: Phase 5 - Real-Time Tracking + Customer Portal
+2026 Q3: Phase 6 - Analytics + Incentives
+2026 Q4: Phase 7 - Route Optimization V2
+2027 Q1: Phase 8 - Multi-Business + Integrations
+```
+
+---
+
 ## License
 
 Proprietary - All rights reserved.
