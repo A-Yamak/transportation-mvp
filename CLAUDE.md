@@ -29,8 +29,9 @@ This is a logistics/delivery management application that handles delivery reques
 | **Phase 1: Admin Panel** | ✅ **DONE** | **5 Filament resources (Shop, Driver, Business, Trip, Financial)** |
 | **Phase 2: FCM Notifications** | ✅ **DONE** | **Push notifications for trip assignment/payment, Inbox UI** |
 | **Phase 3: Payment Collection & Reconciliation** | ✅ **DONE** | **7 new endpoints, 3 services, full TDD coverage** |
-| Flutter UI | ✅ DONE | Complete driver interface with waste collection + inbox |
+| Flutter UI | ✅ DONE | Complete driver interface with waste collection + inbox + biometrics |
 | Flutter API Integration | ✅ DONE | Real API client, GPS tracking, waste logging, notifications |
+| **Biometric Auth** | ✅ **DONE** | **Face ID / Fingerprint login with secure credential storage** |
 | **Test Coverage** | ✅ **DONE** | **389 tests passing (Unit + Feature + Integration)** |
 
 ### Production Readiness Checklist
@@ -1190,6 +1191,8 @@ DELETE /api/v1/driver/notifications/{id}                - Delete notification
 - **Actions Tab** - Only pending action notifications (filtered)
 - **Automatic Sync** - Notifications auto-update when new trips assigned
 - **Navigation** - Tap notification to view trip details or earnings
+- **Bottom Nav Badge** - Unread count badge on Inbox tab in bottom navigation
+- **FCM Auto-Init** - Service automatically initializes on app launch
 
 ### Key Files
 - `app/Models/Notification.php` - Notification model with state management
@@ -1207,6 +1210,56 @@ When trip assigned via `/api/v1/trips/assign`:
 5. App stores in local database
 6. Sync status tracked (pending → sent → read)
 ```
+
+---
+
+## Biometric Authentication (COMPLETE)
+
+Quick login using Face ID (iOS) or Fingerprint (Android) for returning users.
+
+### Features
+- **Face ID / Touch ID** - iOS biometric authentication
+- **Fingerprint** - Android biometric authentication
+- **Secure Credential Storage** - Uses platform-specific secure storage (iOS Keychain / Android Keystore)
+- **Auto-Prompt on Launch** - Automatically attempts biometric login if enabled
+- **Opt-in Setup Flow** - Users prompted after first successful password login
+
+### Key Files
+- `flutter_app/lib/core/auth/biometric_service.dart` - Biometric service with secure storage
+- `flutter_app/lib/features/auth/presentation/login_screen.dart` - Login UI with biometric button
+
+### Providers
+```dart
+biometricServiceProvider      // BiometricService instance
+biometricAvailableProvider    // FutureProvider<bool> - device supports biometrics
+biometricEnabledProvider      // FutureProvider<bool> - user has enabled biometric login
+```
+
+### Login Flow with Biometrics
+```
+1. App launches → Login screen loads
+2. Check if biometric enabled: biometricEnabledProvider
+3. If enabled, auto-trigger biometric authentication
+4. User authenticates with Face ID / Fingerprint
+5. Retrieve stored credentials from secure storage
+6. Login with credentials → Success
+```
+
+### Enable Biometric Flow
+```
+1. User logs in with email/password
+2. Login succeeds
+3. Check if biometrics available on device
+4. Check if biometrics not already enabled
+5. Show dialog: "Enable Face ID / Fingerprint login?"
+6. User taps "Enable"
+7. Authenticate with biometrics to confirm
+8. Store credentials securely
+9. Future logins can use biometrics
+```
+
+### Disable Biometric
+Biometric login can be disabled from the profile/settings screen, which clears stored credentials.
 
 ---
 

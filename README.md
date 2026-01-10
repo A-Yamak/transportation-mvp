@@ -20,7 +20,7 @@ A logistics and delivery management application with route optimization, cost ca
 | **Phase 2: FCM Notifications** | **100%** | **Push notifications + Inbox UI with 2 tabs** |
 | **Phase 3: Payment & Reconciliation** | **100%** | **Payment collection, tupperware tracking, daily reconciliation** |
 | **Test Coverage** | **100%** | **389 tests passing (Unit + Feature + Integration)** |
-| Flutter App | 100% | Real API integration + GPS + waste + notifications + inbox |
+| Flutter App | 100% | Real API integration + GPS + waste + notifications + inbox + biometrics |
 | **Offline Support** | Design | SQLite caching + sync queue (implementation ready) |
 
 ### Pre-Deployment Checklist
@@ -84,6 +84,14 @@ Manual Orders ─────┘    └────────┬────�
 - **Driver Inbox**: Two-tab interface (All Notifications + Pending Actions)
 - **Auto-Notification**: Automatic notification on trip assignment with KM/cost details
 - **Notification Management**: Mark as read, bulk actions, swipe-to-delete
+- **Unread Badge**: Bottom navigation shows unread notification count
+
+**Biometric Authentication**
+- **Face ID / Touch ID**: Quick login with biometric on iOS
+- **Fingerprint**: Quick login with fingerprint on Android
+- **Secure Credential Storage**: Credentials stored in platform-specific secure storage (Keychain/Keystore)
+- **Auto-Prompt**: Biometric login auto-triggers on app launch if enabled
+- **Setup Flow**: Users prompted to enable biometrics after first successful password login
 
 **Payment Collection & Reconciliation (Phase 3)**
 - **Multi-Payment Methods**: Cash, CliQ Now, CliQ Later support
@@ -534,6 +542,9 @@ flutter run --dart-define=API_BASE_URL=https://api.yourapp.com
 - **Waste logging**: Dialog to log expired/damaged items with real-time sold calculation
 - **Waste validation**: Prevents logging waste > delivered quantity
 - **Driver notes**: Optional observations per waste item
+- **Biometric login**: Face ID (iOS) / Fingerprint (Android) for quick login
+- **Inbox with unread badge**: Two-tab inbox (Notifications + Actions) with badge count
+- **Push notifications**: FCM integration for trip assignments and alerts
 
 ## Testing
 
